@@ -12,8 +12,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
 	"github.com/joho/godotenv"
+
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
 )
 
 func Server() error {
@@ -24,12 +25,12 @@ func Server() error {
 	}
 	serverConfigs := configs.LoadServerConfig()
 	mux := http.NewServeMux()
-	Routes(mux)
+	routes := routes(mux)
 	port := serverConfigs.Port
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
-		Handler:      mux,
+		Handler:      routes,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

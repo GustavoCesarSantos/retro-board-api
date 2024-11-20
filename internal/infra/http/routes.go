@@ -3,9 +3,11 @@ package http
 import (
 	"net/http"
 
+	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
 	monitor "github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor/presentation"
 )
 
-func Routes(mux *http.ServeMux) {
-	mux.Handle("GET /health", http.HandlerFunc(monitor.Healthcheck))
+func routes(mux *http.ServeMux) http.Handler {
+	mux.Handle("GET /v1/health", http.HandlerFunc(monitor.Healthcheck))
+	return middleware.EnableCORS(mux)
 }

@@ -8,6 +8,6 @@ import (
 )
 
 func routes(mux *http.ServeMux) http.Handler {
-	mux.Handle("GET /v1/health", http.HandlerFunc(monitor.Healthcheck))
+	mux.Handle("GET /v1/healthcheck", http.HandlerFunc(monitor.Healthcheck))
 	return middleware.EnableCORS(mux)
 }

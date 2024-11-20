@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type ServerConfig struct {
@@ -29,7 +30,7 @@ func LoadServerConfig() ServerConfig {
 		Cors: struct {
 			TrustedOrigins []string
 		}{
-			TrustedOrigins: []string{GetEnv("TRUSTED_ORIGINS", "*")},
+			TrustedOrigins: strings.Fields(GetEnv("TRUSTED_ORIGINS", "*")),
 		},
 		Jwt: struct {
 			Secret string

@@ -4,30 +4,43 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/application"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 	"github.com/markbates/goth/gothic"
 )
 
-type signinWithGoogleCallback struct {}
+type signinWithGoogleCallback struct {
+    findUserByEmail application.IFindUserByEmail
+    saveUser application.ISaveUser
+}
 
-func NewSigninWithGoogleCallback() *signinWithGoogleCallback {
-    return &signinWithGoogleCallback{}
+func NewSigninWithGoogleCallback(findUserByEmail application.IFindUserByEmail, saveUser application.ISaveUser) *signinWithGoogleCallback {
+    return &signinWithGoogleCallback{
+        findUserByEmail,
+        saveUser,
+    }
 }
 
 func(sgc *signinWithGoogleCallback) Handle(w http.ResponseWriter, r *http.Request) {
     q := r.URL.Query()
     q.Add("provider", "google")
     r.URL.RawQuery = q.Encode()
-    user, err := gothic.CompleteUserAuth(w, r)
+    userFromGoogle, err := gothic.CompleteUserAuth(w, r)
     if err != nil {
-        fmt.Println("ERRO")
-        fmt.Println(err.Error())
         utils.ServerErrorResponse(w, r, err)
         return
     }
+    fmt.Println(userFromGoogle)
+    user := sgc.findUserByEmail.Execute(userFromGoogle.Email);
+    if user == nil {
+        sgc.saveUser.Execute(userFromGoogle.Name, userFromGoogle.Email)
+        user = sgc.findUserByEmail.Execute(userFromGoogle.Email);
+        if user == nil {
+            utils.ServerErrorResponse(w, r, fmt.Errorf("USER REGISTRATION FAILED"))
+            return
+        }
+    }
     fmt.Println(user)
-    writeErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"status": "success"}, nil)
-	if writeErr != nil {
-		utils.ServerErrorResponse(w, r, writeErr)
-	}
+    frontendURL := "http://localhost:8000/dashboard"
+	http.Redirect(w, r, frontendURL, http.StatusPermanentRedirect)
 }

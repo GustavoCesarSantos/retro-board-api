@@ -12,17 +12,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/joho/godotenv"
-
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
 )
 
 func Server() error {
-	loadEnvErr := godotenv.Load()
-	if loadEnvErr != nil {
-		slog.Error("failed to load .env file", "error", loadEnvErr)
-		return loadEnvErr
-	}
 	serverConfigs := configs.LoadServerConfig()
 	mux := http.NewServeMux()
 	routes := routes(mux)

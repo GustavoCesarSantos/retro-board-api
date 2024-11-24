@@ -7,7 +7,13 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-func Healthcheck(w http.ResponseWriter, r *http.Request) {
+type healthcheck struct {}
+
+func NewHealthcheck() *healthcheck {
+    return &healthcheck{}
+}
+
+func (hc *healthcheck) Handle(w http.ResponseWriter, r *http.Request) {
 	serverConfig := configs.LoadServerConfig()
 	data := utils.Envelope{
 		"status": "available",

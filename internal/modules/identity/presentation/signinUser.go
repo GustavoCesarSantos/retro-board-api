@@ -34,6 +34,7 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
         utils.NotFoundResponse(w, r)
 		return
     }
+	user.Version++
     accessToken, accessTokenErr := su.creatAuthToken.Execute(*user, 15 * time.Minute)
 	if accessTokenErr != nil {
 		utils.ServerErrorResponse(w, r, accessTokenErr)
@@ -42,6 +43,7 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
     if refreshTokenErr != nil {
 		utils.ServerErrorResponse(w, r, refreshTokenErr)
 	}
+	//TO-DO: Após a criação dos novos tokens é preciso atualizar o número da versão na base
 	data := utils.Envelope{
 		"accessToken": accessToken,
 		"refreshToken": refreshToken,

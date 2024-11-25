@@ -22,6 +22,15 @@ func errorResponse(w http.ResponseWriter, r *http.Request, status int, message a
 	}
 }
 
+func BadRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	errorResponse(w, r, http.StatusBadRequest, err.Error())
+}
+
+func NotFoundResponse(w http.ResponseWriter, r *http.Request) {
+	message := "The requeted resource could not be found"
+	errorResponse(w, r, http.StatusNotFound, message)
+}
+
 func ServerErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	logError(r, err)
 	message := "The server encountered a problem and could not process your request"

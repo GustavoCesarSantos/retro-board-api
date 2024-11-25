@@ -2,25 +2,23 @@ package domain
 
 import "time"
 
-type User struct {
+type Team struct {
     ID int64
     Name string
-    Email string
-    Version int
+    AdminId int64
     CreatedAt time.Time
     UpdatedAt time.Time
 }
 
-func NewUser(
+func NewTeam(
     id int64,
     name string,
-    email string,
-) *User {
-    return &User{
+    adminId int64,
+) *Team {
+    return &Team{
         ID: id,
         Name: name,
-        Email: email,
-        Version: 1,
+        AdminId: adminId,
         CreatedAt: time.Now(),
     }
 }

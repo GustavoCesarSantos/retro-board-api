@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 )
@@ -24,6 +25,11 @@ func errorResponse(w http.ResponseWriter, r *http.Request, status int, message a
 
 func BadRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
 	errorResponse(w, r, http.StatusBadRequest, err.Error())
+}
+
+func MethodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
+	message := fmt.Sprintf("The %s method is not supported for this resource", r.Method)
+	errorResponse(w, r, http.StatusMethodNotAllowed, message)
 }
 
 func NotFoundResponse(w http.ResponseWriter, r *http.Request) {

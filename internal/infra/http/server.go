@@ -17,8 +17,7 @@ import (
 
 func Server() error {
 	serverConfigs := configs.LoadServerConfig()
-	mux := http.NewServeMux()
-	routes := routes(mux)
+	routes := routes()
 	port := serverConfigs.Port
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	srv := &http.Server{

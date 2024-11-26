@@ -18,7 +18,7 @@ func NewShowTeam(findTeam application.IFindTeam) *showTeam {
 }
 
 func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
-    id, err := utils.ReadIDParam(r)
+    id, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {
 		utils.NotFoundResponse(w, r)
 		return

@@ -3,9 +3,9 @@ package db
 import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/domain"
 
 type ITeamRepository interface {
-	Save(team domain.Team)
     FindAllByAdminId(adminId int64) []*domain.Team
     FindById(teamId int64, adminId int64) *domain.Team
+	Save(team domain.Team)
 }
 
 type teamRepository struct {
@@ -20,10 +20,6 @@ func NewTeamRepository() ITeamRepository {
 			*domain.NewTeam(3, "Time 3", 2),
 		},
 	}
-}
-
-func (tr *teamRepository) Save(team domain.Team) {
-	tr.teams = append(tr.teams, team)
 }
 
 func (tr *teamRepository) FindAllByAdminId(adminId int64) []*domain.Team {
@@ -43,4 +39,8 @@ func (tr *teamRepository) FindById(teamId int64, adminId int64) *domain.Team {
         }
     }
     return nil
+}
+
+func (tr *teamRepository) Save(team domain.Team) {
+	tr.teams = append(tr.teams, team)
 }

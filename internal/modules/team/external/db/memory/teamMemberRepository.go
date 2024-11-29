@@ -3,8 +3,8 @@ package db
 import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/domain"
 
 type ITeamMemberRepository interface {
+	Delete(teamId int64, memberId int64)
 	Save(team domain.TeamMember)
-	Delete(teamId int64, memberId int64,)
 	UpdateRole(teamId int64, memberId int64, role int64)
 }
 
@@ -23,10 +23,6 @@ func NewTeamMemberRepository() ITeamMemberRepository {
 	}
 }
 
-func (tm *teamMemberRepository) Save(teamMember domain.TeamMember) {
-	tm.teamMembers = append(tm.teamMembers, teamMember)
-}
-
 func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) {
 	i := 0
 	for _, member := range tm.teamMembers {
@@ -36,6 +32,10 @@ func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) {
 		}
 	}
 	tm.teamMembers = tm.teamMembers[:i]
+}
+
+func (tm *teamMemberRepository) Save(teamMember domain.TeamMember) {
+	tm.teamMembers = append(tm.teamMembers, teamMember)
 }
 
 func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, role int64) {

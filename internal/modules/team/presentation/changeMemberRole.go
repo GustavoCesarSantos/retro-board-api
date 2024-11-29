@@ -7,17 +7,22 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type changeMemberPosition struct {
+type changeMemberRole struct {
     uploadRole application.IUpdateRole
 }
 
-func NewChangeMemberPosition(uploadRole application.IUpdateRole) *changeMemberPosition {
-    return &changeMemberPosition{
+func NewChangeMemberRole(uploadRole application.IUpdateRole) *changeMemberRole {
+    return &changeMemberRole{
         uploadRole,
     }
 }
 
-func(cmp *changeMemberPosition) Handle(w http.ResponseWriter, r *http.Request) {
+func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
+	/*
+	TO-DO: Adicionar uma verificação da role do usuário que está executando a
+	ação. Somente usuários com a role: Admin podem trocar a role de outros usuá
+	rios
+	*/
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -37,7 +42,7 @@ func(cmp *changeMemberPosition) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
     cmp.uploadRole.Execute(teamId, memberId, input.Role)
-    writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"status": "success"}, nil)
+    writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

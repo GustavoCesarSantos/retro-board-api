@@ -24,7 +24,7 @@ func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
     team := st.findTeam.Execute(id, 1)
-    writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"teams": team}, nil)
+    writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"teams": team}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

@@ -3,8 +3,8 @@ package db
 import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/domain"
 
 type IUserRepository interface {
-	Save(user domain.User)
     FindByEmail(email string) *domain.User
+	Save(user domain.User)
 }
 
 type userRepository struct {
@@ -21,10 +21,6 @@ func NewUserRepository() IUserRepository {
 	}
 }
 
-func (ur *userRepository) Save(user domain.User) {
-	ur.users = append(ur.users, user)
-}
-
 func (ur *userRepository) FindByEmail(email string) *domain.User {
     for _, user := range ur.users {
         if user.Email == email {
@@ -32,4 +28,8 @@ func (ur *userRepository) FindByEmail(email string) *domain.User {
         }
     }
     return nil
+}
+
+func (ur *userRepository) Save(user domain.User) {
+	ur.users = append(ur.users, user)
 }

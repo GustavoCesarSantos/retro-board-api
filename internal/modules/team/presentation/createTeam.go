@@ -27,7 +27,7 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
     ct.saveTeam.Execute(input.Name, 1)
-    writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"status": "success"}, nil)
+    writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

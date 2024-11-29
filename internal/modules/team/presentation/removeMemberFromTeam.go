@@ -29,7 +29,7 @@ func(rmt *removeMemberFromTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
     rmt.removeMember.Execute(teamId, memberId)
-    writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"status": "success"}, nil)
+    writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

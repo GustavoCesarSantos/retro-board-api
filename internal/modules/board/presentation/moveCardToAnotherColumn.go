@@ -7,25 +7,28 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type editColumn struct {
+type moveCardtoAnotherColumn struct {
 	ensureBoardOwnership application.IEnsureBoardOwnership
 	ensureColumnOwnership application.IEnsureColumnOwnership
-    updateColumn application.IUpdateColumn
+	ensureCardOwnership application.IEnsureCardOwnership
+    moveCardBetweenColumn application.IMoveCardBetweenColumns
 }
 
-func NewEditColumn(
+func NewMoveCardtoAnotherColumn(
 	ensureBoardOwnership application.IEnsureBoardOwnership,
-	ensureColumnOwnership application.IEnsureColumnOwnership, 
-	updateColumn application.IUpdateColumn,
-) *editColumn {
-    return &editColumn{
+	ensureColumnOwnership application.IEnsureColumnOwnership,
+	ensureCardOwnership application.IEnsureCardOwnership,
+	moveCardBetweenColumn application.IMoveCardBetweenColumns,
+) *moveCardtoAnotherColumn {
+    return &moveCardtoAnotherColumn{
 		ensureBoardOwnership,
 		ensureColumnOwnership,
-        updateColumn,
+		ensureCardOwnership,
+        moveCardBetweenColumn,
     }
 }
 
-func(ec *editColumn) Handle(w http.ResponseWriter, r *http.Request) {
+func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
     teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {
 		utils.NotFoundResponse(w, r)
@@ -41,32 +44,35 @@ func(ec *editColumn) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r)
 		return
 	}
+	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
+	if cardIdErr != nil {
+		utils.NotFoundResponse(w, r)
+		return
+	}
 	var input struct {
-		Name   *string       `json:"name"`
-		Color *string       `json:"color"`
+		NewColumnId   *int64       `json:"newColumnId"`
 	}
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
 		return
 	}
-	ensureBoardErr := ec.ensureBoardOwnership.Execute(teamId, boardId)
+	ensureBoardErr := mc.ensureBoardOwnership.Execute(teamId, boardId)
 	if ensureBoardErr != nil {
 		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
-    ensureColumnErr := ec.ensureColumnOwnership.Execute(boardId, columnId)
+    ensureColumnErr := mc.ensureColumnOwnership.Execute(boardId, columnId)
 	if ensureColumnErr != nil {
 		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
-    ec.updateColumn.Execute(columnId, struct {
-		Name *string
-		Color *string
-	}{ 
-		Name: input.Name,
-		Color: input.Color,
-	})
+    ensureCardErr := mc.ensureCardOwnership.Execute(columnId, cardId)
+	if ensureCardErr != nil {
+		utils.BadRequestResponse(w, r, ensureCardErr)
+		return
+	}
+    mc.moveCardBetweenColumn.Execute(cardId, *input.NewColumnId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

@@ -5,6 +5,7 @@ import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/dom
 type ICardRepository interface {
 	Delete(cardId int64)
     FindAllByColumnId(columnId int64) []*domain.Card
+	FindById(cardId int64) *domain.Card
 	MoveBetweenColumns(cardId int64, columnId int64)
 	Save(card domain.Card)
 	Update(cardId int64, text *string)
@@ -43,6 +44,15 @@ func (cr *cardRepository) FindAllByColumnId(columnId int64) []*domain.Card {
         }
     }
     return cards
+}
+
+func (cr *cardRepository) FindById(cardId int64) *domain.Card {
+    for _, card := range cr.cards {
+        if card.ID == cardId {
+            return &card
+        }
+    }
+    return nil
 }
 
 func (cr *cardRepository) MoveBetweenColumns(cardId int64, columnId int64) {

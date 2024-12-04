@@ -28,12 +28,21 @@ var userRepository = userDb.NewUserRepository()
 
 var createAuthToken = identityApplication.NewCreateAuthToken()
 var ensureBoardOwnership = boardApplication.NewEnsureBoardOwnership(boardRepository)
+var ensureCardOwnership = boardApplication.NewEnsureCardOwnership(cardRepository)
 var ensureColumnOwnership = boardApplication.NewEnsureColumnOwnership(columnRepository)
+var findAllBoards = boardApplication.NewFindAllBoards(boardRepository)
+var findAllCards = boardApplication.NewFindAllCards(cardRepository)
 var findAllColumns = boardApplication.NewFindAllColumns(columnRepository)
 var findAllTeams = teamApplication.NewFindAllTeams(teamRepository)
+var findBoard = boardApplication.NewFindBoard(boardRepository)
+var findCard = boardApplication.NewFindCard(cardRepository)
 var findTeam = teamApplication.NewFindTeam(teamRepository)
 var findUserByEmail = identityApplication.NewFindUserByEmail(userRepository)
 var getNextColumnPosition = boardApplication.NewGetNextColumnPosition(columnRepository)
+var moveCardBetweenColumns = boardApplication.NewMoveCardBetweenColumns(cardRepository)
+var removeBoard = boardApplication.NewRemoveBoard(boardRepository)
+var removeCard = boardApplication.NewRemoveCard(cardRepository)
+var removeColumn = boardApplication.NewRemoveColumn(columnRepository)
 var removeMember = teamApplication.NewRemoveMember(teamMemberRepository)
 var saveBoard = boardApplication.NewSaveBoard(boardRepository)
 var saveCard = boardApplication.NewSaveCard(cardRepository)
@@ -41,9 +50,13 @@ var saveColumn = boardApplication.NewSaveColumn(columnRepository)
 var saveMember = teamApplication.NewSaveMember(teamMemberRepository)
 var saveTeam = teamApplication.NewSaveTeam(teamRepository)
 var saveUser = identityApplication.NewSaveUser(userRepository)
+var updateBoard = boardApplication.NewUpdateBoard(boardRepository)
+var updateCard = boardApplication.NewUpdateCard(cardRepository)
+var updateColumn = boardApplication.NewUpdateColumn(columnRepository)
 var updateRole = teamApplication.NewUpdateRole(teamMemberRepository)
 
 var addMemberToTeam = team.NewAddMemberToTeam(saveMember)
+var changeMemberRole = team.NewChangeMemberRole(updateRole)
 var createBoard = board.NewCreateBoard(saveBoard)
 var createCard = board.NewCreateCard(
 	ensureBoardOwnership,
@@ -57,14 +70,57 @@ var createColumn = board.NewCreateColumn(
 	saveColumn,
 )
 var createTeam = team.NewCreateTeam(saveTeam)
+var deleteBoard = board.NewDeleteBoard(ensureBoardOwnership, removeBoard)
+var deleteCard = board.NewDeleteCard(
+	ensureBoardOwnership,
+	ensureColumnOwnership,
+	ensureCardOwnership, 
+	removeCard,
+)
+var deleteColumn = board.NewDeleteColumn(
+	ensureBoardOwnership,
+	ensureColumnOwnership, 
+	removeColumn,
+)
+var editBoard = board.NewEditBoard(ensureBoardOwnership, updateBoard)
+var editCard = board.NewEditCard(
+	ensureBoardOwnership,
+	ensureColumnOwnership,
+	ensureCardOwnership,  
+	updateCard,
+)
+var editColumn = board.NewEditColumn(
+	ensureBoardOwnership,
+	ensureColumnOwnership, 
+	updateColumn,
+)
 var healthcheck = monitor.NewHealthcheck()
+var listAllBoards = board.NewListAllBoards(findAllBoards)
+var listAllCards = board.NewListAllCards(
+	ensureBoardOwnership,
+	ensureColumnOwnership, 
+	findAllCards,
+)
+var listAllColumns = board.NewListAllColumns(ensureBoardOwnership, findAllColumns)
 var listAllTeams = team.NewListAllTeams(findAllTeams)
+var listBoard = board.NewListBoard(ensureBoardOwnership, findBoard)
+var listCard = board.NewListCard(
+	ensureBoardOwnership,
+	ensureColumnOwnership,
+	ensureCardOwnership, 
+	findCard,
+)
+var moveCardtoAnotherColumn = board.NewMoveCardtoAnotherColumn(
+	ensureBoardOwnership,
+	ensureColumnOwnership,
+	ensureCardOwnership,
+	moveCardBetweenColumns,
+)
 var removeMemberFromTeam = team.NewRemoveMemberFromTeam(removeMember)
 var showTeam = team.NewShowTeam(findTeam)
 var signinUser = identity.NewSigninUser(createAuthToken, findUserByEmail)
 var signinWithGoogle = identity.NewSigninWithGoogle()
 var signinWithGoogleCallback = identity.NewSigninWithGoogleCallback(findUserByEmail, saveUser)
-var changeMemberRole = team.NewChangeMemberRole(updateRole)
 
 func routes() http.Handler {
 	router := httprouter.New()
@@ -86,8 +142,22 @@ func routes() http.Handler {
     router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/members/:memberId/change-role", changeMemberRole.Handle)
 	
     router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards", createBoard.Handle)
-    router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards/:boardId/columns", createCard.Handle)
-    router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards", createColumn.Handle)
+    router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards", listAllBoards.Handle)
+    router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId", listBoard.Handle)
+    router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId", editBoard.Handle)
+    router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/boards/:boardId", deleteBoard.Handle)
+	
+    router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards/:boardId/columns", createColumn.Handle)
+    router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns", listAllColumns.Handle)
+    router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId", editColumn.Handle)
+    router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/boards/:boardId/columns/:columnId", deleteColumn.Handle)
+
+    router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards", createCard.Handle)
+    router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards", listAllCards.Handle)
+    router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId", listCard.Handle)
+    router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId", editCard.Handle)
+    router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId", deleteCard.Handle)
+    router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move", moveCardtoAnotherColumn.Handle)
 
 	return middleware.RecoverPanic(middleware.EnableCORS(router))
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type ISavePoll interface {
-    Execute(teamId int64, name string)
+    Execute(teamId int64, name string) int64
 }
 
 type savePoll struct {
@@ -19,7 +19,8 @@ func NewSavePoll(repository db.IPollRepository) ISavePoll {
     }
 }
 
-func (sp *savePoll) Execute(teamId int64, name string) {
+func (sp *savePoll) Execute(teamId int64, name string) int64 {
     poll := domain.NewPoll(0, teamId, name)
     sp.repository.Save(*poll)
+    return poll.ID
 }

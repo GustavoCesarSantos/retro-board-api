@@ -1,6 +1,8 @@
 package application
 
 import (
+	"errors"
+
 	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/external/db/memory"
 )
 
@@ -22,7 +24,7 @@ type CountVotesResult struct {
 }
 
 type ICountVotesByPollId interface {
-	Execute(pollId int64) CountVotesResult
+	Execute(pollId int64) (*CountVotesResult, error)
 }
 
 type countVotesByPollId struct {
@@ -40,17 +42,13 @@ func NewCountVotesByPollId(
 	}
 }
 
-func (cv *countVotesByPollId) Execute(pollId int64) CountVotesResult {
+func (cv *countVotesByPollId) Execute(pollId int64) (*CountVotesResult, error) {
 	var result CountVotesResult
 	result.Options = make(map[int64]Option)
 	options := cv.optionRepository.FindAllByPollId(pollId)
 	if len(options) == 0 {
-		return CountVotesResult{
-			Options: make(map[int64]Option),
-			Winner:  []Winner{},
-			Total:   0,
-		}
-	}
+		return nil, errors.New("FAILURE TO COUNT VOTES")	
+    }
 	for _, option := range options {
 		count := cv.voteRepository.CountByOptionId(option.ID)
 		result.Total += count
@@ -72,5 +70,5 @@ func (cv *countVotesByPollId) Execute(pollId int64) CountVotesResult {
 			})
 		}
 	}
-	return result
+	return &result, nil
 }

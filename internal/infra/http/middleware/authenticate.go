@@ -22,6 +22,15 @@ func NewUserAuthenticator(repository db.IUserRepository) *userAuthenticator {
     }
 }
 
+func contains(slice []string, item string) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
+
 func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Vary", "Authorization")
@@ -51,11 +60,16 @@ func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFun
             utils.InvalidAuthenticationTokenResponse(w, r)
 			return
 		}
-		if mappedClaims["issuer"].(string) != jwtConfigs.Issuer {
+		issuer := mappedClaims["issuer"].(string) 
+		if issuer != jwtConfigs.Issuer {
             utils.InvalidAuthenticationTokenResponse(w, r)
 			return
 		}
-        //TO-DO: Adicionar verificação se issuer está na string de audience
+        authorizedIssuer := contains(jwtConfigs.Audiences, issuer)
+		if !authorizedIssuer {
+			utils.InvalidAuthenticationTokenResponse(w, r)
+			return
+		}
         email := mappedClaims["email"].(string)
         user := ua.repository.FindByEmail(email)
 		if user == nil {

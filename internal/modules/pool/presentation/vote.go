@@ -26,7 +26,8 @@ func NewVote(
 }
 
 func(v *vote) Handle(w http.ResponseWriter, r *http.Request) {
-    teamId, err := utils.ReadIDParam(r, "teamId")
+    user := utils.ContextGetUser(r)
+	teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {
 		utils.NotFoundResponse(w, r)
 		return
@@ -51,7 +52,7 @@ func(v *vote) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureOptionErr)
 		return
 	}
-    v.saveVote.Execute(1, optionId)
+    v.saveVote.Execute(user.ID, optionId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

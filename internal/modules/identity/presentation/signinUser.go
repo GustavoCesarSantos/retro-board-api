@@ -11,12 +11,18 @@ import (
 type signinUser struct {
     creatAuthToken application.ICreateAuthToken
     findUserByEmail application.IFindUserByEmail
+	updateVersion application.IUpdateVersion
 }
 
-func NewSigninUser(createAuthToken application.ICreateAuthToken,  findUserByEmail application.IFindUserByEmail) *signinUser {
+func NewSigninUser(
+	createAuthToken application.ICreateAuthToken,  
+	findUserByEmail application.IFindUserByEmail,
+	updateVersion application.IUpdateVersion,
+) *signinUser {
     return &signinUser{
         createAuthToken,
         findUserByEmail,
+		updateVersion,
     }
 }
 
@@ -35,6 +41,7 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
 		return
     }
 	user.Version++
+	su.updateVersion.Execute(user.ID, user.Version)
     accessToken, accessTokenErr := su.creatAuthToken.Execute(*user, 15 * time.Minute)
 	if accessTokenErr != nil {
 		utils.ServerErrorResponse(w, r, accessTokenErr)
@@ -43,7 +50,6 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
     if refreshTokenErr != nil {
 		utils.ServerErrorResponse(w, r, refreshTokenErr)
 	}
-	//TO-DO: Após a criação dos novos tokens é preciso atualizar o número da versão na base
 	data := utils.Envelope{
 		"accessToken": accessToken,
 		"refreshToken": refreshToken,

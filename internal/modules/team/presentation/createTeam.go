@@ -18,6 +18,7 @@ func NewCreateTeam(saveTeam application.ISaveTeam) *createTeam {
 }
 
 func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
+	user := utils.ContextGetUser(r)
 	var input struct {
 		Name   string       `json:"name"`
 	}
@@ -26,7 +27,7 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr)
 		return
 	}
-    ct.saveTeam.Execute(input.Name, 1)
+    ct.saveTeam.Execute(input.Name, user.ID)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

@@ -26,6 +26,7 @@ func NewCreateCard(
 }
 
 func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
+	user := utils.ContextGetUser(r)
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -59,7 +60,7 @@ func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
-    cc.saveCard.Execute(columnId, 1, input.Text)
+    cc.saveCard.Execute(columnId, user.ID, input.Text)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

@@ -39,6 +39,7 @@ var countVotesByPollId = pollApplication.NewCountVotesByPollId(
     voteRepository,
 )
 var createAuthToken = identityApplication.NewCreateAuthToken()
+var decodeAuthToken = identityApplication.NewDecodeAuthToken()
 var ensureBoardOwnership = boardApplication.NewEnsureBoardOwnership(boardRepository)
 var ensureCardOwnership = boardApplication.NewEnsureCardOwnership(cardRepository)
 var ensureColumnOwnership = boardApplication.NewEnsureColumnOwnership(
@@ -80,6 +81,7 @@ var updateBoard = boardApplication.NewUpdateBoard(boardRepository)
 var updateCard = boardApplication.NewUpdateCard(cardRepository)
 var updateColumn = boardApplication.NewUpdateColumn(columnRepository)
 var updateRole = teamApplication.NewUpdateRole(teamMemberRepository)
+var updateVersion = identityApplication.NewUpdateVersion(userRepository)
 
 var addMemberToTeam = team.NewAddMemberToTeam(saveMember)
 var changeMemberRole = team.NewChangeMemberRole(updateRole)
@@ -150,10 +152,19 @@ var moveCardtoAnotherColumn = board.NewMoveCardtoAnotherColumn(
 	ensureCardOwnership,
 	moveCardBetweenColumns,
 )
+var refreshAuthToken = identity.NewRefreshAuthToken(
+	createAuthToken, 
+	decodeAuthToken,
+	findUserByEmail,
+)
 var removeMemberFromTeam = team.NewRemoveMemberFromTeam(removeMember)
 var showPollResult = poll.NewShowPollResult(ensurePollOwnership, countVotesByPollId)
 var showTeam = team.NewShowTeam(findTeam)
-var signinUser = identity.NewSigninUser(createAuthToken, findUserByEmail)
+var signinUser = identity.NewSigninUser(
+	createAuthToken, 
+	findUserByEmail, 
+	updateVersion,
+)
 var signinWithGoogle = identity.NewSigninWithGoogle()
 var signinWithGoogleCallback = identity.NewSigninWithGoogleCallback(
     findUserByEmail, 
@@ -168,9 +179,11 @@ func routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheck.Handle)
 
+	router.HandlerFunc(http.MethodPost, "/v1/auth/refresh-token", refreshAuthToken.Handle)
 	router.HandlerFunc(http.MethodPost, "/v1/auth/signin", signinUser.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google", signinWithGoogle.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google/callback", signinWithGoogleCallback.Handle)
+	//TO-DO Criar endpoint de logout
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))

@@ -18,7 +18,8 @@ func NewListAllTeams(findAllTeams application.IFindAllTeams) *listAllTeams {
 }
 
 func(lt *listAllTeams) Handle(w http.ResponseWriter, r *http.Request) {
-    teams := lt.findAllTeams.Execute(1)
+    user := utils.ContextGetUser(r)
+	teams := lt.findAllTeams.Execute(user.ID)
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"teams": teams}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

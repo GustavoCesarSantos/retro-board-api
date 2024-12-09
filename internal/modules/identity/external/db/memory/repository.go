@@ -5,6 +5,7 @@ import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/
 type IUserRepository interface {
     FindByEmail(email string) *domain.User
 	Save(user domain.User)
+	UpdateVersion(userId int64, version int)
 }
 
 type userRepository struct {
@@ -32,4 +33,13 @@ func (ur *userRepository) FindByEmail(email string) *domain.User {
 
 func (ur *userRepository) Save(user domain.User) {
 	ur.users = append(ur.users, user)
+}
+
+func (ur *userRepository) UpdateVersion(userId int64, version int) {
+	for i := range ur.users {
+		if ur.users[i].ID == userId {
+			ur.users[i].Version = version
+			break
+		}
+	}
 }

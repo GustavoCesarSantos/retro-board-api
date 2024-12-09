@@ -27,6 +27,12 @@ func BadRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
 	errorResponse(w, r, http.StatusBadRequest, err.Error())
 }
 
+func InvalidAuthenticationTokenResponse(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("WWW-Authenticate", "Bearer")
+	message := "invalid or missing authentication token"
+	errorResponse(w, r, http.StatusUnauthorized, message)
+}
+
 func MethodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf("The %s method is not supported for this resource", r.Method)
 	errorResponse(w, r, http.StatusMethodNotAllowed, message)

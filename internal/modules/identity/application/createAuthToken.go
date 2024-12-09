@@ -21,6 +21,7 @@ func NewCreateAuthToken() ICreateAuthToken {
 func (su *createAuthToken) Execute(user domain.User, expTime time.Duration) (string, error) {
     jwtConfigs := configs.LoadJwtConfig()
     claims := jwt.MapClaims{
+        "issuer": jwtConfigs.Issuer,
         "name": user.Name,
         "email": user.Email,
         "version": user.Version,

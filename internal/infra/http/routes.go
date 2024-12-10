@@ -5,12 +5,13 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
+	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/database"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
 	boardApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
 	boardDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
 	board "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation"
 	identityApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/application"
-	userDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/memory"
+	userDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/nativeSql"
 	identity "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/presentation"
 	monitor "github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor/presentation"
 	pollApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/application"
@@ -22,6 +23,8 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
+var DB = database.GetDB()
+
 var boardRepository = boardDb.NewBoardRepository()
 var cardRepository = boardDb.NewCardRepository()
 var columnRepository = boardDb.NewColumnRepository()
@@ -29,7 +32,7 @@ var optionRepository = pollDb.NewOptionRepository()
 var pollRepository = pollDb.NewPollRepository()
 var teamRepository = teamDb.NewTeamRepository()
 var teamMemberRepository = teamDb.NewTeamMemberRepository()
-var userRepository = userDb.NewUserRepository()
+var userRepository = userDb.NewUserRepository(DB)
 var voteRepository = pollDb.NewVoteRepository()
 
 var userAuthenticator = middleware.NewUserAuthenticator(userRepository)

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/interfaces"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 	"github.com/golang-jwt/jwt/v5"
@@ -71,8 +71,8 @@ func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFun
 			return
 		}
         email := mappedClaims["email"].(string)
-        user := ua.repository.FindByEmail(email)
-		if user == nil {
+        user, userErr := ua.repository.FindByEmail(email)
+		if userErr != nil {
             utils.InvalidAuthenticationTokenResponse(w, r)
 			return
 		}

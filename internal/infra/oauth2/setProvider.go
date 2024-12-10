@@ -1,6 +1,8 @@
 package oauth2
 
 import (
+	"log/slog"
+
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
@@ -17,4 +19,5 @@ func SetProvider() {
 			"profile",
 		),
 	)
+    slog.Info("OAuth2 providers set")
 }

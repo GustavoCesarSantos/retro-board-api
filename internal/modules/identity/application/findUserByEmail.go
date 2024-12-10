@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/interfaces"
 )
 
 type IFindUserByEmail interface {
-    Execute(email string) *domain.User
+    Execute(email string) (*domain.User, error)
 }
 
 type findUserByEmail struct {
@@ -19,6 +19,6 @@ func NewFindUserByEmail(repository db.IUserRepository) IFindUserByEmail {
     }
 }
 
-func (fu findUserByEmail) Execute(email string) *domain.User {
+func (fu findUserByEmail) Execute(email string) (*domain.User, error) {
     return fu.repository.FindByEmail(email)
 }

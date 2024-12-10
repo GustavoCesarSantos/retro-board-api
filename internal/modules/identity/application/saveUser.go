@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/interfaces"
 )
 
 type ISaveUser interface {
-    Execute(name string, email string)
+    Execute(name string, email string) (*domain.User, error)
 }
 
 type saveUser struct {
@@ -19,7 +19,8 @@ func NewSaveUser(repository db.IUserRepository) ISaveUser {
     }
 }
 
-func (su *saveUser) Execute(name string, email string) {
+func (su *saveUser) Execute(name string, email string) (*domain.User, error) {
     user := domain.NewUser(0, name, email)
-    su.repository.Save(*user)
+    err := su.repository.Save(user)
+    return user, err
 }

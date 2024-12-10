@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -30,15 +31,19 @@ func(sgc *signinWithGoogleCallback) Handle(w http.ResponseWriter, r *http.Reques
         utils.ServerErrorResponse(w, r, err)
         return
     }
-    fmt.Println(userFromGoogle)
-    user := sgc.findUserByEmail.Execute(userFromGoogle.Email);
-    if user == nil {
-        sgc.saveUser.Execute(userFromGoogle.Name, userFromGoogle.Email)
-        user = sgc.findUserByEmail.Execute(userFromGoogle.Email);
-        if user == nil {
-            utils.ServerErrorResponse(w, r, fmt.Errorf("USER REGISTRATION FAILED"))
-            return
-        }
+    user, userErr := sgc.findUserByEmail.Execute(userFromGoogle.Email);
+    if userErr != nil {
+		switch {
+		case errors.Is(userErr, utils.ErrRecordNotFound):
+            user, userErr = sgc.saveUser.Execute(userFromGoogle.Name, userFromGoogle.Email)
+            if userErr != nil {
+                utils.ServerErrorResponse(w, r, userErr)
+                return
+            }
+		default:
+            utils.ServerErrorResponse(w, r, userErr)
+		    return
+		}
     }
     frontendURL := fmt.Sprintf("http://localhost:8000/users/authentica?email=%s", user.Email)
 	http.Redirect(w, r, frontendURL, http.StatusPermanentRedirect)

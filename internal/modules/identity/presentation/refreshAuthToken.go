@@ -41,9 +41,14 @@ func(rt *refreshAuthToken) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, decodedErr)
 		return
 	}
-	user := rt.findUserByEmail.Execute(decodedToken.Email)
-    if user == nil {
-        utils.NotFoundResponse(w, r)
+	user, findUserErr := rt.findUserByEmail.Execute(decodedToken.Email)
+    if findUserErr != nil {
+		switch {
+		case errors.Is(findUserErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, findUserErr)
+		}
 		return
     }
 	if user.Version != decodedToken.Version {

@@ -60,6 +60,7 @@ var findUserByEmail = identityApplication.NewFindUserByEmail(userRepository)
 var getNextColumnPosition = boardApplication.NewGetNextColumnPosition(
     columnRepository,
 )
+var incrementVersion = identityApplication.NewIncrementVersion(userRepository)
 var moveCardBetweenColumns = boardApplication.NewMoveCardBetweenColumns(
     cardRepository,
 )
@@ -81,7 +82,6 @@ var updateBoard = boardApplication.NewUpdateBoard(boardRepository)
 var updateCard = boardApplication.NewUpdateCard(cardRepository)
 var updateColumn = boardApplication.NewUpdateColumn(columnRepository)
 var updateRole = teamApplication.NewUpdateRole(teamMemberRepository)
-var updateVersion = identityApplication.NewUpdateVersion(userRepository)
 
 var addMemberToTeam = team.NewAddMemberToTeam(saveMember)
 var changeMemberRole = team.NewChangeMemberRole(updateRole)
@@ -163,13 +163,14 @@ var showTeam = team.NewShowTeam(findTeam)
 var signinUser = identity.NewSigninUser(
 	createAuthToken, 
 	findUserByEmail, 
-	updateVersion,
+	incrementVersion,
 )
 var signinWithGoogle = identity.NewSigninWithGoogle()
 var signinWithGoogleCallback = identity.NewSigninWithGoogleCallback(
     findUserByEmail, 
     saveUser,
 )
+var signoutUser = identity.NewSignoutUser(incrementVersion)
 var vote = poll.NewVote(ensurePollOwnership, ensureOptionOwnership, saveVote)
 
 func routes() http.Handler {
@@ -183,7 +184,7 @@ func routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/auth/signin", signinUser.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google", signinWithGoogle.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google/callback", signinWithGoogleCallback.Handle)
-	//TO-DO Criar endpoint de logout
+	router.HandlerFunc(http.MethodPost, "/v1/auth/signout", signoutUser.Handle)
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))

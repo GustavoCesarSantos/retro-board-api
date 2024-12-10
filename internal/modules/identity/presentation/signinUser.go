@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -11,18 +12,18 @@ import (
 type signinUser struct {
     creatAuthToken application.ICreateAuthToken
     findUserByEmail application.IFindUserByEmail
-	updateVersion application.IUpdateVersion
+	incrementVersion application.IIncrementVersion
 }
 
 func NewSigninUser(
 	createAuthToken application.ICreateAuthToken,  
 	findUserByEmail application.IFindUserByEmail,
-	updateVersion application.IUpdateVersion,
+	incrementVersion application.IIncrementVersion,
 ) *signinUser {
     return &signinUser{
         createAuthToken,
         findUserByEmail,
-		updateVersion,
+		incrementVersion,
     }
 }
 
@@ -35,13 +36,26 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr)
 		return
 	}
-	user := su.findUserByEmail.Execute(input.Email);
-    if user == nil {
-        utils.NotFoundResponse(w, r)
+	user, findUserErr := su.findUserByEmail.Execute(input.Email)
+    if findUserErr != nil {
+		switch {
+		case errors.Is(findUserErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, findUserErr)
+		}
 		return
     }
-	user.Version++
-	su.updateVersion.Execute(user.ID, user.Version)
+    incrementErr:= su.incrementVersion.Execute(user)
+    if incrementErr != nil {
+		switch {
+		case errors.Is(incrementErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, incrementErr)
+		}
+		return
+    }
     accessToken, accessTokenErr := su.creatAuthToken.Execute(*user, 15 * time.Minute)
 	if accessTokenErr != nil {
 		utils.ServerErrorResponse(w, r, accessTokenErr)

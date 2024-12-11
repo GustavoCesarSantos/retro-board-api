@@ -10,13 +10,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var db *sql.DB
-
-func OpenDB() {
+func OpenDB() (*sql.DB, error) {
 	var databaseConfig = configs.LoadDatabaseConfig()
-    db, err := sql.Open("postgres", databaseConfig.Dsn)
-	if err != nil {
-        panic(err.Error())
+    db, openErr := sql.Open("postgres", databaseConfig.Dsn)
+	if openErr != nil {
+        return nil, openErr
 	}
 	db.SetMaxOpenConns(databaseConfig.MaxOpenConns)
 	db.SetMaxIdleConns(databaseConfig.MaxIdleConns)
@@ -26,11 +24,8 @@ func OpenDB() {
 	pingErr := db.PingContext(ctx)
 	if pingErr != nil {
 		db.Close()
-        panic(pingErr.Error())
+        return nil, pingErr
 	}
 	slog.Info("Database connection pool established")
-}
-
-func GetDB() *sql.DB {
-    return db
+	return db, nil
 }

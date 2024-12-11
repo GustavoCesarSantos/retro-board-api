@@ -20,7 +20,7 @@ func NewSaveUser(repository db.IUserRepository) ISaveUser {
 }
 
 func (su *saveUser) Execute(name string, email string) (*domain.User, error) {
-    user := domain.NewUser(0, name, email)
+    user := domain.NewUser(name, email)
     err := su.repository.Save(user)
     return user, err
 }

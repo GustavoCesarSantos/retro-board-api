@@ -1,11 +1,11 @@
 package http
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/database"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
 	boardApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
 	boardDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
@@ -23,163 +23,166 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-var DB = database.GetDB()
-
-var boardRepository = boardDb.NewBoardRepository()
-var cardRepository = boardDb.NewCardRepository()
-var columnRepository = boardDb.NewColumnRepository()
-var optionRepository = pollDb.NewOptionRepository()
-var pollRepository = pollDb.NewPollRepository()
-var teamRepository = teamDb.NewTeamRepository()
-var teamMemberRepository = teamDb.NewTeamMemberRepository()
-var userRepository = userDb.NewUserRepository(DB)
-var voteRepository = pollDb.NewVoteRepository()
-
-var userAuthenticator = middleware.NewUserAuthenticator(userRepository)
-
-var countVotesByPollId = pollApplication.NewCountVotesByPollId(
-    optionRepository, 
-    voteRepository,
-)
-var createAuthToken = identityApplication.NewCreateAuthToken()
-var decodeAuthToken = identityApplication.NewDecodeAuthToken()
-var ensureBoardOwnership = boardApplication.NewEnsureBoardOwnership(boardRepository)
-var ensureCardOwnership = boardApplication.NewEnsureCardOwnership(cardRepository)
-var ensureColumnOwnership = boardApplication.NewEnsureColumnOwnership(
-    columnRepository,
-)
-var ensureOptionOwnership = pollApplication.NewEnsureOptionOwnership(optionRepository)
-var ensurePollOwnership = pollApplication.NewEnsurePollOwnership(pollRepository)
-var findAllBoards = boardApplication.NewFindAllBoards(boardRepository)
-var findAllCards = boardApplication.NewFindAllCards(cardRepository)
-var findAllColumns = boardApplication.NewFindAllColumns(columnRepository)
-var findAllPolls = pollApplication.NewFindAllPolls(pollRepository)
-var findAllTeams = teamApplication.NewFindAllTeams(teamRepository)
-var findBoard = boardApplication.NewFindBoard(boardRepository)
-var findCard = boardApplication.NewFindCard(cardRepository)
-var findPoll = pollApplication.NewFindPoll(pollRepository)
-var findTeam = teamApplication.NewFindTeam(teamRepository)
-var findUserByEmail = identityApplication.NewFindUserByEmail(userRepository)
-var getNextColumnPosition = boardApplication.NewGetNextColumnPosition(
-    columnRepository,
-)
-var incrementVersion = identityApplication.NewIncrementVersion(userRepository)
-var moveCardBetweenColumns = boardApplication.NewMoveCardBetweenColumns(
-    cardRepository,
-)
-var removeBoard = boardApplication.NewRemoveBoard(boardRepository)
-var removeCard = boardApplication.NewRemoveCard(cardRepository)
-var removeColumn = boardApplication.NewRemoveColumn(columnRepository)
-var removeMember = teamApplication.NewRemoveMember(teamMemberRepository)
-var removeOption = pollApplication.NewRemoveOption(optionRepository)
-var saveBoard = boardApplication.NewSaveBoard(boardRepository)
-var saveCard = boardApplication.NewSaveCard(cardRepository)
-var saveColumn = boardApplication.NewSaveColumn(columnRepository)
-var saveMember = teamApplication.NewSaveMember(teamMemberRepository)
-var saveOption = pollApplication.NewSaveOption(optionRepository)
-var savePoll = pollApplication.NewSavePoll(pollRepository)
-var saveTeam = teamApplication.NewSaveTeam(teamRepository)
-var saveUser = identityApplication.NewSaveUser(userRepository)
-var saveVote = pollApplication.NewSaveVote(voteRepository)
-var updateBoard = boardApplication.NewUpdateBoard(boardRepository)
-var updateCard = boardApplication.NewUpdateCard(cardRepository)
-var updateColumn = boardApplication.NewUpdateColumn(columnRepository)
-var updateRole = teamApplication.NewUpdateRole(teamMemberRepository)
-
-var addMemberToTeam = team.NewAddMemberToTeam(saveMember)
-var changeMemberRole = team.NewChangeMemberRole(updateRole)
-var createBoard = board.NewCreateBoard(saveBoard)
-var createCard = board.NewCreateCard(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	saveCard,
-)
-var createColumn = board.NewCreateColumn(
-	ensureBoardOwnership,
-	findAllColumns,
-	getNextColumnPosition,
-	saveColumn,
-)
-var createPoll = poll.NewCreatePoll(saveOption, savePoll)
-var createTeam = team.NewCreateTeam(saveTeam)
-var deleteBoard = board.NewDeleteBoard(ensureBoardOwnership, removeBoard)
-var deleteCard = board.NewDeleteCard(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	ensureCardOwnership,
-	removeCard,
-)
-var deleteColumn = board.NewDeleteColumn(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	removeColumn,
-)
-var deleteOption = poll.NewDeleteOption(
-    ensurePollOwnership, 
-    ensureOptionOwnership, 
-    removeOption,
-)
-var editBoard = board.NewEditBoard(ensureBoardOwnership, updateBoard)
-var editCard = board.NewEditCard(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	ensureCardOwnership,
-	updateCard,
-)
-var editColumn = board.NewEditColumn(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	updateColumn,
-)
-var healthcheck = monitor.NewHealthcheck()
-var listAllBoards = board.NewListAllBoards(findAllBoards)
-var listAllCards = board.NewListAllCards(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	findAllCards,
-)
-var listAllColumns = board.NewListAllColumns(ensureBoardOwnership, findAllColumns)
-var listAllPolls = poll.NewListAllPolls(findAllPolls)
-var listAllTeams = team.NewListAllTeams(findAllTeams)
-var listBoard = board.NewListBoard(ensureBoardOwnership, findBoard)
-var listCard = board.NewListCard(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	ensureCardOwnership,
-	findCard,
-)
-var listPoll = poll.NewListPoll(ensurePollOwnership, findPoll)
-var moveCardtoAnotherColumn = board.NewMoveCardtoAnotherColumn(
-	ensureBoardOwnership,
-	ensureColumnOwnership,
-	ensureCardOwnership,
-	moveCardBetweenColumns,
-)
-var refreshAuthToken = identity.NewRefreshAuthToken(
-	createAuthToken, 
-	decodeAuthToken,
-	findUserByEmail,
-)
-var removeMemberFromTeam = team.NewRemoveMemberFromTeam(removeMember)
-var showPollResult = poll.NewShowPollResult(ensurePollOwnership, countVotesByPollId)
-var showTeam = team.NewShowTeam(findTeam)
-var signinUser = identity.NewSigninUser(
-	createAuthToken, 
-	findUserByEmail, 
-	incrementVersion,
-)
-var signinWithGoogle = identity.NewSigninWithGoogle()
-var signinWithGoogleCallback = identity.NewSigninWithGoogleCallback(
-    findUserByEmail, 
-    saveUser,
-)
-var signoutUser = identity.NewSignoutUser(incrementVersion)
-var vote = poll.NewVote(ensurePollOwnership, ensureOptionOwnership, saveVote)
-
-func routes() http.Handler {
+func routes(db *sql.DB) http.Handler {
 	router := httprouter.New()
 	router.NotFound = http.HandlerFunc(utils.NotFoundResponse)
 	router.MethodNotAllowed = http.HandlerFunc(utils.MethodNotAllowedResponse)
+
+	//Init Repos
+	boardRepository := boardDb.NewBoardRepository()
+	cardRepository := boardDb.NewCardRepository()
+	columnRepository := boardDb.NewColumnRepository()
+	optionRepository := pollDb.NewOptionRepository()
+	pollRepository := pollDb.NewPollRepository()
+	teamRepository := teamDb.NewTeamRepository()
+	teamMemberRepository := teamDb.NewTeamMemberRepository()
+	userRepository := userDb.NewUserRepository(db)
+	voteRepository := pollDb.NewVoteRepository()
+
+	//Init Middlewares
+	userAuthenticator := middleware.NewUserAuthenticator(userRepository)
+
+	//Init Use Cases
+	countVotesByPollId := pollApplication.NewCountVotesByPollId(
+		optionRepository, 
+		voteRepository,
+	)
+	createAuthToken := identityApplication.NewCreateAuthToken()
+	decodeAuthToken := identityApplication.NewDecodeAuthToken()
+	ensureBoardOwnership := boardApplication.NewEnsureBoardOwnership(boardRepository)
+	ensureCardOwnership := boardApplication.NewEnsureCardOwnership(cardRepository)
+	ensureColumnOwnership := boardApplication.NewEnsureColumnOwnership(
+		columnRepository,
+	)
+	ensureOptionOwnership := pollApplication.NewEnsureOptionOwnership(optionRepository)
+	ensurePollOwnership := pollApplication.NewEnsurePollOwnership(pollRepository)
+	findAllBoards := boardApplication.NewFindAllBoards(boardRepository)
+	findAllCards := boardApplication.NewFindAllCards(cardRepository)
+	findAllColumns := boardApplication.NewFindAllColumns(columnRepository)
+	findAllPolls := pollApplication.NewFindAllPolls(pollRepository)
+	findAllTeams := teamApplication.NewFindAllTeams(teamRepository)
+	findBoard := boardApplication.NewFindBoard(boardRepository)
+	findCard := boardApplication.NewFindCard(cardRepository)
+	findPoll := pollApplication.NewFindPoll(pollRepository)
+	findTeam := teamApplication.NewFindTeam(teamRepository)
+	findUserByEmail := identityApplication.NewFindUserByEmail(userRepository)
+	getNextColumnPosition := boardApplication.NewGetNextColumnPosition(
+		columnRepository,
+	)
+	incrementVersion := identityApplication.NewIncrementVersion(userRepository)
+	moveCardBetweenColumns := boardApplication.NewMoveCardBetweenColumns(
+		cardRepository,
+	)
+	removeBoard := boardApplication.NewRemoveBoard(boardRepository)
+	removeCard := boardApplication.NewRemoveCard(cardRepository)
+	removeColumn := boardApplication.NewRemoveColumn(columnRepository)
+	removeMember := teamApplication.NewRemoveMember(teamMemberRepository)
+	removeOption := pollApplication.NewRemoveOption(optionRepository)
+	saveBoard := boardApplication.NewSaveBoard(boardRepository)
+	saveCard := boardApplication.NewSaveCard(cardRepository)
+	saveColumn := boardApplication.NewSaveColumn(columnRepository)
+	saveMember := teamApplication.NewSaveMember(teamMemberRepository)
+	saveOption := pollApplication.NewSaveOption(optionRepository)
+	savePoll := pollApplication.NewSavePoll(pollRepository)
+	saveTeam := teamApplication.NewSaveTeam(teamRepository)
+	saveUser := identityApplication.NewSaveUser(userRepository)
+	saveVote := pollApplication.NewSaveVote(voteRepository)
+	updateBoard := boardApplication.NewUpdateBoard(boardRepository)
+	updateCard := boardApplication.NewUpdateCard(cardRepository)
+	updateColumn := boardApplication.NewUpdateColumn(columnRepository)
+	updateRole := teamApplication.NewUpdateRole(teamMemberRepository)
+
+	//Init Handlers
+	addMemberToTeam := team.NewAddMemberToTeam(saveMember)
+	changeMemberRole := team.NewChangeMemberRole(updateRole)
+	createBoard := board.NewCreateBoard(saveBoard)
+	createCard := board.NewCreateCard(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		saveCard,
+	)
+	createColumn := board.NewCreateColumn(
+		ensureBoardOwnership,
+		findAllColumns,
+		getNextColumnPosition,
+		saveColumn,
+	)
+	createPoll := poll.NewCreatePoll(saveOption, savePoll)
+	createTeam := team.NewCreateTeam(saveTeam)
+	deleteBoard := board.NewDeleteBoard(ensureBoardOwnership, removeBoard)
+	deleteCard := board.NewDeleteCard(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		ensureCardOwnership,
+		removeCard,
+	)
+	deleteColumn := board.NewDeleteColumn(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		removeColumn,
+	)
+	deleteOption := poll.NewDeleteOption(
+		ensurePollOwnership, 
+		ensureOptionOwnership, 
+		removeOption,
+	)
+	editBoard := board.NewEditBoard(ensureBoardOwnership, updateBoard)
+	editCard := board.NewEditCard(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		ensureCardOwnership,
+		updateCard,
+	)
+	editColumn := board.NewEditColumn(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		updateColumn,
+	)
+	healthcheck := monitor.NewHealthcheck()
+	listAllBoards := board.NewListAllBoards(findAllBoards)
+	listAllCards := board.NewListAllCards(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		findAllCards,
+	)
+	listAllColumns := board.NewListAllColumns(ensureBoardOwnership, findAllColumns)
+	listAllPolls := poll.NewListAllPolls(findAllPolls)
+	listAllTeams := team.NewListAllTeams(findAllTeams)
+	listBoard := board.NewListBoard(ensureBoardOwnership, findBoard)
+	listCard := board.NewListCard(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		ensureCardOwnership,
+		findCard,
+	)
+	listPoll := poll.NewListPoll(ensurePollOwnership, findPoll)
+	moveCardtoAnotherColumn := board.NewMoveCardtoAnotherColumn(
+		ensureBoardOwnership,
+		ensureColumnOwnership,
+		ensureCardOwnership,
+		moveCardBetweenColumns,
+	)
+	refreshAuthToken := identity.NewRefreshAuthToken(
+		createAuthToken, 
+		decodeAuthToken,
+		findUserByEmail,
+	)
+	removeMemberFromTeam := team.NewRemoveMemberFromTeam(removeMember)
+	showPollResult := poll.NewShowPollResult(ensurePollOwnership, countVotesByPollId)
+	showTeam := team.NewShowTeam(findTeam)
+	signinUser := identity.NewSigninUser(
+		createAuthToken, 
+		findUserByEmail, 
+		incrementVersion,
+	)
+	signinWithGoogle := identity.NewSigninWithGoogle()
+	signinWithGoogleCallback := identity.NewSigninWithGoogleCallback(
+		findUserByEmail, 
+		saveUser,
+	)
+	signoutUser := identity.NewSignoutUser(incrementVersion)
+	vote := poll.NewVote(ensurePollOwnership, ensureOptionOwnership, saveVote)
+
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheck.Handle)
 

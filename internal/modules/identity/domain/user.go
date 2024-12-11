@@ -8,19 +8,16 @@ type User struct {
     Email string
     Version int
     CreatedAt time.Time
-    UpdatedAt time.Time
+    UpdatedAt *time.Time
 }
 
 func NewUser(
-    id int64,
     name string,
     email string,
 ) *User {
     return &User{
-        ID: id,
         Name: name,
         Email: email,
-        Version: 1,
         CreatedAt: time.Now(),
     }
 }

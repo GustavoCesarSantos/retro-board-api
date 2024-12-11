@@ -15,9 +15,9 @@ type userRepository struct {
     DB *sql.DB
 }
 
-func NewUserRepository(DB *sql.DB) db.IUserRepository {
+func NewUserRepository(db *sql.DB) db.IUserRepository {
 	return &userRepository{
-        DB,
+        DB: db,
 	}
 }
 
@@ -39,7 +39,6 @@ func (ur *userRepository) FindByEmail(email string) (*domain.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err := ur.DB.QueryRowContext(ctx, query, email).Scan(
-		&[]byte{},
 		&user.ID,
         &user.Name,
         &user.Email,
@@ -62,20 +61,18 @@ func (ur *userRepository) Save(user *domain.User) error {
     query := `
         INSERT INTO users (
             name,
-            email,
-            version
+            email
         )
         VALUES (
             $1,
-            $2,
-            $3
+            $2
         )
         RETURNING
             id,
             version,
             created_at
     `
-	args := []any{user.Name, user.Email, user.Version}
+	args := []any{user.Name, user.Email}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
     return ur.DB.QueryRowContext(ctx, query, args...).Scan(

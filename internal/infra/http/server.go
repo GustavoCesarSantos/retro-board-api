@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,9 +16,9 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
 )
 
-func Server() error {
+func Server(db *sql.DB) error {
 	serverConfigs := configs.LoadServerConfig()
-	routes := routes()
+	routes := routes(db)
 	port := serverConfigs.Port
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	srv := &http.Server{

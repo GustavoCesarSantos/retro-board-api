@@ -17,11 +17,16 @@ func main() {
 		slog.Error("failed to load .env file", "error", loadEnvErr)
         os.Exit(1)
 	}
-	database.OpenDB()
+	DB, DBErr := database.OpenDB()
+	if DBErr != nil {
+		slog.Error(DBErr.Error())
+		os.Exit(1)
+	}
+	defer DB.Close()
     oauth2.SetProvider()
-	err := http.Server()
-	if err != nil {
-		slog.Error(err.Error())
+	serverErr := http.Server(DB)
+	if serverErr != nil {
+		slog.Error(serverErr.Error())
 		os.Exit(1)
 	}
 }

@@ -12,11 +12,7 @@ type userRepository struct {
 
 func NewUserRepository() db.IUserRepository {
 	return &userRepository{
-		users: []domain.User{
-			*domain.NewUser(1, "Usuário 1", "usuario1@usuario.com"),
-			*domain.NewUser(2, "Usuário 2", "usuario2@usuario.com"),
-			*domain.NewUser(3, "Usuário 3", "usuario3@usuario.com"),
-		},
+		users: []domain.User{},
 	}
 }
 

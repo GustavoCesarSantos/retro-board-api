@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
 	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/interfaces"
@@ -76,11 +75,7 @@ func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFun
             utils.InvalidAuthenticationTokenResponse(w, r)
 			return
 		}
-        version, versionErr := strconv.Atoi(mappedClaims["version"].(string))
-        if versionErr != nil {
-            utils.ServerErrorResponse(w, r, versionErr)
-            return
-        }
+        version := int(mappedClaims["version"].(float64))
         if  version != user.Version {
             utils.InvalidAuthenticationTokenResponse(w, r)
 			return

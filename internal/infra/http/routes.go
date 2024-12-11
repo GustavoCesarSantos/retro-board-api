@@ -190,7 +190,7 @@ func routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/auth/signin", signinUser.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google", signinWithGoogle.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google/callback", signinWithGoogleCallback.Handle)
-	router.HandlerFunc(http.MethodPost, "/v1/auth/signout", signoutUser.Handle)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/signout", userAuthenticator.Authenticate(signoutUser.Handle))
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))

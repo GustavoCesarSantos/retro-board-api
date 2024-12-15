@@ -1,6 +1,7 @@
 package team
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
@@ -8,22 +9,23 @@ import (
 )
 
 type changeMemberRole struct {
-    uploadRole application.IUpdateRole
+	ensureAdminMembership application.IEnsureAdminMembership
+    updateRole application.IUpdateRole
 }
 
-func NewChangeMemberRole(uploadRole application.IUpdateRole) *changeMemberRole {
+func NewChangeMemberRole(
+	ensureAdminMembership application.IEnsureAdminMembership,
+	updateRole application.IUpdateRole,
+) *changeMemberRole {
     return &changeMemberRole{
-        uploadRole,
+		ensureAdminMembership,
+        updateRole,
     }
 }
 
 func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
-	/*
-	TO-DO: Adicionar uma verificação da role do usuário que está executando a
-	ação. Somente usuários com a role: Admin podem trocar a role de outros usuá
-	rios
-	*/
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
+	user := utils.ContextGetUser(r)
+	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.NotFoundResponse(w, r)
 		return
@@ -41,7 +43,21 @@ func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr)
 		return
 	}
-    cmp.uploadRole.Execute(teamId, memberId, input.Role)
+	ensureAdminErr := cmp.ensureAdminMembership.Execute(teamId, user.ID)
+	if ensureAdminErr != nil {
+		utils.BadRequestResponse(w, r, ensureAdminErr)
+		return
+	}
+    updateErr := cmp.updateRole.Execute(teamId, memberId, input.Role)
+	if updateErr != nil {
+		switch {
+		case errors.Is(updateErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, updateErr)
+		}
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

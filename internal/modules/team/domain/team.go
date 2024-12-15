@@ -7,7 +7,7 @@ type Team struct {
     Name string
     AdminId int64
     CreatedAt time.Time
-    UpdatedAt time.Time
+    UpdatedAt *time.Time
 }
 
 func NewTeam(

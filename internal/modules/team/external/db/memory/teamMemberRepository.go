@@ -1,18 +1,16 @@
 package db
 
-import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/domain"
-
-type ITeamMemberRepository interface {
-	Delete(teamId int64, memberId int64)
-	Save(team domain.TeamMember)
-	UpdateRole(teamId int64, memberId int64, role int64)
-}
+import (
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/domain"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/interfaces"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
+)
 
 type teamMemberRepository struct {
 	teamMembers []domain.TeamMember
 }
 
-func NewTeamMemberRepository() ITeamMemberRepository {
+func NewTeamMemberRepository() db.ITeamMemberRepository {
 	return &teamMemberRepository{
 		teamMembers: []domain.TeamMember{
 			*domain.NewTeamMember(1, 1, 1, 1),
@@ -23,7 +21,7 @@ func NewTeamMemberRepository() ITeamMemberRepository {
 	}
 }
 
-func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) {
+func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
 	i := 0
 	for _, member := range tm.teamMembers {
 		if !(member.TeamId == teamId && member.MemberId == memberId) {
@@ -32,17 +30,29 @@ func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) {
 		}
 	}
 	tm.teamMembers = tm.teamMembers[:i]
+    return nil
 }
 
-func (tm *teamMemberRepository) Save(teamMember domain.TeamMember) {
-	tm.teamMembers = append(tm.teamMembers, teamMember)
+func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId int64) (*domain.TeamMember, error) {
+    for _, teamMember := range tm.teamMembers {
+        if teamMember.TeamId == teamId && teamMember.MemberId == memberId && teamMember.RoleId == 1 {
+            return &teamMember, nil
+        }
+    }
+    return nil, utils.ErrRecordNotFound
 }
 
-func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, role int64) {
+func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
+	tm.teamMembers = append(tm.teamMembers, *teamMember)
+    return nil
+}
+
+func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, roleId int64) error {
 	for i := range tm.teamMembers {
 		if tm.teamMembers[i].TeamId == teamId && tm.teamMembers[i].MemberId == memberId {
-			tm.teamMembers[i].Role = role
+			tm.teamMembers[i].RoleId = roleId
 			break
 		}
 	}
+    return nil
 }

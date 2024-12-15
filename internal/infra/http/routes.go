@@ -18,7 +18,7 @@ import (
 	pollDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/external/db/memory"
 	poll "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/presentation"
 	teamApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
-	teamDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/memory"
+	teamDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/nativeSql"
 	team "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
@@ -34,8 +34,8 @@ func routes(db *sql.DB) http.Handler {
 	columnRepository := boardDb.NewColumnRepository()
 	optionRepository := pollDb.NewOptionRepository()
 	pollRepository := pollDb.NewPollRepository()
-	teamRepository := teamDb.NewTeamRepository()
-	teamMemberRepository := teamDb.NewTeamMemberRepository()
+	teamRepository := teamDb.NewTeamRepository(db)
+	teamMemberRepository := teamDb.NewTeamMemberRepository(db)
 	userRepository := userDb.NewUserRepository(db)
 	voteRepository := pollDb.NewVoteRepository()
 
@@ -49,6 +49,7 @@ func routes(db *sql.DB) http.Handler {
 	)
 	createAuthToken := identityApplication.NewCreateAuthToken()
 	decodeAuthToken := identityApplication.NewDecodeAuthToken()
+	ensureAdminMembership := teamApplication.NewEnsureAdminMembership(teamMemberRepository)
 	ensureBoardOwnership := boardApplication.NewEnsureBoardOwnership(boardRepository)
 	ensureCardOwnership := boardApplication.NewEnsureCardOwnership(cardRepository)
 	ensureColumnOwnership := boardApplication.NewEnsureColumnOwnership(
@@ -78,6 +79,7 @@ func routes(db *sql.DB) http.Handler {
 	removeColumn := boardApplication.NewRemoveColumn(columnRepository)
 	removeMember := teamApplication.NewRemoveMember(teamMemberRepository)
 	removeOption := pollApplication.NewRemoveOption(optionRepository)
+	removeTeam := teamApplication.NewRemoveTeam(teamRepository)
 	saveBoard := boardApplication.NewSaveBoard(boardRepository)
 	saveCard := boardApplication.NewSaveCard(cardRepository)
 	saveColumn := boardApplication.NewSaveColumn(columnRepository)
@@ -93,8 +95,8 @@ func routes(db *sql.DB) http.Handler {
 	updateRole := teamApplication.NewUpdateRole(teamMemberRepository)
 
 	//Init Handlers
-	addMemberToTeam := team.NewAddMemberToTeam(saveMember)
-	changeMemberRole := team.NewChangeMemberRole(updateRole)
+	addMemberToTeam := team.NewAddMemberToTeam(ensureAdminMembership, saveMember)
+	changeMemberRole := team.NewChangeMemberRole(ensureAdminMembership, updateRole)
 	createBoard := board.NewCreateBoard(saveBoard)
 	createCard := board.NewCreateCard(
 		ensureBoardOwnership,
@@ -108,7 +110,7 @@ func routes(db *sql.DB) http.Handler {
 		saveColumn,
 	)
 	createPoll := poll.NewCreatePoll(saveOption, savePoll)
-	createTeam := team.NewCreateTeam(saveTeam)
+	createTeam := team.NewCreateTeam(removeTeam, saveMember, saveTeam)
 	deleteBoard := board.NewDeleteBoard(ensureBoardOwnership, removeBoard)
 	deleteCard := board.NewDeleteCard(
 		ensureBoardOwnership,
@@ -167,8 +169,14 @@ func routes(db *sql.DB) http.Handler {
 		decodeAuthToken,
 		findUserByEmail,
 	)
-	removeMemberFromTeam := team.NewRemoveMemberFromTeam(removeMember)
-	showPollResult := poll.NewShowPollResult(ensurePollOwnership, countVotesByPollId)
+	removeMemberFromTeam := team.NewRemoveMemberFromTeam(
+		ensureAdminMembership, 
+		removeMember,
+	)
+	showPollResult := poll.NewShowPollResult(
+		ensurePollOwnership, 
+		countVotesByPollId,
+	)
 	showTeam := team.NewShowTeam(findTeam)
 	signinUser := identity.NewSigninUser(
 		createAuthToken, 

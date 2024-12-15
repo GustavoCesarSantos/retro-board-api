@@ -1,6 +1,9 @@
 usuário N -> usuarios_times <- N times
 
-members
+usuário 1 -> 1 regra de acesso ao time
+usuário N <- 1 regra de acesso ao time
+
+users
 id
 name
 email
@@ -12,15 +15,20 @@ teams
 id
 name
 createdAt
+updatedAt
 
 teamMembers
 id
-userId
+memberId
 teamId
-role
+roleId
 createdAt
 updatedAt
 
+teamRoles
+id
+name
+createdAt
 
 boards 1 -> N columns
 boards 1 <- 1 columns
@@ -55,7 +63,6 @@ memberId
 text
 createdAt
 updatedAt
-
 
 polls 1 -> N options
 polls 1 <- 1 options

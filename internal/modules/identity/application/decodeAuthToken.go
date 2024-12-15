@@ -2,7 +2,6 @@ package application
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
 	"github.com/golang-jwt/jwt/v5"
@@ -39,12 +38,8 @@ func (da *decodeAuthToken) Execute(refreshToken string) (*DecodedToken, error) {
     if !ok ||  !claims.Valid {
         return nil, errors.New("INVALID TOKEN VALUE")
     }
-    version, versionErr := strconv.Atoi(mappedClaims["version"].(string))
-    if versionErr != nil {
-        return nil, errors.New("FAILED TO CONVERT VERSION NUMBER")
-    }
     return &DecodedToken{
         Email: mappedClaims["email"].(string),
-        Version: version,
+        Version: int(mappedClaims["version"].(float64)),
     }, nil
 }

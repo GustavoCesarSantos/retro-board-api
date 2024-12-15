@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/interfaces"
 )
 
 type ISaveMember interface {
-    Execute(teamId int64, memberId int64, role int64)
+    Execute(teamId int64, memberId int64, roleId int64) error
 }
 
 type saveMember struct {
@@ -19,7 +19,7 @@ func NewSaveMember(repository db.ITeamMemberRepository) ISaveMember {
     }
 }
 
-func (sm *saveMember) Execute(teamId int64, memberId int64, role int64) {
-    teamMember := domain.NewTeamMember(0, teamId, memberId, role)
-    sm.repository.Save(*teamMember)
+func (sm *saveMember) Execute(teamId int64, memberId int64, roleId int64) error {
+    teamMember := domain.NewTeamMember(0, teamId, memberId, roleId)
+    return sm.repository.Save(teamMember)
 }

@@ -1,6 +1,7 @@
 package team
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
@@ -24,7 +25,16 @@ func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r)
 		return
 	}
-    team := st.findTeam.Execute(id, user.ID)
+    team, findErr := st.findTeam.Execute(id, user.ID)
+	if findErr != nil {
+		switch {
+		case errors.Is(findErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, findErr)
+		}
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"teams": team}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/interfaces"
 )
 
 type IFindTeam interface {
-    Execute(teamId int64, adminId int64) *domain.Team
+    Execute(teamId int64, memberId int64) (*domain.Team, error)
 }
 
 type findTeam struct {
@@ -19,6 +19,6 @@ func NewFindTeam(repository db.ITeamRepository) IFindTeam {
     }
 }
 
-func (ft *findTeam) Execute(teamId int64, adminId int64) *domain.Team {
-    return ft.repository.FindById(teamId, adminId)
+func (ft *findTeam) Execute(teamId int64, memberId int64) (*domain.Team, error) {
+    return ft.repository.FindById(teamId, memberId)
 }

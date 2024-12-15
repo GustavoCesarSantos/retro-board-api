@@ -1,11 +1,9 @@
 package application
 
-import (
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/memory"
-)
+import db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/interfaces"
 
 type IRemoveMember interface {
-    Execute(teamId int64, memberId int64)
+    Execute(teamId int64, memberId int64) error
 }
 
 type removeMember struct {
@@ -18,6 +16,6 @@ func NewRemoveMember(repository db.ITeamMemberRepository) IRemoveMember {
     }
 }
 
-func (rm *removeMember) Execute(teamId int64, memberId int64) {
-    rm.repository.Delete(teamId	, memberId)
+func (rm *removeMember) Execute(teamId int64, memberId int64) error {
+    return rm.repository.Delete(teamId, memberId)
 }

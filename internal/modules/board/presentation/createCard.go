@@ -60,7 +60,11 @@ func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
-    cc.saveCard.Execute(columnId, user.ID, input.Text)
+    saveErr := cc.saveCard.Execute(columnId, user.ID, input.Text)
+	if saveErr != nil {
+		utils.ServerErrorResponse(w, r, saveErr)
+		return
+	}
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

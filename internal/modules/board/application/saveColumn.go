@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
 type ISaveColumn interface {
-    Execute(boardId int64, name string, color string, position int)
+    Execute(boardId int64, name string, color string, position int) error
 }
 
 type saveColumn struct {
@@ -19,7 +19,7 @@ func NewSaveColumn(repository db.IColumnRepository) ISaveColumn {
     }
 }
 
-func (sc *saveColumn) Execute(boardId int64, name string, color string, position int) {
+func (sc *saveColumn) Execute(boardId int64, name string, color string, position int) error {
     column := domain.NewColumn(0, boardId, name, color, position)
-    sc.repository.Save(*column)
+    return sc.repository.Save(column)
 }

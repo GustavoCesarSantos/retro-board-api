@@ -1,11 +1,11 @@
 package application
 
 import (
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
 type IMoveCardBetweenColumns interface {
-    Execute(cardId int64, columnId int64)
+    Execute(cardId int64, columnId int64) error
 }
 
 type moveCardBetweenColumns struct {
@@ -18,6 +18,13 @@ func NewMoveCardBetweenColumns(repository db.ICardRepository) IMoveCardBetweenCo
     }
 }
 
-func (mc *moveCardBetweenColumns) Execute(cardId int64, columnId int64) {
-    mc.repository.MoveBetweenColumns(cardId, columnId)
+func (mc *moveCardBetweenColumns) Execute(cardId int64, columnId int64) error {
+    card := struct{
+        Text *string
+        ColumnId *int64
+    }{
+        Text: nil,
+        ColumnId: &columnId,
+    }
+    return mc.repository.Update(cardId, card)
 }

@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
 type ISaveBoard interface {
-    Execute(teamId int64, name string)
+    Execute(teamId int64, name string) error
 }
 
 type saveBoard struct {
@@ -19,7 +19,7 @@ func NewSaveBoard(repository db.IBoardRepository) ISaveBoard {
     }
 }
 
-func (sb *saveBoard) Execute(teamId int64, name string) {
+func (sb *saveBoard) Execute(teamId int64, name string) error {
     board := domain.NewBoard(0, teamId, name)
-    sb.repository.Save(*board)
+    return sb.repository.Save(board)
 }

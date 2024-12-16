@@ -12,7 +12,10 @@ type listAllColumns struct {
     findAllColumns application.IFindAllColumns
 }
 
-func NewListAllColumns(ensureBoardOwnership application.IEnsureBoardOwnership, findAllColumns application.IFindAllColumns) *listAllColumns {
+func NewListAllColumns(
+	ensureBoardOwnership application.IEnsureBoardOwnership, 
+	findAllColumns application.IFindAllColumns,
+) *listAllColumns {
     return &listAllColumns {
 		ensureBoardOwnership,
         findAllColumns,
@@ -20,6 +23,7 @@ func NewListAllColumns(ensureBoardOwnership application.IEnsureBoardOwnership, f
 }
 
 func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
+	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -35,7 +39,11 @@ func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
-	columns := lc.findAllColumns.Execute(boardId)
+	columns, findErr := lc.findAllColumns.Execute(boardId)
+	if findErr != nil {
+		utils.ServerErrorResponse(w, r, findErr)
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"columns": columns}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

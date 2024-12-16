@@ -1,6 +1,7 @@
 package board
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
@@ -72,7 +73,16 @@ func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request)
 		utils.BadRequestResponse(w, r, ensureCardErr)
 		return
 	}
-    mc.moveCardBetweenColumn.Execute(cardId, *input.NewColumnId)
+    moveErr := mc.moveCardBetweenColumn.Execute(cardId, *input.NewColumnId)
+	if moveErr != nil {
+		switch {
+		case errors.Is(moveErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, moveErr)
+		}
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

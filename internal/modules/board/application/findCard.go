@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
 type IFindCard interface {
-    Execute(cardId int64) *domain.Card
+    Execute(cardId int64) (*domain.Card, error)
 }
 
 type findCard struct {
@@ -19,6 +19,6 @@ func NewFindCard(repository db.ICardRepository) IFindCard {
     }
 }
 
-func (fb *findCard) Execute(cardId int64) *domain.Card {
-    return fb.repository.FindById(cardId)
+func (fc *findCard) Execute(cardId int64) (*domain.Card, error) {
+    return fc.repository.FindById(cardId)
 }

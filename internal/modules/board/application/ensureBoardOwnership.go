@@ -3,7 +3,7 @@ package application
 import (
 	"errors"
 
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
 type IEnsureBoardOwnership interface {
@@ -21,7 +21,10 @@ func NewEnsureBoardOwnership(repository db.IBoardRepository) IEnsureBoardOwnersh
 }
 
 func (ebo *ensureBoardOwnership) Execute(teamId int64, boardId int64) error {
-    boards := ebo.repository.FindAllByTeamId(teamId)
+    boards, findErr := ebo.repository.FindAllByTeamId(teamId)
+    if findErr != nil {
+        return findErr
+    }
     found := false
     for _, board := range boards {
         if board.ID == boardId {

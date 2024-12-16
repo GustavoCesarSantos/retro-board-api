@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
 type IFindAllColumns interface {
-    Execute(boardId int64) []*domain.Column
+    Execute(boardId int64) ([]*domain.Column, error)
 }
 
 type findAllColumns struct {
@@ -19,6 +19,6 @@ func NewFindAllColumns(repository db.IColumnRepository) IFindAllColumns {
     }
 }
 
-func (fac *findAllColumns) Execute(boardId int64) []*domain.Column {
+func (fac *findAllColumns) Execute(boardId int64) ([]*domain.Column, error) {
     return fac.repository.FindAllByBoardId(boardId)
 }

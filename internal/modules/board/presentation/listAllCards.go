@@ -26,6 +26,7 @@ func NewListAllCards(
 }
 
 func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
+	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -51,7 +52,11 @@ func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
-	cards := lc.findAllCards.Execute(columnId)
+	cards, findErr := lc.findAllCards.Execute(columnId)
+	if findErr != nil {
+		utils.ServerErrorResponse(w, r, findErr)
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"cards": cards}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

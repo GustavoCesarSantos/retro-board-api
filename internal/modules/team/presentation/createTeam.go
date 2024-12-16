@@ -1,6 +1,7 @@
 package team
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
@@ -45,7 +46,12 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	if saveAdminErr != nil {
 		removeErr := ct.removeTeam.Execute(team.ID, team.AdminId)
 		if removeErr != nil {
-			utils.ServerErrorResponse(w, r, saveTeamErr)
+			switch {
+			case errors.Is(removeErr, utils.ErrRecordNotFound):
+				utils.NotFoundResponse(w, r)
+			default:
+				utils.ServerErrorResponse(w, r, removeErr)
+			}
 			return
 		}
 		utils.ServerErrorResponse(w, r, saveTeamErr)

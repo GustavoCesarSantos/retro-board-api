@@ -1,6 +1,7 @@
 package board
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
@@ -44,13 +45,22 @@ func(eb *editBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
-    eb.updateBoard.Execute(boardId, struct {
+    updateErr := eb.updateBoard.Execute(boardId, struct {
 		Name *string
 		Active *bool
 	}{ 
 		Name: input.Name,
 		Active: input.Active,
 	})
+	if updateErr != nil {
+		switch {
+		case errors.Is(updateErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, updateErr)
+		}
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

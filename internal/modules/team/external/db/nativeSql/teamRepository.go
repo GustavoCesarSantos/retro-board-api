@@ -176,7 +176,7 @@ func (tr *teamRepository) FindById(teamId int64, memberId int64) (*domain.Team, 
 }
 
 func (tr *teamRepository) Save(team *domain.Team) error {
-query := `
+    query := `
         INSERT INTO teams (
             name
         )

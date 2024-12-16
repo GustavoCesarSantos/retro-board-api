@@ -8,27 +8,27 @@ id
 name
 email
 version
-createdAt
-updatedAt
+created_at
+updated_at
 
 teams
 id
 name
-createdAt
-updatedAt
+created_at
+updated_at
 
-teamMembers
+team_members
 id
-memberId
-teamId
-roleId
-createdAt
-updatedAt
+member_id
+team_id
+role_id
+created_at
+updated_at
 
-teamRoles
+team_roles
 id
 name
-createdAt
+created_at
 
 boards 1 -> N columns
 boards 1 <- 1 columns
@@ -41,28 +41,28 @@ cards N <- 1 member
 
 boards
 id
-teamId
+team_id
 name
 active
-createdAt
-updatedAt
+created_at
+updated_at
 
 columns
 id
-boardId
+board_id
 name
 color
 position
-createdAt
-updatedAt
+created_at
+updated_at
 
 cards
 id
-columnId
-memberId
+column_id
+member_id
 text
-createdAt
-updatedAt
+created_at
+updated_at
 
 polls 1 -> N options
 polls 1 <- 1 options
@@ -75,20 +75,20 @@ votes 1 <- 1 member
 
 polls
 id
-teamId
+team_id
 name
-createdAt
-updatedAt
+created_at
+updated_at
 
 options
 id
-pollId
+poll_id
 text
-createdAt
-updatedAt
+created_at
+updated_at
 
 votes
 id
-memberId
-optionId
-createdAt
+member_id
+option_id
+created_at

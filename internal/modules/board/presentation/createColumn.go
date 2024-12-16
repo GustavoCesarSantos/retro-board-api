@@ -53,8 +53,16 @@ func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
-    position := cc.getNextColumnPosition.Execute(boardId)
-    cc.saveColumn.Execute(boardId, input.Name, input.Color, position)
+    position, getErr := cc.getNextColumnPosition.Execute(boardId)
+	if getErr != nil {
+		utils.ServerErrorResponse(w, r, getErr)
+		return
+	}
+    saveErr := cc.saveColumn.Execute(boardId, input.Name, input.Color, position)
+	if saveErr != nil {
+		utils.ServerErrorResponse(w, r, saveErr)
+		return
+	}
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

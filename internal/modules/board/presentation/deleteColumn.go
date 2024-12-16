@@ -1,6 +1,7 @@
 package board
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
@@ -51,7 +52,16 @@ func(dc *deleteColumn) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
-    dc.removeColumn.Execute(columnId)
+    removeErr := dc.removeColumn.Execute(columnId)
+	if removeErr != nil {
+		switch {
+		case errors.Is(removeErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, removeErr)
+		}
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

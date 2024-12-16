@@ -1,9 +1,9 @@
 package application
 
-import db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+import db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 
 type IRemoveCard interface {
-    Execute(cardId int64)
+    Execute(cardId int64) error
 }
 
 type removeCard struct {
@@ -16,6 +16,6 @@ func NewRemoveCard(repository db.ICardRepository) IRemoveCard {
     }
 }
 
-func (rb *removeCard) Execute(cardId int64) {
-    rb.repository.Delete(cardId)
+func (rc *removeCard) Execute(cardId int64) error {
+    return rc.repository.Delete(cardId)
 }

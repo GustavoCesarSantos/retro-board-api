@@ -1,6 +1,7 @@
 package team
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
@@ -41,9 +42,14 @@ func(rmt *removeMemberFromTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	}
     removeErr := rmt.removeMember.Execute(teamId, memberId)
 	if removeErr != nil {
-		utils.ServerErrorResponse(w, r, removeErr)
+		switch {
+		case errors.Is(removeErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, removeErr)
+		}
 		return
-	}
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

@@ -1,9 +1,9 @@
 package application
 
-import db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+import db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 
 type IRemoveColumn interface {
-    Execute(columnId int64)
+    Execute(columnId int64) error
 }
 
 type removeColumn struct {
@@ -16,6 +16,6 @@ func NewRemoveColumn(repository db.IColumnRepository) IRemoveColumn {
     }
 }
 
-func (rc *removeColumn) Execute(columnId int64) {
-    rc.repository.Delete(columnId)
+func (rc *removeColumn) Execute(columnId int64) error {
+    return rc.repository.Delete(columnId)
 }

@@ -1,6 +1,7 @@
 package board
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
@@ -35,7 +36,16 @@ func(lb *listBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
-	board := lb.findBoard.Execute(boardId)
+	board, findErr := lb.findBoard.Execute(boardId)
+	if findErr != nil {
+		switch {
+		case errors.Is(findErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, findErr)
+		}
+		return
+    }
 	if board == nil {
 		utils.NotFoundResponse(w, r)
 		return

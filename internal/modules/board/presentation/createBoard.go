@@ -31,7 +31,11 @@ func(cb *createBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr)
 		return
 	}
-    cb.saveBoard.Execute(teamId, input.Name)
+    saveErr := cb.saveBoard.Execute(teamId, input.Name)
+	if saveErr != nil {
+		utils.ServerErrorResponse(w, r, saveErr)
+		return
+	}
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

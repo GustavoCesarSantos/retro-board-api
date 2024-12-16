@@ -3,7 +3,7 @@ package application
 import (
 	"errors"
 
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
 type IEnsureCardOwnership interface {
@@ -21,7 +21,10 @@ func NewEnsureCardOwnership(repository db.ICardRepository) IEnsureCardOwnership 
 }
 
 func (eco *ensureCardOwnership) Execute(columnId int64, cardId int64) error {
-    cards := eco.repository.FindAllByColumnId(columnId)
+    cards, findErr := eco.repository.FindAllByColumnId(columnId)
+    if findErr != nil {
+        return findErr
+    }
     found := false
     for _, card := range cards {
         if card.ID == cardId {

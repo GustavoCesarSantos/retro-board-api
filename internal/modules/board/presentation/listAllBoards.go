@@ -18,12 +18,17 @@ func NewListAllBoards(findAllBoards application.IFindAllBoards) *listAllBoards {
 }
 
 func(lb *listAllBoards) Handle(w http.ResponseWriter, r *http.Request) {
+	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.NotFoundResponse(w, r)
 		return
 	}
-	boards := lb.findAllBoards.Execute(teamId)
+	boards, findErr := lb.findAllBoards.Execute(teamId)
+	if findErr != nil {
+		utils.ServerErrorResponse(w, r, findErr)
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"boards": boards}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

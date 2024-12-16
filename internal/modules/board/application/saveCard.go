@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
 )
 
-type ISaveCard interface {
-    Execute(columnId int64, memberId int64, text string)
+type ISaveCard interface { 
+    Execute(columnId int64, memberId int64, text string) error
 }
 
 type saveCard struct {
@@ -19,7 +19,7 @@ func NewSaveCard(repository db.ICardRepository) ISaveCard {
     }
 }
 
-func (sc *saveCard) Execute(columnId int64, memberId int64, text string) {
+func (sc *saveCard) Execute(columnId int64, memberId int64, text string) error {
     card := domain.NewCard(0, columnId, memberId, text)
-    sc.repository.Save(*card)
+    return sc.repository.Save(card)
 }

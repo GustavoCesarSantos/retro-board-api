@@ -1,6 +1,7 @@
 package board
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
@@ -64,7 +65,16 @@ func(lc *listCard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureCardErr)
 		return
 	}
-	card := lc.findCard.Execute(cardId)
+	card, findErr := lc.findCard.Execute(cardId)
+	if findErr != nil {
+		switch {
+		case errors.Is(findErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, findErr)
+		}
+		return
+    }
 	if card == nil {
 		utils.NotFoundResponse(w, r)
 		return

@@ -1,25 +1,17 @@
 package db
 
-import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
+import (
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
+)
 
-type UpdateColumnParams struct {
-	Name *string
-    Color *string
-}
 
-type IColumnRepository interface {
-	CountColumnsByBoardId(boardId int64) int
-	Delete(columnId int64)
-    FindAllByBoardId(boardId int64) []*domain.Column
-	Save(column domain.Column)
-	Update(columnId int64, column UpdateColumnParams)
-}
 
 type columnRepository struct {
 	columns []domain.Column
 }
 
-func NewColumnRepository() IColumnRepository {
+func NewColumnRepository() db.IColumnRepository {
 	return &columnRepository{
 		columns: []domain.Column{
 			*domain.NewColumn(1, 1, "Column 1", "#FFFFFF", 1),
@@ -29,11 +21,11 @@ func NewColumnRepository() IColumnRepository {
 	}
 }
 
-func (cr *columnRepository) CountColumnsByBoardId(boardId int64) int {
-    return len(cr.columns)
+func (cr *columnRepository) CountColumnsByBoardId(boardId int64) (int, error) {
+    return len(cr.columns), nil
 }
 
-func (cr *columnRepository) Delete(columnId int64) {
+func (cr *columnRepository) Delete(columnId int64) error {
     i := 0
 	for _, column := range cr.columns {
 		if !(column.ID == columnId) {
@@ -42,23 +34,25 @@ func (cr *columnRepository) Delete(columnId int64) {
 		}
 	}
 	cr.columns = cr.columns[:i]
+    return nil
 }
 
-func (cr *columnRepository) FindAllByBoardId(boardId int64) []*domain.Column {
+func (cr *columnRepository) FindAllByBoardId(boardId int64) ([]*domain.Column, error) {
     var columns []*domain.Column
     for _, column := range cr.columns {
         if column.BoardId == boardId {
             columns = append(columns, &column)
         }
     }
-    return columns
+    return columns, nil
 }
 
-func (cr *columnRepository) Save(column domain.Column) {
-	cr.columns = append(cr.columns, column)
+func (cr *columnRepository) Save(column *domain.Column) error {
+	cr.columns = append(cr.columns, *column)
+    return nil
 }
 
-func (cr *columnRepository) Update(columnId int64, column UpdateColumnParams) {
+func (cr *columnRepository) Update(columnId int64, column db.UpdateColumnParams) error {
     for i := range cr.columns {
 		if cr.columns[i].ID == columnId {
 			if column.Name != nil {
@@ -70,4 +64,5 @@ func (cr *columnRepository) Update(columnId int64, column UpdateColumnParams) {
 			break
 		}
 	}
+    return nil
 }

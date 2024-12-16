@@ -1,6 +1,7 @@
 package board
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
@@ -35,7 +36,16 @@ func(db *deleteBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
-    db.removeBoard.Execute(boardId)
+    removeErr := db.removeBoard.Execute(boardId)
+	if removeErr != nil {
+		switch {
+		case errors.Is(removeErr, utils.ErrRecordNotFound):
+            utils.NotFoundResponse(w, r)
+		default:
+            utils.ServerErrorResponse(w, r, removeErr)
+		}
+		return
+    }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

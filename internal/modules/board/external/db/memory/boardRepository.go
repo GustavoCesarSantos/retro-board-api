@@ -1,25 +1,16 @@
 package db
 
-import "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
-
-type UpdateBoardParams struct {
-	Name *string
-	Active *bool
-}
-
-type IBoardRepository interface {
-	Delete(boardId int64)
-    FindAllByTeamId(teamId int64) []*domain.Board
-    FindById(boardId int64) *domain.Board
-	Save(board domain.Board)
-	Update(boardId int64, board UpdateBoardParams)
-}
+import (
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
+	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
+)
 
 type boardRepository struct {
 	boards []domain.Board
 }
 
-func NewBoardRepository() IBoardRepository {
+func NewBoardRepository() db.IBoardRepository {
 	return &boardRepository{
 		boards: []domain.Board{
 			*domain.NewBoard(1, 1, "Board 1"),
@@ -29,7 +20,7 @@ func NewBoardRepository() IBoardRepository {
 	}
 }
 
-func (br *boardRepository) Delete(boardId int64) {
+func (br *boardRepository) Delete(boardId int64) error { 
     i := 0
 	for _, board := range br.boards {
 		if !(board.ID == boardId) {
@@ -38,32 +29,34 @@ func (br *boardRepository) Delete(boardId int64) {
 		}
 	}
 	br.boards = br.boards[:i]
+    return nil
 }
 
-func (br *boardRepository) FindAllByTeamId(teamId int64) []*domain.Board {
+func (br *boardRepository) FindAllByTeamId(teamId int64) ([]*domain.Board, error) {
     var boards []*domain.Board
     for _, board := range br.boards {
         if board.TeamId == teamId {
             boards = append(boards, &board)
         }
     }
-    return boards
+    return boards, nil
 }
 
-func (br *boardRepository) FindById(boardId int64) *domain.Board {
+func (br *boardRepository) FindById(boardId int64) (*domain.Board, error) {
     for _, board := range br.boards {
         if board.ID == boardId {
-            return &board
+            return &board, nil
         }
     }
+    return nil, utils.ErrRecordNotFound
+}
+
+func (br *boardRepository) Save(board *domain.Board) error {
+	br.boards = append(br.boards, *board)
     return nil
 }
 
-func (br *boardRepository) Save(board domain.Board) {
-	br.boards = append(br.boards, board)
-}
-
-func (br *boardRepository) Update(boardId int64, board UpdateBoardParams) {
+func (br *boardRepository) Update(boardId int64, board db.UpdateBoardParams) error {
     for i := range br.boards {
 		if br.boards[i].ID == boardId {
 			if board.Name != nil {
@@ -75,4 +68,5 @@ func (br *boardRepository) Update(boardId int64, board UpdateBoardParams) {
 			break
 		}
 	}
+    return nil
 }

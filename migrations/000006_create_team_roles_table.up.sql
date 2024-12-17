@@ -1,5 +1,5 @@
-CREATE TABLE IF NOT EXISTS teamRoles (
+CREATE TABLE IF NOT EXISTS team_roles (
     id bigserial PRIMARY KEY,
-    role VARCHAR(50) NOT NULL,
+    name VARCHAR(50) NOT NULL,
     created_at timestamp(0) with time zone NOT NULL DEFAULT NOW()
 );

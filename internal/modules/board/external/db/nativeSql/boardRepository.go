@@ -55,7 +55,7 @@ func (br *boardRepository) FindAllByTeamId(teamId int64) ([]*domain.Board, error
         FROM
             boards
         WHERE
-            teamId = $1
+            team_id = $1
     `
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

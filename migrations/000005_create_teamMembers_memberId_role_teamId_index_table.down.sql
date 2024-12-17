@@ -1,1 +1,0 @@
-DROP INDEX IF EXISTS idx_teamMembers_memberId_role_teamId;

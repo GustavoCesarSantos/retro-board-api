@@ -26,12 +26,12 @@ func (tr *teamRepository) Delete(teamId int64, adminId int64) error {
         DELETE FROM 
             teams t
         USING 
-            teamMembers tm
+            team_members tm
         WHERE 
             t.id = $1 
-            AND tm.teamId = t.id 
-            AND tm.memberId = $2
-            AND tm.roleId = 1;
+            AND tm.team_id = t.id 
+            AND tm.member_id = $2
+            AND tm.role_id = 1;
     `
 	args := []any{teamId, adminId}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -60,12 +60,12 @@ func (tr *teamRepository) FindAllByAdminId(adminId int64) ([]*domain.Team, error
         FROM
             teams t
         INNER JOIN
-            teamMembers tm
+            team_members tm
         ON
-            tm.teamId = t.id
+            tm.team_id = t.id
         WHERE
-            tm.memberId = $1
-            AND tm.roleId = 1;
+            tm.member_id = $1
+            AND tm.role_id = 1;
     `
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -104,11 +104,11 @@ func (tr *teamRepository) FindAllByMemberId(memberId int64) ([]*domain.Team, err
         FROM
             teams t
         INNER JOIN
-            teamMembers tm
+            team_members tm
         ON
-            tm.teamId = t.id
+            tm.team_id = t.id
         WHERE
-            tm.memberId = $1;
+            tm.member_id = $1;
     `
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -147,12 +147,12 @@ func (tr *teamRepository) FindById(teamId int64, memberId int64) (*domain.Team, 
         FROM
             teams t
         INNER JOIN
-            teamMembers tm
+            team_members tm
         ON
-            tm.teamId = t.id
+            tm.team_id = t.id
         WHERE
             t.id = $1
-            AND tm.memberId = $2;
+            AND tm.member_id = $2;
     `
 	args := []any{teamId, memberId}
 	var team domain.Team

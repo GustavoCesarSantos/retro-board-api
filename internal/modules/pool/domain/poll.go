@@ -7,7 +7,7 @@ type Poll struct {
 	TeamId int64
     Name string
     CreatedAt time.Time
-    UpdatedAt time.Time
+    UpdatedAt *time.Time
 }
 
 func NewPoll(

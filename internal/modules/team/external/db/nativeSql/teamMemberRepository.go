@@ -24,10 +24,10 @@ func NewTeamMemberRepository(db *sql.DB) db.ITeamMemberRepository {
 func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
     query := `
         DELETE FROM
-            teamMembers
+            team_members
         WHERE
-            teamId = $1
-            AND memberId = $2;
+            team_id = $1
+            AND member_id = $2;
     `
 	args := []any{teamId, memberId}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -53,11 +53,11 @@ func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId i
             created_at,
             updated_at
         FROM
-            teamMembers
+            team_members
         WHERE
-            memberId = $1
-            AND roleId = 1
-            AND teamId = $2;
+            member_id = $1
+            AND role_id = 1
+            AND team_id = $2;
     `
     args := []any{memberId, teamId}
 	var teamMember domain.TeamMember
@@ -81,10 +81,10 @@ func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId i
 
 func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
     query := `
-        INSERT INTO teamMembers (
-            memberId,
-            teamId,
-            roleId
+        INSERT INTO team_members (
+            member_id,
+            team_id,
+            role_id
         )
         VALUES (
             $1,
@@ -107,12 +107,12 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
 func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, roleId int64) error {
     query := `
         UPDATE
-            teamMembers 
+            team_members 
         SET
-            roleId = $1
+            role_id = $1
         WHERE
-            teamId = $2
-            AND memberId = $3;
+            team_id = $2
+            AND member_id = $3;
     `
 	args := []any{
         roleId,

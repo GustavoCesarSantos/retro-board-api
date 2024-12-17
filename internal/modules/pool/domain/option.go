@@ -7,7 +7,7 @@ type Option struct {
 	PollId int64
     Text string
     CreatedAt time.Time
-    UpdatedAt time.Time
+    UpdatedAt *time.Time
 }
 
 func NewOption(

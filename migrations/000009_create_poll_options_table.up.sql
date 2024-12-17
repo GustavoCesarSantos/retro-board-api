@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS polls (
+CREATE TABLE IF NOT EXISTS poll_options (
     id bigserial PRIMARY KEY,
     poll_id BIGINT NOT NULL,
     text VARCHAR(50) NOT NULL,

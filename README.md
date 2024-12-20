@@ -47,7 +47,7 @@ active
 created_at
 updated_at
 
-columns
+board_columns
 id
 board_id
 name
@@ -56,7 +56,7 @@ position
 created_at
 updated_at
 
-cards
+board_cards
 id
 column_id
 member_id
@@ -80,14 +80,14 @@ name
 created_at
 updated_at
 
-options
+poll_options
 id
 poll_id
 text
 created_at
 updated_at
 
-votes
+poll_votes
 id
 member_id
 option_id

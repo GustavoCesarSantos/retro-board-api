@@ -25,7 +25,7 @@ func NewCardRepository(db *sql.DB) db.ICardRepository {
 func (cr *cardRepository) Delete(cardId int64) error {
     query := `
         DELETE FROM
-            cards
+            board_cards
         WHERE
             id = $1;
     `
@@ -54,7 +54,7 @@ func (cr *cardRepository) FindAllByColumnId(columnId int64) ([]*domain.Card, err
             created_at,
             updated_at
         FROM
-           cards 
+           board_cards 
         WHERE
             column_id = $1
     `
@@ -96,7 +96,7 @@ func (cr *cardRepository) FindById(cardId int64) (*domain.Card, error) {
             created_at,
             updated_at
         FROM
-           cards 
+           board_cards 
         WHERE
             id = $1
     `
@@ -124,7 +124,7 @@ func (cr *cardRepository) FindById(cardId int64) (*domain.Card, error) {
 
 func (cr *cardRepository) Save(card *domain.Card) error {
     query := `
-        INSERT INTO cards (
+        INSERT INTO board_cards (
             column_id,
             member_id,
             text
@@ -150,7 +150,7 @@ func (cr *cardRepository) Save(card *domain.Card) error {
 func (cr *cardRepository) Update(cardId int64, card db.UpdateCardParams) error {
     query := `
         UPDATE
-            cards 
+            board_cards 
         SET
             text = $1,
             column_id = $2

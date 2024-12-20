@@ -26,7 +26,7 @@ func (cr *columnRepository) CountColumnsByBoardId(boardId int64) (int, error) {
         SELECT
             COUNT(*) AS total
         FROM
-           columns 
+           board_columns 
         WHERE
             board_id = $1
     `
@@ -50,7 +50,7 @@ func (cr *columnRepository) CountColumnsByBoardId(boardId int64) (int, error) {
 func (cr *columnRepository) Delete(columnId int64) error {
     query := `
         DELETE FROM
-            columns
+            board_columns
         WHERE
             id = $1;
     `
@@ -80,7 +80,7 @@ func (cr *columnRepository) FindAllByBoardId(boardId int64) ([]*domain.Column, e
             created_at,
             updated_at
         FROM
-            columns
+            board_columns
         WHERE
             board_id = $1
     `
@@ -115,7 +115,7 @@ func (cr *columnRepository) FindAllByBoardId(boardId int64) ([]*domain.Column, e
 
 func (cr *columnRepository) Save(column *domain.Column) error {
     query := `
-        INSERT INTO columns (
+        INSERT INTO board_columns (
             board_id,
             name,
             color,
@@ -143,7 +143,7 @@ func (cr *columnRepository) Save(column *domain.Column) error {
 func (cr *columnRepository) Update(columnId int64, column db.UpdateColumnParams) error {
     query := `
         UPDATE
-           cards 
+           board_columns 
         SET
             name = $1,
             color = $2

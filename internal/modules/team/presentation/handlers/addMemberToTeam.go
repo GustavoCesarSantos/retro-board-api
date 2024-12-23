@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -22,6 +23,19 @@ func NewAddMemberToTeam(
     }
 }
 
+// Handle adds a member to a team.
+// @Summary Adds a member to a team
+// @Description Adds a new member to a team with a specific role, provided the authenticated user is an admin of the team.
+// @Tags Team
+// @Param teamId path int true "Team ID"
+// @Param input body dtos.AddMemberToTeamRequest true "Member details (ID and role)"
+// @Security BearerAuth
+// @Produce json
+// @Success 204 "Member added successfully"
+// @Failure 400 {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or insufficient permissions)"
+// @Failure 404 {object} utils.ErrorEnvelope "Team not found"
+// @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
+// @Router /teams/:teamId/members [post]
 func(amt *addMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
     user := utils.ContextGetUser(r)
 	teamId, readIDErr := utils.ReadIDParam(r, "teamId")
@@ -29,10 +43,7 @@ func(amt *addMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r)
 		return
 	}
-	var input struct {
-        MemberId int64 `json:"memberId"`
-        RoleId int64 `json:"roleId"`
-	}
+	var input dtos.AddMemberToTeamRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)

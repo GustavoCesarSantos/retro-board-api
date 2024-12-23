@@ -5,21 +5,23 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	httpSwagger "github.com/swaggo/http-swagger"
 
+	_ "github.com/GustavoCesarSantos/retro-board-api/docs"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
 	boardApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
 	boardDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
 	board "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation"
 	identityApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/application"
 	userDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/nativeSql"
-	identity "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/presentation"
-	monitor "github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor/presentation"
+	identity "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/presentation/handlers"
+	monitor "github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor/presentation/handlers"
 	pollApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/application"
 	pollDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/external/db/memory"
 	poll "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/presentation"
 	teamApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
 	teamDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/nativeSql"
-	team "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation"
+	team "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation/handlers"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -206,7 +208,7 @@ func routes(db *sql.DB) http.Handler {
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(addMemberToTeam.Handle))
 	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/members/:memberId", userAuthenticator.Authenticate(removeMemberFromTeam.Handle))
-	router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/members/:memberId/change-role", userAuthenticator.Authenticate(changeMemberRole.Handle))
+	router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/roles", userAuthenticator.Authenticate(changeMemberRole.Handle))
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards", userAuthenticator.Authenticate(createBoard.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards", userAuthenticator.Authenticate(listAllBoards.Handle))
@@ -234,6 +236,8 @@ func routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/polls/:pollId/options/:optionId", userAuthenticator.Authenticate(deleteOption.Handle))
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/polls/:pollId/options/:optionId/vote", userAuthenticator.Authenticate(vote.Handle))
+
+	router.Handler(http.MethodGet, "/v1/docs/*filepath", httpSwagger.WrapHandler)
 
 	return middleware.RecoverPanic(middleware.EnableCORS(router))
 }

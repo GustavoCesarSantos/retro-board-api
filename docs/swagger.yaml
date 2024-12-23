@@ -1,0 +1,471 @@
+basePath: /v1
+definitions:
+  dtos.AddMemberToTeamRequest:
+    properties:
+      memberId:
+        example: 1
+        type: integer
+      roleId:
+        example: 2
+        type: integer
+    type: object
+  dtos.ChangeMemberRoleRequest:
+    properties:
+      role:
+        example: 1
+        type: integer
+    type: object
+  dtos.CreateTeamRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  dtos.CreateTeamResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: team1
+        type: string
+    type: object
+  dtos.HealthCheckResponse:
+    properties:
+      status:
+        example: available
+        type: string
+      system_info:
+        $ref: '#/definitions/internal_modules_monitor_presentation_dtos.SystemInfo'
+    type: object
+  dtos.ListAllTeamsResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: team1
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dtos.RefreshAuthTokenRequest:
+    properties:
+      refreshToken:
+        type: string
+    type: object
+  dtos.ShowTeamResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: team1
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dtos.SigninUserRequest:
+    properties:
+      email:
+        example: teste@teste.com
+        type: string
+    type: object
+  dtos.SigninUserResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  identity.RefreshAuthTokenEnvelope:
+    properties:
+      refreshed_token:
+        type: string
+    type: object
+  identity.SigninUserEnvelope:
+    properties:
+      signin_tokens:
+        $ref: '#/definitions/dtos.SigninUserResponse'
+    type: object
+  internal_modules_monitor_presentation_dtos.SystemInfo:
+    properties:
+      environment:
+        example: develop
+        type: string
+    type: object
+  monitor.HealthCheckEnvelope:
+    properties:
+      health_check:
+        $ref: '#/definitions/dtos.HealthCheckResponse'
+    type: object
+  team.CreateTeamEnvelop:
+    properties:
+      team:
+        $ref: '#/definitions/dtos.CreateTeamResponse'
+    type: object
+  team.ListAllTeamsEnvelop:
+    properties:
+      teams:
+        items:
+          $ref: '#/definitions/dtos.ListAllTeamsResponse'
+        type: array
+    type: object
+  team.ShowTeamEnvelop:
+    properties:
+      team:
+        items:
+          $ref: '#/definitions/dtos.ShowTeamResponse'
+        type: array
+    type: object
+  utils.ErrorEnvelope:
+    properties:
+      error:
+        example: error message
+        type: string
+    type: object
+host: localhost:9000
+info:
+  contact: {}
+  description: Documentação da API.
+  termsOfService: http://swagger.io/terms/
+  title: Retro Board API
+  version: "1.0"
+paths:
+  /auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint accepts a refresh token and returns a new access
+        token if the refresh token is valid.
+      parameters:
+      - description: Refresh token
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RefreshAuthTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Access token refreshed successfully
+          schema:
+            $ref: '#/definitions/identity.RefreshAuthTokenEnvelope'
+        "400":
+          description: Invalid request (e.g., missing parameters or invalid refresh
+            token or invalid credentials)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      summary: Refresh access token using the provided refresh token
+      tags:
+      - Identity
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint signs in a user based on their email, generates an
+        access token and a refresh token.
+      parameters:
+      - description: User email
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.SigninUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tokens generated successfully
+          schema:
+            $ref: '#/definitions/identity.SigninUserEnvelope'
+        "400":
+          description: Invalid request (e.g., missing parameters)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      summary: Sign in user and generate access and refresh tokens
+      tags:
+      - Identity
+  /auth/signout:
+    post:
+      description: This endpoint invalidates the user's current session by incrementing
+        their token version.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User signed out successfully
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Sign out the current user
+      tags:
+      - Identity
+  /healthcheck:
+    get:
+      description: Returns the current health status of the application and environment
+        information.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Health check result
+          schema:
+            $ref: '#/definitions/monitor.HealthCheckEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      summary: Application health check
+      tags:
+      - Monitor
+  /identity/signin/google:
+    get:
+      description: This endpoint starts the OAuth2.0 sign-in flow with Google.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redirecting to Google for authentication
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      summary: Initiates OAuth2.0 sign-in with Google
+      tags:
+      - Identity
+  /teams:
+    get:
+      description: This endpoint fetches all teams associated with the currently authenticated
+        user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of teams successfully retrieved
+          schema:
+            $ref: '#/definitions/team.ListAllTeamsEnvelop'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List all teams
+      tags:
+      - Team
+    post:
+      description: This endpoint allows a user to create a new team and automatically
+        assigns the user as the admin of the team.
+      parameters:
+      - description: Name of the team to be created
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Team created successfully
+          schema:
+            $ref: '#/definitions/team.CreateTeamEnvelop'
+        "400":
+          description: Invalid request (e.g., missing parameters)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create a new team
+      tags:
+      - Team
+  /teams/:teamId:
+    get:
+      description: This endpoint retrieves detailed information about a specific team.
+        The user must be a member of the team to access this information.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Details of the team
+          schema:
+            $ref: '#/definitions/team.ShowTeamEnvelop'
+        "404":
+          description: Not Found - Team not found or user not a member
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get details of a specific team
+      tags:
+      - Team
+  /teams/:teamId/members:
+    post:
+      description: Adds a new member to a team with a specific role, provided the
+        authenticated user is an admin of the team.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Member details (ID and role)
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AddMemberToTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Member added successfully
+        "400":
+          description: Invalid request (e.g., missing parameters or insufficient permissions)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Adds a member to a team
+      tags:
+      - Team
+  /teams/:teamId/members/:memberId:
+    delete:
+      description: This endpoint removes a specific member from a team. Only admins
+        are allowed to perform this operation.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Member ID
+        in: path
+        name: memberId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Member removed successfully
+        "400":
+          description: Invalid request (e.g., Invalid input or unauthorized operation)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Not Found - Team or member not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Remove a member from a team
+      tags:
+      - Team
+  /teams/:teamId/members/:memberId/roles:
+    patch:
+      description: This endpoint allows an admin of a team to change the role of another
+        member within the team.
+      parameters:
+      - description: ID of the team
+        in: path
+        name: teamId
+        required: true
+        type: string
+      - description: ID of the member whose role is being changed
+        in: path
+        name: memberId
+        required: true
+        type: string
+      - description: New role for the member
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangeMemberRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Role updated successfully
+        "400":
+          description: Invalid request (e.g., missing parameters or insufficient permissions)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team or member not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Change a member's role in a team
+      tags:
+      - Team
+securityDefinitions:
+  "":
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

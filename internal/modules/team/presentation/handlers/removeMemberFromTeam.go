@@ -13,6 +13,19 @@ type removeMemberFromTeam struct {
     removeMember application.IRemoveMember
 }
 
+// RemoveMemberFromTeam removes a member from a team.
+// @Summary Remove a member from a team
+// @Description This endpoint removes a specific member from a team. Only admins are allowed to perform this operation.
+// @Tags Team
+// @Security BearerAuth
+// @Param teamId path int true "Team ID"
+// @Param memberId path int true "Member ID"
+// @Produce json
+// @Success 204 "Member removed successfully"
+// @Failure 400 {object} utils.ErrorEnvelope "Invalid request (e.g., Invalid input or unauthorized operation)"
+// @Failure 404 {object} utils.ErrorEnvelope "Not Found - Team or member not found"
+// @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
+// @Router /teams/:teamId/members/:memberId [delete]
 func NewRemoveMemberFromTeam(
 	ensureAdminMembership application.IEnsureAdminMembership,
     removeMember application.IRemoveMember,

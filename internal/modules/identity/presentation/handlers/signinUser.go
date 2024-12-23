@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -27,10 +28,24 @@ func NewSigninUser(
     }
 }
 
+type SigninUserEnvelope struct {
+	SigninTokens dtos.SigninUserResponse `json:"signin_tokens"`
+}
+
+// SignInUser handles user sign-in, creates access and refresh tokens.
+// @Summary Sign in user and generate access and refresh tokens
+// @Description This endpoint signs in a user based on their email, generates an access token and a refresh token.
+// @Tags Identity
+// @Accept json
+// @Produce json
+// @Param input body dtos.SigninUserRequest true "User email"
+// @Success 200 {object} identity.SigninUserEnvelope "Tokens generated successfully"
+// @Failure 400 {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters)"
+// @Failure 404 {object} utils.ErrorEnvelope "User not found"
+// @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
+// @Router /auth/signin [post]
 func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Email   string       `json:"email"`
-	}
+	var input dtos.SigninUserRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
@@ -64,9 +79,9 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
     if refreshTokenErr != nil {
 		utils.ServerErrorResponse(w, r, refreshTokenErr)
 	}
+	response := dtos.NewSigninUserResponse(accessToken, refreshToken)
 	data := utils.Envelope{
-		"accessToken": accessToken,
-		"refreshToken": refreshToken,
+		"signin_tokens": response,
 	}
 	writeErr := utils.WriteJSON(w, http.StatusOK, data, nil)
 	if writeErr != nil {

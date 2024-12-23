@@ -12,6 +12,10 @@ var (
 	ErrEditConflict   = errors.New("EDIT CONFLICT")
 )
 
+type ErrorEnvelope struct {
+	Error string `json:"error" example:"error message"`
+}
+
 func logError(r *http.Request, err error) {
 	var (
 		method = r.Method

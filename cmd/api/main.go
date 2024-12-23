@@ -11,6 +11,19 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/oauth2"
 )
 
+// @title Retro Board API
+// @version 1.0
+// @description Documentação da API.
+// @termsOfService http://swagger.io/terms/
+
+// @host localhost:9000
+// @BasePath /v1
+
+// @securityDefinitions.bearerAuth
+// @securityDefinitions.apiKey
+// @name Authorization
+// @in header
+
 func main() {
 	loadEnvErr := godotenv.Load()
 	if loadEnvErr != nil {

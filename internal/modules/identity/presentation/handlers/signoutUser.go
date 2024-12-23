@@ -20,6 +20,16 @@ func NewSignoutUser(
     }
 }
 
+// SignoutUser handles the user sign-out process.
+// @Summary Sign out the current user
+// @Description This endpoint invalidates the user's current session by incrementing their token version. 
+// @Tags Identity
+// @Security BearerAuth
+// @Produce json
+// @Success 204 "User signed out successfully"
+// @Failure 404 {object} utils.ErrorEnvelope "User not found"
+// @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
+// @Router /auth/signout [post]
 func(su *signoutUser) Handle(w http.ResponseWriter, r *http.Request) {
     user := utils.ContextGetUser(r)
     incrementErr := su.incrementVersion.Execute(user)

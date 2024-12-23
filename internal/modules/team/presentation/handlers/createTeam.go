@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -26,11 +27,24 @@ func NewCreateTeam(
     }
 }
 
+type CreateTeamEnvelop struct {
+	Team dtos.CreateTeamResponse `json:"team"`
+}
+
+// CreateTeam creates a new team.
+// @Summary Create a new team
+// @Description This endpoint allows a user to create a new team and automatically assigns the user as the admin of the team.
+// @Tags Team
+// @Security BearerAuth
+// @Param input body dtos.CreateTeamRequest true "Name of the team to be created"
+// @Produce json
+// @Success 201 {object} team.CreateTeamEnvelop "Team created successfully"
+// @Failure 400 {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters)"
+// @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
+// @Router /teams [post]
 func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	user := utils.ContextGetUser(r)
-	var input struct {
-		Name   string       `json:"name"`
-	}
+	var input dtos.CreateTeamRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
@@ -57,7 +71,8 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.ServerErrorResponse(w, r, saveTeamErr)
 		return
 	}
-	writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"team": team}, nil)
+	response := dtos.NewCreateTeamResponse(team.ID, team.Name, team.CreatedAt)
+	writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"team": response}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

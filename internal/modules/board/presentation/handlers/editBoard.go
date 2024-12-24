@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -20,6 +21,20 @@ func NewEditBoard(ensureBoardOwnership application.IEnsureBoardOwnership, update
     }
 }
 
+// @Summary      Edit a board
+// @Description  Updates the name or activation status of a board.
+// @Tags         Board
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId   path      int                     true  "Team ID"
+// @Param        boardId  path      int                     true  "Board ID"
+// @Param        body     body      dtos.EditBoardRequest   true  "Board update details"
+// @Success      204      "Board successfully updated"
+// @Failure      400      {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
+// @Failure      404      {object} utils.ErrorEnvelope          "Team or board not found"
+// @Failure      500      {object} utils.ErrorEnvelope          "Internal server error"
+// @Router       /teams/:teamId/boards/:boardId [put]
 func(eb *editBoard) Handle(w http.ResponseWriter, r *http.Request) {
     teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {
@@ -31,10 +46,7 @@ func(eb *editBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r)
 		return
 	}
-	var input struct {
-		Name   *string       `json:"name"`
-		Active *bool       `json:"active"`
-	}
+	var input dtos.EditBoardRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)

@@ -8,7 +8,7 @@ type Board struct {
     Name string
 	Active bool
     CreatedAt time.Time
-    UpdatedAt time.Time
+    UpdatedAt *time.Time
 }
 
 func NewBoard(

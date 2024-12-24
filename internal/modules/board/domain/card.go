@@ -8,7 +8,7 @@ type Card struct {
 	MemberId int64
     Text string
     CreatedAt time.Time
-    UpdatedAt time.Time
+    UpdatedAt *time.Time
 }
 
 func NewCard(

@@ -11,7 +11,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
 	boardApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
 	boardDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
-	board "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation"
+	board "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/handlers"
 	identityApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/application"
 	userDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/nativeSql"
 	identity "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/presentation/handlers"

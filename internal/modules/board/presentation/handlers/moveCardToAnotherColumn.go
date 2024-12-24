@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -29,30 +30,44 @@ func NewMoveCardtoAnotherColumn(
     }
 }
 
+// @Summary      Move a card to another column
+// @Description  Moves a card from one column to another in a specific board.
+// @Tags         Board
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId     path      int               true  "Team ID"
+// @Param        boardId    path      int               true  "Board ID"
+// @Param        columnId   path      int               true  "Column ID"
+// @Param        cardId     path      int               true  "Card ID"
+// @Param        body       body      dtos.MoveCardtoAnotherColumnRequest true "New Column ID"
+// @Success      204        "Card moved successfully"
+// @Failure      400        {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or invalid input data)"
+// @Failure      404        {object} utils.ErrorEnvelope "Card or column not found"
+// @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
+// @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move [put]
 func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
-    teamId, err := utils.ReadIDParam(r, "teamId")
-	if err != nil {
-		utils.NotFoundResponse(w, r)
+    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
+	if teamIdErr != nil {
+		utils.BadRequestResponse(w, r, teamIdErr)
 		return
 	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.BadRequestResponse(w, r, boardIdErr)
 		return
 	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.BadRequestResponse(w, r, columnIdErr)
 		return
 	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.BadRequestResponse(w, r, cardIdErr)
 		return
 	}
-	var input struct {
-		NewColumnId   *int64       `json:"newColumnId"`
-	}
+	var input dtos.MoveCardtoAnotherColumnRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
@@ -73,7 +88,7 @@ func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request)
 		utils.BadRequestResponse(w, r, ensureCardErr)
 		return
 	}
-    moveErr := mc.moveCardBetweenColumn.Execute(cardId, *input.NewColumnId)
+    moveErr := mc.moveCardBetweenColumn.Execute(cardId, input.NewColumnId)
 	if moveErr != nil {
 		switch {
 		case errors.Is(moveErr, utils.ErrRecordNotFound):

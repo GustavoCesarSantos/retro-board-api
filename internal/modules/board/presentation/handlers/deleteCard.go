@@ -29,6 +29,21 @@ func NewDeleteCard(
     }
 }
 
+// @Summary      Delete a card
+// @Description  Deletes a card associated with the specified team, board, column, and card ID.
+// @Tags         Board
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId    path      int    true  "Team ID"
+// @Param        boardId   path      int    true  "Board ID"
+// @Param        columnId  path      int    true  "Column ID"
+// @Param        cardId    path      int    true  "Card ID"
+// @Success      204       "Card successfully deleted"
+// @Failure      400       {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
+// @Failure      404       {object} utils.ErrorEnvelope "Team, board, column, or card not found"
+// @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
+// @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [delete]
 func(dc *deleteCard) Handle(w http.ResponseWriter, r *http.Request) {
     teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {

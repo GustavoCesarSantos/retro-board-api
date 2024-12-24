@@ -20,6 +20,19 @@ func NewDeleteBoard(ensureBoardOwnership application.IEnsureBoardOwnership, remo
     }
 }
 
+// @Summary      Delete a board
+// @Description  Deletes a board associated with the specified team and board ID.
+// @Tags         Board
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId    path      int    true  "Team ID"
+// @Param        boardId   path      int    true  "Board ID"
+// @Success      204       "Board successfully deleted"
+// @Failure      400       {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
+// @Failure      404       {object} utils.ErrorEnvelope "Team or board not found"
+// @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
+// @Router       /teams/:teamId/boards/:boardId [delete]
 func(db *deleteBoard) Handle(w http.ResponseWriter, r *http.Request) {
     teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {

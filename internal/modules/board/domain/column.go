@@ -9,7 +9,7 @@ type Column struct {
     Color string
     Position int
     CreatedAt time.Time
-    UpdatedAt time.Time
+    UpdatedAt *time.Time
 }
 
 func NewColumn(

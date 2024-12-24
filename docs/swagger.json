@@ -323,6 +323,957 @@
                 }
             }
         },
+        "/teams/:teamId/boards": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all boards associated with a specific team.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "List all boards for a team",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of boards",
+                        "schema": {
+                            "$ref": "#/definitions/board.ListAllBoardsEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a board associated with the specified team.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Create a new board",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Board creation data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateBoardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Board successfully created"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/boards/:boardId": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates the name or activation status of a board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Edit a board",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Board update details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.EditBoardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Board successfully updated"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team or board not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a board associated with the specified team and board ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Delete a board",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Board successfully deleted"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team or board not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/boards/:boardId/columns": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all columns associated with a specific board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "List all columns for a board",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of columns",
+                        "schema": {
+                            "$ref": "#/definitions/board.ListAllColumnsEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or invalid input data)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a column associated with the specified board and team.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Create a new column",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Column creation data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateColumnRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Column successfully created"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team or board not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/boards/:boardId/columns/:columnId": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates the details of a column, such as name and color.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Edit a column",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Column update details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.EditColumnRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Column successfully updated"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team, board, or column not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a column associated with the specified team, board, and column ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Delete a column",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Column successfully deleted"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team, board, or column not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/boards/:boardId/columns/:columnId/cards": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all cards associated with a specific column on a board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "List all cards for a column on a board",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of cards",
+                        "schema": {
+                            "$ref": "#/definitions/board.ListAllCardsEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or invalid input data)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or column not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a card associated with the specified column, board, and team.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Create a new card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Card creation data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateCardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Card successfully created"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team, board, or column not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the details of a specific card based on its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Get a single card by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Card details",
+                        "schema": {
+                            "$ref": "#/definitions/board.ListCardEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or invalid input data)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates the text content of a card.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Edit a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Card update details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.EditCardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Card successfully updated"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team, board, column, or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a card associated with the specified team, board, column, and card ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Delete a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Card successfully deleted"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Team, board, column, or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Moves a card from one column to another in a specific board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Board"
+                ],
+                "summary": "Move a card to another column",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Column ID",
+                        "name": "columnId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New Column ID",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.MoveCardtoAnotherColumnRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Card moved successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or invalid input data)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Card or column not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/teams/:teamId/members": {
             "post": {
                 "security": [
@@ -504,6 +1455,47 @@
         }
     },
     "definitions": {
+        "board.ListAllBoardsEnvelop": {
+            "type": "object",
+            "properties": {
+                "boards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllBoardsResponse"
+                    }
+                }
+            }
+        },
+        "board.ListAllCardsEnvelop": {
+            "type": "object",
+            "properties": {
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllCardsResponse"
+                    }
+                }
+            }
+        },
+        "board.ListAllColumnsEnvelop": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllColumnsResponse"
+                    }
+                }
+            }
+        },
+        "board.ListCardEnvelop": {
+            "type": "object",
+            "properties": {
+                "card": {
+                    "$ref": "#/definitions/dtos.ListCardResponse"
+                }
+            }
+        },
         "dtos.AddMemberToTeamRequest": {
             "type": "object",
             "properties": {
@@ -523,6 +1515,37 @@
                 "role": {
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "dtos.CreateBoardRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "board1"
+                }
+            }
+        },
+        "dtos.CreateCardRequest": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "example": "card1-text"
+                }
+            }
+        },
+        "dtos.CreateColumnRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "example": "#FFFFFF"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "column1"
                 }
             }
         },
@@ -550,6 +1573,41 @@
                 }
             }
         },
+        "dtos.EditBoardRequest": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "new-board1"
+                }
+            }
+        },
+        "dtos.EditCardRequest": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "example": "new-card1-text"
+                }
+            }
+        },
+        "dtos.EditColumnRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "example": "#000000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "new-column1"
+                }
+            }
+        },
         "dtos.HealthCheckResponse": {
             "type": "object",
             "properties": {
@@ -559,6 +1617,91 @@
                 },
                 "system_info": {
                     "$ref": "#/definitions/internal_modules_monitor_presentation_dtos.SystemInfo"
+                }
+            }
+        },
+        "dtos.ListAllBoardsResponse": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "board1"
+                },
+                "team_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ListAllCardsResponse": {
+            "type": "object",
+            "properties": {
+                "column_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "member_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "text": {
+                    "type": "string",
+                    "example": "card1-text"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ListAllColumnsResponse": {
+            "type": "object",
+            "properties": {
+                "board_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "color": {
+                    "type": "string",
+                    "example": "#FFFFFF"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "column1"
+                },
+                "position": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -578,6 +1721,42 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.ListCardResponse": {
+            "type": "object",
+            "properties": {
+                "column_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "member_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "text": {
+                    "type": "string",
+                    "example": "card1-text"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.MoveCardtoAnotherColumnRequest": {
+            "type": "object",
+            "properties": {
+                "new_column_id": {
+                    "type": "integer",
+                    "example": 3
                 }
             }
         },

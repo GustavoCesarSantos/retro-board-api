@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -25,6 +26,21 @@ func NewCreateCard(
     }
 }
 
+// @Summary      Create a new card
+// @Description  Creates a card associated with the specified column, board, and team.
+// @Tags         Board
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId    path      int    true  "Team ID"
+// @Param        boardId   path      int    true  "Board ID"
+// @Param        columnId  path      int    true  "Column ID"
+// @Param        input     body      dtos.CreateCardRequest true "Card creation data"
+// @Success      204       "Card successfully created"
+// @Failure      400       {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
+// @Failure      404       {object} utils.ErrorEnvelope "Team, board, or column not found"
+// @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
+// @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [post]
 func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 	user := utils.ContextGetUser(r)
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
@@ -42,9 +58,7 @@ func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r)
 		return
 	}
-	var input struct {
-		Text   string       `json:"text"`
-	}
+	var input dtos.CreateCardRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)

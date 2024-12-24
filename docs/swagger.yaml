@@ -1,5 +1,31 @@
 basePath: /v1
 definitions:
+  board.ListAllBoardsEnvelop:
+    properties:
+      boards:
+        items:
+          $ref: '#/definitions/dtos.ListAllBoardsResponse'
+        type: array
+    type: object
+  board.ListAllCardsEnvelop:
+    properties:
+      cards:
+        items:
+          $ref: '#/definitions/dtos.ListAllCardsResponse'
+        type: array
+    type: object
+  board.ListAllColumnsEnvelop:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/dtos.ListAllColumnsResponse'
+        type: array
+    type: object
+  board.ListCardEnvelop:
+    properties:
+      card:
+        $ref: '#/definitions/dtos.ListCardResponse'
+    type: object
   dtos.AddMemberToTeamRequest:
     properties:
       memberId:
@@ -14,6 +40,27 @@ definitions:
       role:
         example: 1
         type: integer
+    type: object
+  dtos.CreateBoardRequest:
+    properties:
+      name:
+        example: board1
+        type: string
+    type: object
+  dtos.CreateCardRequest:
+    properties:
+      text:
+        example: card1-text
+        type: string
+    type: object
+  dtos.CreateColumnRequest:
+    properties:
+      color:
+        example: '#FFFFFF'
+        type: string
+      name:
+        example: column1
+        type: string
     type: object
   dtos.CreateTeamRequest:
     properties:
@@ -31,6 +78,30 @@ definitions:
         example: team1
         type: string
     type: object
+  dtos.EditBoardRequest:
+    properties:
+      active:
+        example: true
+        type: boolean
+      name:
+        example: new-board1
+        type: string
+    type: object
+  dtos.EditCardRequest:
+    properties:
+      text:
+        example: new-card1-text
+        type: string
+    type: object
+  dtos.EditColumnRequest:
+    properties:
+      color:
+        example: '#000000'
+        type: string
+      name:
+        example: new-column1
+        type: string
+    type: object
   dtos.HealthCheckResponse:
     properties:
       status:
@@ -38,6 +109,66 @@ definitions:
         type: string
       system_info:
         $ref: '#/definitions/internal_modules_monitor_presentation_dtos.SystemInfo'
+    type: object
+  dtos.ListAllBoardsResponse:
+    properties:
+      active:
+        example: true
+        type: boolean
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: board1
+        type: string
+      team_id:
+        example: 2
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  dtos.ListAllCardsResponse:
+    properties:
+      column_id:
+        example: 2
+        type: integer
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      member_id:
+        example: 2
+        type: integer
+      text:
+        example: card1-text
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dtos.ListAllColumnsResponse:
+    properties:
+      board_id:
+        example: 2
+        type: integer
+      color:
+        example: '#FFFFFF'
+        type: string
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: column1
+        type: string
+      position:
+        example: 1
+        type: integer
+      updated_at:
+        type: string
     type: object
   dtos.ListAllTeamsResponse:
     properties:
@@ -51,6 +182,31 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  dtos.ListCardResponse:
+    properties:
+      column_id:
+        example: 2
+        type: integer
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      member_id:
+        example: 2
+        type: integer
+      text:
+        example: card1-text
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dtos.MoveCardtoAnotherColumnRequest:
+    properties:
+      new_column_id:
+        example: 3
+        type: integer
     type: object
   dtos.RefreshAuthTokenRequest:
     properties:
@@ -345,6 +501,634 @@ paths:
       summary: Get details of a specific team
       tags:
       - Team
+  /teams/:teamId/boards:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all boards associated with a specific team.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of boards
+          schema:
+            $ref: '#/definitions/board.ListAllBoardsEnvelop'
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List all boards for a team
+      tags:
+      - Board
+    post:
+      consumes:
+      - application/json
+      description: Creates a board associated with the specified team.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateBoardRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Board successfully created
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create a new board
+      tags:
+      - Board
+  /teams/:teamId/boards/:boardId:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a board associated with the specified team and board ID.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Board successfully deleted
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team or board not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Delete a board
+      tags:
+      - Board
+    put:
+      consumes:
+      - application/json
+      description: Updates the name or activation status of a board.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Board update details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.EditBoardRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Board successfully updated
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team or board not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Edit a board
+      tags:
+      - Board
+  /teams/:teamId/boards/:boardId/columns:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all columns associated with a specific board.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of columns
+          schema:
+            $ref: '#/definitions/board.ListAllColumnsEnvelop'
+        "400":
+          description: Invalid request (e.g., missing parameters or invalid input
+            data)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List all columns for a board
+      tags:
+      - Board
+    post:
+      consumes:
+      - application/json
+      description: Creates a column associated with the specified board and team.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateColumnRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Column successfully created
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team or board not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create a new column
+      tags:
+      - Board
+  /teams/:teamId/boards/:boardId/columns/:columnId:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a column associated with the specified team, board, and
+        column ID.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Column successfully deleted
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team, board, or column not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Delete a column
+      tags:
+      - Board
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of a column, such as name and color.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      - description: Column update details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.EditColumnRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Column successfully updated
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team, board, or column not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Edit a column
+      tags:
+      - Board
+  /teams/:teamId/boards/:boardId/columns/:columnId/cards:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all cards associated with a specific column on a board.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of cards
+          schema:
+            $ref: '#/definitions/board.ListAllCardsEnvelop'
+        "400":
+          description: Invalid request (e.g., missing parameters or invalid input
+            data)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Board or column not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List all cards for a column on a board
+      tags:
+      - Board
+    post:
+      consumes:
+      - application/json
+      description: Creates a card associated with the specified column, board, and
+        team.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      - description: Card creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Card successfully created
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team, board, or column not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create a new card
+      tags:
+      - Board
+  /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a card associated with the specified team, board, column,
+        and card ID.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Card successfully deleted
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team, board, column, or card not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Delete a card
+      tags:
+      - Board
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the details of a specific card based on its ID.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Card details
+          schema:
+            $ref: '#/definitions/board.ListCardEnvelop'
+        "400":
+          description: Invalid request (e.g., missing parameters or invalid input
+            data)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Card not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get a single card by ID
+      tags:
+      - Board
+    put:
+      consumes:
+      - application/json
+      description: Updates the text content of a card.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Card update details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.EditCardRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Card successfully updated
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Team, board, column, or card not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Edit a card
+      tags:
+      - Board
+  /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move:
+    put:
+      consumes:
+      - application/json
+      description: Moves a card from one column to another in a specific board.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Column ID
+        in: path
+        name: columnId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: New Column ID
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.MoveCardtoAnotherColumnRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Card moved successfully
+        "400":
+          description: Invalid request (e.g., missing parameters or invalid input
+            data)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Card or column not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Move a card to another column
+      tags:
+      - Board
   /teams/:teamId/members:
     post:
       description: Adds a new member to a team with a specific role, provided the

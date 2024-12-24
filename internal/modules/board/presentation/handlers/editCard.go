@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -29,6 +30,22 @@ func NewEditCard(
     }
 }
 
+// @Summary      Edit a card
+// @Description  Updates the text content of a card.
+// @Tags         Board
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId    path      int                      true  "Team ID"
+// @Param        boardId   path      int                      true  "Board ID"
+// @Param        columnId  path      int                      true  "Column ID"
+// @Param        cardId    path      int                      true  "Card ID"
+// @Param        body      body      dtos.EditCardRequest     true  "Card update details"
+// @Success      204       "Card successfully updated"
+// @Failure      400       {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
+// @Failure      404       {object} utils.ErrorEnvelope           "Team, board, column, or card not found"
+// @Failure      500       {object} utils.ErrorEnvelope           "Internal server error"
+// @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [put]
 func(ec *editCard) Handle(w http.ResponseWriter, r *http.Request) {
     teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {
@@ -50,9 +67,7 @@ func(ec *editCard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r)
 		return
 	}
-	var input struct {
-		Text   *string       `json:"text"`
-	}
+	var input dtos.EditCardRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)

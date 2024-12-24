@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -28,6 +29,20 @@ func NewCreateColumn(
     }
 }
 
+// @Summary      Create a new column
+// @Description  Creates a column associated with the specified board and team.
+// @Tags         Board
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId    path      int    true  "Team ID"
+// @Param        boardId   path      int    true  "Board ID"
+// @Param        input     body      dtos.CreateColumnRequest true "Column creation data"
+// @Success      204       "Column successfully created"
+// @Failure      400       {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
+// @Failure      404       {object} utils.ErrorEnvelope "Team or board not found"
+// @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
+// @Router      /teams/:teamId/boards/:boardId/columns [post]
 func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
@@ -39,10 +54,7 @@ func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r)
 		return
 	}
-	var input struct {
-		Name   string       `json:"name"`
-		Color   string       `json:"color"`
-	}
+	var input dtos.CreateColumnRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)

@@ -1458,9 +1458,397 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/teams/:teamId/polls": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all polls associated with a specific team.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Poll"
+                ],
+                "summary": "List all polls",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of polls",
+                        "schema": {
+                            "$ref": "#/definitions/poll.ListAllPollsEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new poll with options for a specific team.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Poll"
+                ],
+                "summary": "Create a new poll",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Poll creation data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreatePollRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Poll created successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/polls/:pollId": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves detailed information about a specific poll.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Poll"
+                ],
+                "summary": "Get poll details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Poll ID",
+                        "name": "pollId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Poll details",
+                        "schema": {
+                            "$ref": "#/definitions/poll.ListPollEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Poll not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/polls/:pollId/options/:optionId": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes an option from a specific poll, ensuring proper ownership validation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Poll"
+                ],
+                "summary": "Delete an option from a poll",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Poll ID",
+                        "name": "pollId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Option ID",
+                        "name": "optionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Option deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/polls/:pollId/result": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the result of a poll, including the total votes, votes per option, and the winning option.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Poll"
+                ],
+                "summary": "Show poll result",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Poll ID",
+                        "name": "pollId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Poll results",
+                        "schema": {
+                            "$ref": "#/definitions/poll.ShowPollResultEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Poll not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/{teamId}/polls/{pollId}/options/{optionId}/vote": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cast a vote for a specific option in a poll.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Poll"
+                ],
+                "summary": "Vote in a poll",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Poll ID",
+                        "name": "pollId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Option ID",
+                        "name": "optionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Vote successfully recorded"
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "403": {
+                        "description": "User is not allowed to vote on this poll",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Poll or option not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "application.Option": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "votes": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "application.Winner": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "votes": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "board.ListAllBoardsEnvelop": {
             "type": "object",
             "properties": {
@@ -1552,6 +1940,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "column1"
+                }
+            }
+        },
+        "dtos.CreatePollRequest": {
+            "type": "object",
+            "properties": {
+                "poll": {
+                    "$ref": "#/definitions/dtos.Poll"
                 }
             }
         },
@@ -1711,6 +2107,29 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.ListAllPollsResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "poll1"
+                },
+                "team_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.ListAllTeamsResponse": {
             "type": "object",
             "properties": {
@@ -1757,6 +2176,29 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.ListPollResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "poll1"
+                },
+                "team_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.MoveCardtoAnotherColumnRequest": {
             "type": "object",
             "properties": {
@@ -1766,11 +2208,53 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.OptionTexts": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.Poll": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.OptionTexts"
+                    }
+                }
+            }
+        },
         "dtos.RefreshAuthTokenRequest": {
             "type": "object",
             "properties": {
                 "refreshToken": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.ShowPollResultResponse": {
+            "type": "object",
+            "properties": {
+                "options": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/application.Option"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "winner": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/application.Winner"
+                    }
                 }
             }
         },
@@ -1843,6 +2327,33 @@ const docTemplate = `{
             "properties": {
                 "health_check": {
                     "$ref": "#/definitions/dtos.HealthCheckResponse"
+                }
+            }
+        },
+        "poll.ListAllPollsEnvelop": {
+            "type": "object",
+            "properties": {
+                "polls": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllPollsResponse"
+                    }
+                }
+            }
+        },
+        "poll.ListPollEnvelop": {
+            "type": "object",
+            "properties": {
+                "poll": {
+                    "$ref": "#/definitions/dtos.ListPollResponse"
+                }
+            }
+        },
+        "poll.ShowPollResultEnvelop": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "$ref": "#/definitions/dtos.ShowPollResultResponse"
                 }
             }
         },

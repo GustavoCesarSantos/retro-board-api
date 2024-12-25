@@ -32,6 +32,7 @@ func NewCreateBoard(saveBoard application.ISaveBoard) *createBoard {
 // @Failure      500      {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards [post]
 func(cb *createBoard) Handle(w http.ResponseWriter, r *http.Request) {
+	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
     teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {
 		utils.NotFoundResponse(w, r)

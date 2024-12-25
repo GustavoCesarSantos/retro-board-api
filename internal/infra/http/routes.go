@@ -18,7 +18,7 @@ import (
 	monitor "github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor/presentation/handlers"
 	pollApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/application"
 	pollDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/external/db/memory"
-	poll "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/presentation"
+	poll "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/presentation/handlers"
 	teamApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
 	teamDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/nativeSql"
 	team "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation/handlers"

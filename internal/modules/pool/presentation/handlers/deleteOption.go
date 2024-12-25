@@ -25,20 +25,34 @@ func NewDeleteOption(
     }
 }
 
+// @Summary      Delete an option from a poll
+// @Description  Deletes an option from a specific poll, ensuring proper ownership validation.
+// @Tags         Poll
+// @Security	 BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        teamId     path      int    true  "Team ID"
+// @Param        pollId     path      int    true  "Poll ID"
+// @Param        optionId   path      int    true  "Option ID"
+// @Success      204        "Option deleted successfully"
+// @Failure      400        {object}  utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
+// @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
+// @Router       /teams/:teamId/polls/:pollId/options/:optionId [delete]
 func(do *deleteOption) Handle(w http.ResponseWriter, r *http.Request) {
-    teamId, err := utils.ReadIDParam(r, "teamId")
-	if err != nil {
-		utils.NotFoundResponse(w, r)
+	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
+    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
+	if teamIdErr != nil {
+		utils.BadRequestResponse(w, r, teamIdErr)
 		return
 	}
     pollId, pollIdErr := utils.ReadIDParam(r, "pollId")
 	if pollIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.BadRequestResponse(w, r, pollIdErr)
 		return
 	}
 	optionId, optionIdErr := utils.ReadIDParam(r, "optionId")
 	if optionIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.BadRequestResponse(w, r, optionIdErr)
 		return
 	}
 	ensurePollErr := do.ensurePollOwnership.Execute(teamId, pollId)

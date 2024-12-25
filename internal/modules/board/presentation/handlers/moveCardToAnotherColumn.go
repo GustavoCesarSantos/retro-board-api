@@ -47,6 +47,7 @@ func NewMoveCardtoAnotherColumn(
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move [put]
 func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
+	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.BadRequestResponse(w, r, teamIdErr)

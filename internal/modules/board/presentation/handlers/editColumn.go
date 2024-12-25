@@ -43,6 +43,7 @@ func NewEditColumn(
 // @Failure      500        {object} utils.ErrorEnvelope           "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId [put]
 func(ec *editColumn) Handle(w http.ResponseWriter, r *http.Request) {
+	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
     teamId, err := utils.ReadIDParam(r, "teamId")
 	if err != nil {
 		utils.NotFoundResponse(w, r)

@@ -7,20 +7,20 @@ import (
 )
 
 type Option struct {
-	Name  string
-	Votes int
+	Name  string `json:"name" example:"1"`
+	Votes int `json:"votes" example:"1"`
 }
 
 type Winner struct {
-	ID    int64
-	Name  string
-	Votes int
+	ID    int64 `json:"id" example:"1"`
+	Name  string `json:"name" example:"1"`
+	Votes int `json:"votes" example:"1"`
 }
 
 type CountVotesResult struct {
-	Options map[int64]Option
-	Winner  []Winner
-	Total   int
+	Options map[int64]Option `json:"options"`
+	Winner  []Winner `json:"winner"`
+	Total   int `json:"total"`
 }
 
 type ICountVotesByPollId interface {

@@ -1,0 +1,7 @@
+*.yml
+*.md
+*.key
+*.pub
+*.sh
+.env
+.gitignore

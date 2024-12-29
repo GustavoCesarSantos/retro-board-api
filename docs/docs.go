@@ -120,6 +120,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/signin/google": {
+            "get": {
+                "description": "This endpoint starts the OAuth2.0 sign-in flow with Google.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Identity"
+                ],
+                "summary": "Initiates OAuth2.0 sign-in with Google",
+                "responses": {
+                    "200": {
+                        "description": "Redirecting to Google for authentication",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/signout": {
             "post": {
                 "security": [
@@ -169,32 +195,6 @@ const docTemplate = `{
                         "description": "Health check result",
                         "schema": {
                             "$ref": "#/definitions/monitor.HealthCheckEnvelope"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorEnvelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/identity/signin/google": {
-            "get": {
-                "description": "This endpoint starts the OAuth2.0 sign-in flow with Google.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Identity"
-                ],
-                "summary": "Initiates OAuth2.0 sign-in with Google",
-                "responses": {
-                    "200": {
-                        "description": "Redirecting to Google for authentication",
-                        "schema": {
-                            "type": "string"
                         }
                     },
                     "500": {

@@ -517,6 +517,23 @@ paths:
       summary: Sign in user and generate access and refresh tokens
       tags:
       - Identity
+  /auth/signin/google:
+    get:
+      description: This endpoint starts the OAuth2.0 sign-in flow with Google.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redirecting to Google for authentication
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      summary: Initiates OAuth2.0 sign-in with Google
+      tags:
+      - Identity
   /auth/signout:
     post:
       description: This endpoint invalidates the user's current session by incrementing
@@ -557,23 +574,6 @@ paths:
       summary: Application health check
       tags:
       - Monitor
-  /identity/signin/google:
-    get:
-      description: This endpoint starts the OAuth2.0 sign-in flow with Google.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Redirecting to Google for authentication
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.ErrorEnvelope'
-      summary: Initiates OAuth2.0 sign-in with Google
-      tags:
-      - Identity
   /teams:
     get:
       description: This endpoint fetches all teams associated with the currently authenticated

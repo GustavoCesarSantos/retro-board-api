@@ -20,7 +20,7 @@ func NewSigninWithGoogle() *signinWithGoogle {
 // @Produce json
 // @Success 200 {string} string "Redirecting to Google for authentication"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
-// @Router /identity/signin/google [get]
+// @Router /auth/signin/google [get]
 func(sg *signinWithGoogle) Handle(w http.ResponseWriter, r *http.Request) {
     q := r.URL.Query()
     q.Add("provider", "google")

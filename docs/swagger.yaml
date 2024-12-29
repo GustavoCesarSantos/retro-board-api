@@ -21,6 +21,21 @@ definitions:
         example: 1
         type: integer
     type: object
+  board.CreateBoardEnvelop:
+    properties:
+      board:
+        $ref: '#/definitions/dtos.CreateBoardResponse'
+    type: object
+  board.CreateCardEnvelop:
+    properties:
+      card:
+        $ref: '#/definitions/dtos.CreateCardResponse'
+    type: object
+  board.CreateColumnEnvelop:
+    properties:
+      column:
+        $ref: '#/definitions/dtos.CreateColumnResponse'
+    type: object
   board.ListAllBoardsEnvelop:
     properties:
       boards:
@@ -49,10 +64,10 @@ definitions:
     type: object
   dtos.AddMemberToTeamRequest:
     properties:
-      memberId:
-        example: 1
-        type: integer
-      roleId:
+      email:
+        example: useremail@foo.bar
+        type: string
+      role_id:
         example: 2
         type: integer
     type: object
@@ -68,8 +83,30 @@ definitions:
         example: board1
         type: string
     type: object
+  dtos.CreateBoardResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: board1
+        type: string
+    type: object
   dtos.CreateCardRequest:
     properties:
+      text:
+        example: card1-text
+        type: string
+    type: object
+  dtos.CreateCardResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
       text:
         example: card1-text
         type: string
@@ -79,6 +116,20 @@ definitions:
       color:
         example: '#FFFFFF'
         type: string
+      name:
+        example: column1
+        type: string
+    type: object
+  dtos.CreateColumnResponse:
+    properties:
+      color:
+        example: '#FFFFFF'
+        type: string
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
       name:
         example: column1
         type: string
@@ -657,8 +708,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
+        "201":
           description: Board successfully created
+          schema:
+            $ref: '#/definitions/board.CreateBoardEnvelop'
         "400":
           description: Invalid request (e.g., missing parameters or validation error)
           schema:
@@ -818,8 +871,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
+        "201":
           description: Column successfully created
+          schema:
+            $ref: '#/definitions/board.CreateColumnEnvelop'
         "400":
           description: Invalid request (e.g., missing parameters or validation error)
           schema:
@@ -1005,8 +1060,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
+        "201":
           description: Card successfully created
+          schema:
+            $ref: '#/definitions/board.CreateCardEnvelop'
         "400":
           description: Invalid request (e.g., missing parameters or validation error)
           schema:

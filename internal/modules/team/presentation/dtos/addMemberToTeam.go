@@ -5,6 +5,6 @@ type SystemInfo struct {
 }
 
 type AddMemberToTeamRequest struct {
-	MemberId int64 `json:"memberId" example:"1"`
-    RoleId int64 `json:"roleId" example:"2"`
+    Email string `json:"email" example:"useremail@foo.bar"`
+    RoleId int64 `json:"role_id" example:"2"`
 }

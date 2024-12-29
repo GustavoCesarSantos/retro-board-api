@@ -10,15 +10,18 @@ import (
 
 type addMemberToTeam struct {
 	ensureAdminMembership application.IEnsureAdminMembership
+	findMemberInfoByEmail application.IFindMemberInfoByEmail
     saveMember application.ISaveMember
 }
 
 func NewAddMemberToTeam(
 	ensureAdminMembership application.IEnsureAdminMembership,
+	findMemberInfoByEmail application.IFindMemberInfoByEmail,
 	saveMember application.ISaveMember,
 ) *addMemberToTeam {
     return &addMemberToTeam{
 		ensureAdminMembership,
+		findMemberInfoByEmail,
         saveMember,
     }
 }
@@ -54,7 +57,12 @@ func(amt *addMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureAdminErr)
 		return
 	}
-    saveErr := amt.saveMember.Execute(teamId, input.MemberId, input.RoleId)
+	memberInfo, findErr := amt.findMemberInfoByEmail.Execute(input.Email)
+	if findErr != nil {
+		utils.NotFoundResponse(w, r)
+		return
+	}
+    saveErr := amt.saveMember.Execute(teamId, memberInfo.ID, input.RoleId)
     if saveErr != nil {
 		utils.ServerErrorResponse(w, r, saveErr)
 		return

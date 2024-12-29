@@ -29,6 +29,10 @@ func NewCreateColumn(
     }
 }
 
+type CreateColumnEnvelop struct {
+	Column dtos.CreateColumnResponse `json:"column"`
+}
+
 // @Summary      Create a new column
 // @Description  Creates a column associated with the specified board and team.
 // @Tags         Board
@@ -38,7 +42,7 @@ func NewCreateColumn(
 // @Param        teamId    path      int    true  "Team ID"
 // @Param        boardId   path      int    true  "Board ID"
 // @Param        input     body      dtos.CreateColumnRequest true "Column creation data"
-// @Success      204       "Column successfully created"
+// @Success 201 {object}   board.CreateColumnEnvelop "Column successfully created"
 // @Failure      400       {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
 // @Failure      404       {object} utils.ErrorEnvelope "Team or board not found"
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
@@ -71,12 +75,13 @@ func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.ServerErrorResponse(w, r, getErr)
 		return
 	}
-    saveErr := cc.saveColumn.Execute(boardId, input.Name, input.Color, position)
+    column, saveErr := cc.saveColumn.Execute(boardId, input.Name, input.Color, position)
 	if saveErr != nil {
 		utils.ServerErrorResponse(w, r, saveErr)
 		return
 	}
-    writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
+	response := dtos.NewCreateColumnResponse(column.ID, column.Name, column.Color, column.CreatedAt)
+    writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"column": response}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

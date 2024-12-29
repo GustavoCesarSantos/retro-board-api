@@ -6,7 +6,7 @@ import (
 )
 
 type ISaveCard interface { 
-    Execute(columnId int64, memberId int64, text string) error
+    Execute(columnId int64, memberId int64, text string) (*domain.Card, error)
 }
 
 type saveCard struct {
@@ -19,7 +19,8 @@ func NewSaveCard(repository db.ICardRepository) ISaveCard {
     }
 }
 
-func (sc *saveCard) Execute(columnId int64, memberId int64, text string) error {
+func (sc *saveCard) Execute(columnId int64, memberId int64, text string) (*domain.Card, error) {
     card := domain.NewCard(0, columnId, memberId, text)
-    return sc.repository.Save(card)
+    err := sc.repository.Save(card)
+    return card, err
 }

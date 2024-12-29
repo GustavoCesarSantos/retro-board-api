@@ -14,6 +14,7 @@ import (
 	board "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/handlers"
 	identityApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/application"
 	userDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/nativeSql"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/integration/provider"
 	identity "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/presentation/handlers"
 	monitor "github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor/presentation/handlers"
 	pollApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/application"
@@ -41,6 +42,8 @@ func routes(db *sql.DB) http.Handler {
 	userRepository := userDb.NewUserRepository(db)
 	voteRepository := pollDb.NewVoteRepository()
 
+	userPublicApiProvider := provider.NewUserPublicApiProvider(userRepository)
+
 	//Init Middlewares
 	userAuthenticator := middleware.NewUserAuthenticator(userRepository)
 
@@ -66,6 +69,7 @@ func routes(db *sql.DB) http.Handler {
 	findAllTeams := teamApplication.NewFindAllTeams(teamRepository)
 	findBoard := boardApplication.NewFindBoard(boardRepository)
 	findCard := boardApplication.NewFindCard(cardRepository)
+	findMemberInfosByEmail := teamApplication.NewFindMemberInfoByEmail(userPublicApiProvider)
 	findPoll := pollApplication.NewFindPoll(pollRepository)
 	findTeam := teamApplication.NewFindTeam(teamRepository)
 	findUserByEmail := identityApplication.NewFindUserByEmail(userRepository)
@@ -97,7 +101,11 @@ func routes(db *sql.DB) http.Handler {
 	updateRole := teamApplication.NewUpdateRole(teamMemberRepository)
 
 	//Init Handlers
-	addMemberToTeam := team.NewAddMemberToTeam(ensureAdminMembership, saveMember)
+	addMemberToTeam := team.NewAddMemberToTeam(
+		ensureAdminMembership, 
+		findMemberInfosByEmail, 
+		saveMember,
+	)
 	changeMemberRole := team.NewChangeMemberRole(ensureAdminMembership, updateRole)
 	createBoard := board.NewCreateBoard(saveBoard)
 	createCard := board.NewCreateCard(

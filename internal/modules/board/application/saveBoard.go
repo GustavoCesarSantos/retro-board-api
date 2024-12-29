@@ -6,7 +6,7 @@ import (
 )
 
 type ISaveBoard interface {
-    Execute(teamId int64, name string) error
+    Execute(teamId int64, name string) (*domain.Board, error)
 }
 
 type saveBoard struct {
@@ -19,7 +19,8 @@ func NewSaveBoard(repository db.IBoardRepository) ISaveBoard {
     }
 }
 
-func (sb *saveBoard) Execute(teamId int64, name string) error {
+func (sb *saveBoard) Execute(teamId int64, name string) (*domain.Board, error) {
     board := domain.NewBoard(0, teamId, name)
-    return sb.repository.Save(board)
+    err := sb.repository.Save(board)
+    return board, err
 }

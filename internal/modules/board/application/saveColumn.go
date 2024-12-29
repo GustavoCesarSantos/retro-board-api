@@ -6,7 +6,7 @@ import (
 )
 
 type ISaveColumn interface {
-    Execute(boardId int64, name string, color string, position int) error
+    Execute(boardId int64, name string, color string, position int) (*domain.Column, error)
 }
 
 type saveColumn struct {
@@ -19,7 +19,8 @@ func NewSaveColumn(repository db.IColumnRepository) ISaveColumn {
     }
 }
 
-func (sc *saveColumn) Execute(boardId int64, name string, color string, position int) error {
+func (sc *saveColumn) Execute(boardId int64, name string, color string, position int) (*domain.Column, error) {
     column := domain.NewColumn(0, boardId, name, color, position)
-    return sc.repository.Save(column)
+    err := sc.repository.Save(column)
+    return column, err
 }

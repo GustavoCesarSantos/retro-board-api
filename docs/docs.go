@@ -419,8 +419,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "Board successfully created"
+                    "201": {
+                        "description": "Board successfully created",
+                        "schema": {
+                            "$ref": "#/definitions/board.CreateBoardEnvelop"
+                        }
                     },
                     "400": {
                         "description": "Invalid request (e.g., missing parameters or validation error)",
@@ -666,8 +669,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "Column successfully created"
+                    "201": {
+                        "description": "Column successfully created",
+                        "schema": {
+                            "$ref": "#/definitions/board.CreateColumnEnvelop"
+                        }
                     },
                     "400": {
                         "description": "Invalid request (e.g., missing parameters or validation error)",
@@ -947,8 +953,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "Card successfully created"
+                    "201": {
+                        "description": "Card successfully created",
+                        "schema": {
+                            "$ref": "#/definitions/board.CreateCardEnvelop"
+                        }
                     },
                     "400": {
                         "description": "Invalid request (e.g., missing parameters or validation error)",
@@ -1849,6 +1858,30 @@ const docTemplate = `{
                 }
             }
         },
+        "board.CreateBoardEnvelop": {
+            "type": "object",
+            "properties": {
+                "board": {
+                    "$ref": "#/definitions/dtos.CreateBoardResponse"
+                }
+            }
+        },
+        "board.CreateCardEnvelop": {
+            "type": "object",
+            "properties": {
+                "card": {
+                    "$ref": "#/definitions/dtos.CreateCardResponse"
+                }
+            }
+        },
+        "board.CreateColumnEnvelop": {
+            "type": "object",
+            "properties": {
+                "column": {
+                    "$ref": "#/definitions/dtos.CreateColumnResponse"
+                }
+            }
+        },
         "board.ListAllBoardsEnvelop": {
             "type": "object",
             "properties": {
@@ -1893,11 +1926,11 @@ const docTemplate = `{
         "dtos.AddMemberToTeamRequest": {
             "type": "object",
             "properties": {
-                "memberId": {
-                    "type": "integer",
-                    "example": 1
+                "email": {
+                    "type": "string",
+                    "example": "useremail@foo.bar"
                 },
-                "roleId": {
+                "role_id": {
                     "type": "integer",
                     "example": 2
                 }
@@ -1921,9 +1954,41 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.CreateBoardResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "board1"
+                }
+            }
+        },
         "dtos.CreateCardRequest": {
             "type": "object",
             "properties": {
+                "text": {
+                    "type": "string",
+                    "example": "card1-text"
+                }
+            }
+        },
+        "dtos.CreateCardResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "text": {
                     "type": "string",
                     "example": "card1-text"
@@ -1936,6 +2001,26 @@ const docTemplate = `{
                 "color": {
                     "type": "string",
                     "example": "#FFFFFF"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "column1"
+                }
+            }
+        },
+        "dtos.CreateColumnResponse": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "example": "#FFFFFF"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
                 },
                 "name": {
                     "type": "string",

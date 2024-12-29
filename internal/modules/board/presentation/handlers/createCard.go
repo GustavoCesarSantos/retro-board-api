@@ -26,6 +26,10 @@ func NewCreateCard(
     }
 }
 
+type CreateCardEnvelop struct {
+	Card dtos.CreateCardResponse `json:"card"`
+}
+
 // @Summary      Create a new card
 // @Description  Creates a card associated with the specified column, board, and team.
 // @Tags         Board
@@ -36,7 +40,7 @@ func NewCreateCard(
 // @Param        boardId   path      int    true  "Board ID"
 // @Param        columnId  path      int    true  "Column ID"
 // @Param        input     body      dtos.CreateCardRequest true "Card creation data"
-// @Success      204       "Card successfully created"
+// @Success 201 {object}   board.CreateCardEnvelop "Card successfully created"
 // @Failure      400       {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
 // @Failure      404       {object} utils.ErrorEnvelope "Team, board, or column not found"
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
@@ -75,12 +79,13 @@ func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
-    saveErr := cc.saveCard.Execute(columnId, user.ID, input.Text)
+    card, saveErr := cc.saveCard.Execute(columnId, user.ID, input.Text)
 	if saveErr != nil {
 		utils.ServerErrorResponse(w, r, saveErr)
 		return
 	}
-    writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
+	response := dtos.NewCreateCardResponse(card.ID, card.Text, card.CreatedAt)
+    writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"card": response}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

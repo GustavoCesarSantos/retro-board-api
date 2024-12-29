@@ -18,6 +18,10 @@ func NewCreateBoard(saveBoard application.ISaveBoard) *createBoard {
     }
 }
 
+type CreateBoardEnvelop struct {
+	Board dtos.CreateBoardResponse `json:"board"`
+}
+
 // @Summary      Create a new board
 // @Description  Creates a board associated with the specified team.
 // @Tags         Board
@@ -26,7 +30,7 @@ func NewCreateBoard(saveBoard application.ISaveBoard) *createBoard {
 // @Produce      json
 // @Param        teamId   path      int    true  "Team ID"
 // @Param        input    body      dtos.CreateBoardRequest true "Board creation data"
-// @Success      204      "Board successfully created"
+// @Success 201 {object}  board.CreateBoardEnvelop "Board successfully created"
 // @Failure      400      {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
 // @Failure      404      {object} utils.ErrorEnvelope "Team not found"
 // @Failure      500      {object} utils.ErrorEnvelope "Internal server error"
@@ -44,12 +48,13 @@ func(cb *createBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr)
 		return
 	}
-    saveErr := cb.saveBoard.Execute(teamId, input.Name)
+    board, saveErr := cb.saveBoard.Execute(teamId, input.Name)
 	if saveErr != nil {
 		utils.ServerErrorResponse(w, r, saveErr)
 		return
 	}
-    writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
+	response := dtos.NewCreateBoardResponse(board.ID, board.Name, board.CreatedAt)
+    writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"board": response}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)
 	}

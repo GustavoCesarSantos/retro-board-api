@@ -1692,69 +1692,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teams/:teamId/polls/:pollId/result": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves the result of a poll, including the total votes, votes per option, and the winning option.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Poll"
-                ],
-                "summary": "Show poll result",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Team ID",
-                        "name": "teamId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Poll ID",
-                        "name": "pollId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Poll results",
-                        "schema": {
-                            "$ref": "#/definitions/poll.ShowPollResultEnvelop"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request (e.g., missing parameters or validation error)",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorEnvelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Poll not found",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorEnvelope"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorEnvelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/teams/{teamId}/polls/{pollId}/options/{optionId}/vote": {
+        "/teams/:teamId/polls/:pollId/options/:optionId/vote": {
             "post": {
                 "security": [
                     {
@@ -1813,6 +1751,68 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Poll or option not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/teams/:teamId/polls/:pollId/result": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the result of a poll, including the total votes, votes per option, and the winning option.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Poll"
+                ],
+                "summary": "Show poll result",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "teamId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Poll ID",
+                        "name": "pollId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Poll results",
+                        "schema": {
+                            "$ref": "#/definitions/poll.ShowPollResultEnvelop"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (e.g., missing parameters or validation error)",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorEnvelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Poll not found",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorEnvelope"
                         }

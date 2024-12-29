@@ -39,7 +39,7 @@ func NewVote(
 // @Failure      403        {object}  utils.ErrorEnvelope  "User is not allowed to vote on this poll"
 // @Failure      404        {object}  utils.ErrorEnvelope  "Poll or option not found"
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
-// @Router       /teams/{teamId}/polls/{pollId}/options/{optionId}/vote [post]
+// @Router       /teams/:teamId/polls/:pollId/options/:optionId/vote [post]
 func(v *vote) Handle(w http.ResponseWriter, r *http.Request) {
 	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
     user := utils.ContextGetUser(r)

@@ -1551,48 +1551,7 @@ paths:
       summary: Delete an option from a poll
       tags:
       - Poll
-  /teams/:teamId/polls/:pollId/result:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves the result of a poll, including the total votes, votes
-        per option, and the winning option.
-      parameters:
-      - description: Team ID
-        in: path
-        name: teamId
-        required: true
-        type: integer
-      - description: Poll ID
-        in: path
-        name: pollId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Poll results
-          schema:
-            $ref: '#/definitions/poll.ShowPollResultEnvelop'
-        "400":
-          description: Invalid request (e.g., missing parameters or validation error)
-          schema:
-            $ref: '#/definitions/utils.ErrorEnvelope'
-        "404":
-          description: Poll not found
-          schema:
-            $ref: '#/definitions/utils.ErrorEnvelope'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.ErrorEnvelope'
-      security:
-      - BearerAuth: []
-      summary: Show poll result
-      tags:
-      - Poll
-  /teams/{teamId}/polls/{pollId}/options/{optionId}/vote:
+  /teams/:teamId/polls/:pollId/options/:optionId/vote:
     post:
       consumes:
       - application/json
@@ -1637,6 +1596,47 @@ paths:
       security:
       - BearerAuth: []
       summary: Vote in a poll
+      tags:
+      - Poll
+  /teams/:teamId/polls/:pollId/result:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the result of a poll, including the total votes, votes
+        per option, and the winning option.
+      parameters:
+      - description: Team ID
+        in: path
+        name: teamId
+        required: true
+        type: integer
+      - description: Poll ID
+        in: path
+        name: pollId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Poll results
+          schema:
+            $ref: '#/definitions/poll.ShowPollResultEnvelop'
+        "400":
+          description: Invalid request (e.g., missing parameters or validation error)
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "404":
+          description: Poll not found
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Show poll result
       tags:
       - Poll
 securityDefinitions:

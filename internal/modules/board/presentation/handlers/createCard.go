@@ -9,20 +9,14 @@ import (
 )
 
 type createCard struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-    ensureColumnOwnership application.IEnsureColumnOwnership
-    saveCard application.ISaveCard
+	saveCard application.ISaveCard
 }
 
 func NewCreateCard(
-	ensureBoardOwnership application.IEnsureBoardOwnership,
-    ensureColumnOwnership application.IEnsureColumnOwnership,
-    saveCard application.ISaveCard,
+	saveCard application.ISaveCard,
 ) *createCard {
     return &createCard{
-		ensureBoardOwnership,
-        ensureColumnOwnership,
-        saveCard,
+	    saveCard,
     }
 }
 
@@ -46,18 +40,7 @@ type CreateCardEnvelop struct {
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [post]
 func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
 	user := utils.ContextGetUser(r)
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
-	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
-    boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
-	if boardIdErr != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -67,16 +50,6 @@ func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
-		return
-	}
-    ensureBoardErr := cc.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
-		return
-	}
-    ensureColumnErr := cc.ensureColumnOwnership.Execute(boardId, columnId)
-	if ensureColumnErr != nil {
-		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
     card, saveErr := cc.saveCard.Execute(columnId, user.ID, input.Text)

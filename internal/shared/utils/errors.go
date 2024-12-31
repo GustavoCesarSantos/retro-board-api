@@ -8,8 +8,13 @@ import (
 )
 
 var (
+	ErrBoardNotInTeam = errors.New("BOARD DOES NOT BELONG TO THE SPECIFIED TEAM")
+	ErrCardNotInColumn = errors.New("CARD DOES NOT BELONG TO THE SPECIFIED COLUMN")
+	ErrColumnNotInBoard = errors.New("COLUMN DOES NOT BELONG TO THE SPECIFIED BOARD")
+	ErrEditConflict = errors.New("EDIT CONFLICT")
 	ErrRecordNotFound = errors.New("RECORD NOT FOUND")
-	ErrEditConflict   = errors.New("EDIT CONFLICT")
+	ErrUserNoEditPermission = errors.New("USER DOES NOT HAVE EDIT PERMISSION")
+	ErrUserNotInTeam = errors.New("USER DOES NOT BELONG TO THE SPECIFIED TEAM")
 )
 
 type ErrorEnvelope struct {
@@ -35,6 +40,15 @@ func errorResponse(w http.ResponseWriter, r *http.Request, status int, message a
 
 func BadRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
 	errorResponse(w, r, http.StatusBadRequest, err.Error())
+}
+
+func ForbiddenResponse(w http.ResponseWriter, r *http.Request, err error) {
+	message := "Forbidden Access" 
+	if err != nil {
+		message = err.Error()
+	}
+	errorResponse(w, r, http.StatusForbidden, message)
+
 }
 
 func InvalidAuthenticationTokenResponse(w http.ResponseWriter, r *http.Request) {

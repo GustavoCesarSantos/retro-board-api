@@ -9,17 +9,14 @@ import (
 )
 
 type listAllColumns struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-    findAllColumns application.IFindAllColumns
+	findAllColumns application.IFindAllColumns
 }
 
 func NewListAllColumns(
-	ensureBoardOwnership application.IEnsureBoardOwnership, 
 	findAllColumns application.IFindAllColumns,
 ) *listAllColumns {
     return &listAllColumns {
-		ensureBoardOwnership,
-        findAllColumns,
+	    findAllColumns,
     }
 }
 
@@ -40,20 +37,9 @@ type ListAllColumnsEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns [get]
 func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
-	if teamIdErr != nil {
-		utils.BadRequestResponse(w, r, teamIdErr)
-		return
-	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
 		utils.BadRequestResponse(w, r, boardIdErr)
-		return
-	}
-	ensureBoardErr := lc.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
 	columns, findErr := lc.findAllColumns.Execute(boardId)

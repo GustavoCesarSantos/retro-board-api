@@ -10,23 +10,14 @@ import (
 )
 
 type moveCardtoAnotherColumn struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-	ensureColumnOwnership application.IEnsureColumnOwnership
-	ensureCardOwnership application.IEnsureCardOwnership
-    moveCardBetweenColumn application.IMoveCardBetweenColumns
+	moveCardBetweenColumn application.IMoveCardBetweenColumns
 }
 
 func NewMoveCardtoAnotherColumn(
-	ensureBoardOwnership application.IEnsureBoardOwnership,
-	ensureColumnOwnership application.IEnsureColumnOwnership,
-	ensureCardOwnership application.IEnsureCardOwnership,
 	moveCardBetweenColumn application.IMoveCardBetweenColumns,
 ) *moveCardtoAnotherColumn {
     return &moveCardtoAnotherColumn{
-		ensureBoardOwnership,
-		ensureColumnOwnership,
-		ensureCardOwnership,
-        moveCardBetweenColumn,
+	    moveCardBetweenColumn,
     }
 }
 
@@ -47,22 +38,6 @@ func NewMoveCardtoAnotherColumn(
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move [put]
 func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
-	if teamIdErr != nil {
-		utils.BadRequestResponse(w, r, teamIdErr)
-		return
-	}
-	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
-	if boardIdErr != nil {
-		utils.BadRequestResponse(w, r, boardIdErr)
-		return
-	}
-	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
-	if columnIdErr != nil {
-		utils.BadRequestResponse(w, r, columnIdErr)
-		return
-	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
 		utils.BadRequestResponse(w, r, cardIdErr)
@@ -72,21 +47,6 @@ func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request)
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
-		return
-	}
-	ensureBoardErr := mc.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
-		return
-	}
-    ensureColumnErr := mc.ensureColumnOwnership.Execute(boardId, columnId)
-	if ensureColumnErr != nil {
-		utils.BadRequestResponse(w, r, ensureColumnErr)
-		return
-	}
-    ensureCardErr := mc.ensureCardOwnership.Execute(columnId, cardId)
-	if ensureCardErr != nil {
-		utils.BadRequestResponse(w, r, ensureCardErr)
 		return
 	}
     moveErr := mc.moveCardBetweenColumn.Execute(cardId, input.NewColumnId)

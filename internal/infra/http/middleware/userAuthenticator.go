@@ -5,19 +5,20 @@ import (
 	"net/http"
 	"strings"
 
-	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/external/db/interfaces"
-	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
-	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/configs"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/integration/interfaces"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
 type userAuthenticator struct {
-    repository db.IUserRepository
+    provider interfaces.IUserIdentityApi
 }
 
-func NewUserAuthenticator(repository db.IUserRepository) *userAuthenticator {
+func NewUserAuthenticator(provider interfaces.IUserIdentityApi) *userAuthenticator {
     return &userAuthenticator{
-        repository,
+        provider,
     }
 }
 
@@ -70,7 +71,7 @@ func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFun
 			return
 		}
         email := mappedClaims["email"].(string)
-        user, userErr := ua.repository.FindByEmail(email)
+        user, userErr := ua.provider.FindByEmail(email)
 		if userErr != nil {
             utils.InvalidAuthenticationTokenResponse(w, r)
 			return

@@ -33,6 +33,16 @@ func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
     return nil
 }
 
+func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMember, error) {
+	var teamMembers []*domain.TeamMember
+    for _, teamMember := range tm.teamMembers {
+        if teamMember.TeamId == teamId {
+            teamMembers = append(teamMembers, &teamMember)
+        }
+    }
+    return teamMembers, nil
+}
+
 func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId int64) (*domain.TeamMember, error) {
     for _, teamMember := range tm.teamMembers {
         if teamMember.TeamId == teamId && teamMember.MemberId == memberId && teamMember.RoleId == 1 {

@@ -12,9 +12,11 @@ type createBoard struct {
     saveBoard application.ISaveBoard
 }
 
-func NewCreateBoard(saveBoard application.ISaveBoard) *createBoard {
+func NewCreateBoard(
+	saveBoard application.ISaveBoard,
+) *createBoard {
     return &createBoard{
-        saveBoard,
+		saveBoard,
     }
 }
 
@@ -36,10 +38,9 @@ type CreateBoardEnvelop struct {
 // @Failure      500      {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards [post]
 func(cb *createBoard) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, err := utils.ReadIDParam(r, "teamId")
-	if err != nil {
-		utils.NotFoundResponse(w, r)
+	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
+	if teamIdErr != nil {
+		utils.BadRequestResponse(w, r, teamIdErr)
 		return
 	}
 	var input dtos.CreateBoardRequest
@@ -48,7 +49,7 @@ func(cb *createBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr)
 		return
 	}
-    board, saveErr := cb.saveBoard.Execute(teamId, input.Name)
+	board, saveErr := cb.saveBoard.Execute(teamId, input.Name)
 	if saveErr != nil {
 		utils.ServerErrorResponse(w, r, saveErr)
 		return

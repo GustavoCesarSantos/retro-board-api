@@ -10,14 +10,14 @@ import (
 )
 
 type listBoard struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-    findBoard application.IFindBoard
+	findBoard application.IFindBoard
 }
 
-func NewListBoard(ensureBoardOwnership application.IEnsureBoardOwnership, findBoard application.IFindBoard) *listBoard {
+func NewListBoard(
+	findBoard application.IFindBoard,
+) *listBoard {
     return &listBoard {
-		ensureBoardOwnership,
-        findBoard,
+	    findBoard,
     }
 }
 
@@ -40,20 +40,9 @@ type ListBoardEnvelop struct {
 // @Router       /teams/:teamId/boards/:boardId [get]
 
 func(lb *listBoard) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
-	if teamIdErr != nil {
-		utils.BadRequestResponse(w, r, teamIdErr)
-		return
-	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
 		utils.BadRequestResponse(w, r, boardIdErr)
-		return
-	}
-	ensureBoardErr := lb.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
 	board, findErr := lb.findBoard.Execute(boardId)

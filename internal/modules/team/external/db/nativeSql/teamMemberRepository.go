@@ -46,6 +46,49 @@ func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
     return nil
 }
 
+func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMember, error) {
+    query := `
+        SELECT
+            id,
+            team_id,
+            member_id,
+            role,
+            created_at,
+            updated_at
+        FROM
+            team_members
+        WHERE
+            team_id = $1
+    `
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	rows, err := tm.DB.QueryContext(ctx, query, teamId)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    teamMembers := []*domain.TeamMember{}
+    for rows.Next() {
+        var teamMember  domain.TeamMember
+        err := rows.Scan(
+            &teamMember.ID,
+            &teamMember.TeamId,
+            &teamMember.MemberId,
+            &teamMember.RoleId,
+            &teamMember.CreatedAt,
+            &teamMember.UpdatedAt,
+        )
+        if err != nil {
+            return nil, err
+        }
+        teamMembers = append(teamMembers, &teamMember)
+    }
+    if rowsErr := rows.Err(); rowsErr != nil {
+        return nil, rowsErr
+    }
+    return teamMembers, nil
+}
+
 func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId int64) (*domain.TeamMember, error) {
     query := `
         SELECT

@@ -9,20 +9,17 @@ import (
 )
 
 type createColumn struct {
-    ensureBoardOwnership application.IEnsureBoardOwnership
     findAllColumns application.IFindAllColumns
 	getNextColumnPosition application.IGetNextColumnPosition
     saveColumn application.ISaveColumn
 }
 
 func NewCreateColumn(
-    ensureBoardOwnership application.IEnsureBoardOwnership, 
     findAllColumns application.IFindAllColumns,
 	getNextColumnPosition application.IGetNextColumnPosition,
     saveColumn application.ISaveColumn,
 ) *createColumn {
     return &createColumn{
-        ensureBoardOwnership,
         findAllColumns,
 		getNextColumnPosition,
         saveColumn,
@@ -48,12 +45,6 @@ type CreateColumnEnvelop struct {
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards/:boardId/columns [post]
 func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
-	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
     boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -63,11 +54,6 @@ func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
-		return
-	}
-    ensureBoardErr := cc.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
     position, getErr := cc.getNextColumnPosition.Execute(boardId)

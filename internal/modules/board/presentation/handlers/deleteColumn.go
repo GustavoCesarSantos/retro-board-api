@@ -9,20 +9,14 @@ import (
 )
 
 type deleteColumn struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-	ensureColumnOwnership application.IEnsureColumnOwnership
-    removeColumn application.IRemoveColumn
+	removeColumn application.IRemoveColumn
 }
 
 func NewDeleteColumn(
-	ensureBoardOwnership application.IEnsureBoardOwnership,
-	ensureColumnOwnership application.IEnsureColumnOwnership, 
 	removeColumn application.IRemoveColumn,
 ) *deleteColumn {
     return &deleteColumn{
-		ensureBoardOwnership,
-		ensureColumnOwnership,
-        removeColumn,
+	    removeColumn,
     }
 }
 
@@ -41,30 +35,9 @@ func NewDeleteColumn(
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId [delete]
 func(dc *deleteColumn) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, err := utils.ReadIDParam(r, "teamId")
-	if err != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
-	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
-	if boardIdErr != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
 		utils.NotFoundResponse(w, r)
-		return
-	}
-	ensureBoardErr := dc.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
-		return
-	}
-    ensureColumnErr := dc.ensureColumnOwnership.Execute(boardId, columnId)
-	if ensureColumnErr != nil {
-		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
     removeErr := dc.removeColumn.Execute(columnId)

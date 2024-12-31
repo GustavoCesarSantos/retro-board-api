@@ -10,14 +10,14 @@ import (
 )
 
 type editBoard struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-    updateBoard application.IUpdateBoard
+	updateBoard application.IUpdateBoard
 }
 
-func NewEditBoard(ensureBoardOwnership application.IEnsureBoardOwnership, updateBoard application.IUpdateBoard) *editBoard {
+func NewEditBoard(
+	updateBoard application.IUpdateBoard,
+) *editBoard {
     return &editBoard{
-		ensureBoardOwnership,
-        updateBoard,
+	    updateBoard,
     }
 }
 
@@ -36,12 +36,6 @@ func NewEditBoard(ensureBoardOwnership application.IEnsureBoardOwnership, update
 // @Failure      500      {object} utils.ErrorEnvelope          "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId [put]
 func(eb *editBoard) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, err := utils.ReadIDParam(r, "teamId")
-	if err != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -51,11 +45,6 @@ func(eb *editBoard) Handle(w http.ResponseWriter, r *http.Request) {
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
 		utils.BadRequestResponse(w, r, readErr)
-		return
-	}
-	ensureBoardErr := eb.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
 		return
 	}
     updateErr := eb.updateBoard.Execute(boardId, struct {

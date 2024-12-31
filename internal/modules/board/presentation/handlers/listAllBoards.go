@@ -9,12 +9,14 @@ import (
 )
 
 type listAllBoards struct {
-    findAllBoards application.IFindAllBoards
+	findAllBoards application.IFindAllBoards
 }
 
-func NewListAllBoards(findAllBoards application.IFindAllBoards) *listAllBoards {
+func NewListAllBoards(
+	findAllBoards application.IFindAllBoards,
+) *listAllBoards {
     return &listAllBoards {
-        findAllBoards,
+		findAllBoards,
     }
 }
 
@@ -35,8 +37,7 @@ type ListAllBoardsEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards [get]
 func(lb *listAllBoards) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
+	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
 		utils.NotFoundResponse(w, r)
 		return

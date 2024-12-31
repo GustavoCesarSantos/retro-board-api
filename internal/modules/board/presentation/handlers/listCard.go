@@ -10,23 +10,14 @@ import (
 )
 
 type listCard struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-	ensureColumnOwnership application.IEnsureColumnOwnership
-	ensureCardOwnership application.IEnsureCardOwnership
-    findCard application.IFindCard
+	findCard application.IFindCard
 }
 
 func NewListCard(
-	ensureBoardOwnership application.IEnsureBoardOwnership,
-	ensureColumnOwnership application.IEnsureColumnOwnership,
-	ensureCardOwnership application.IEnsureCardOwnership, 
 	findCard application.IFindCard,
 ) *listCard {
     return &listCard {
-		ensureBoardOwnership,
-		ensureColumnOwnership,
-		ensureCardOwnership,
-        findCard,
+	    findCard,
     }
 }
 
@@ -50,40 +41,9 @@ type ListCardEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [get]
 func(lc *listCard) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
-	if teamIdErr != nil {
-		utils.BadRequestResponse(w, r, teamIdErr)
-		return
-	}
-	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
-	if boardIdErr != nil {
-		utils.BadRequestResponse(w, r, boardIdErr)
-		return
-	}
-	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
-	if columnIdErr != nil {
-		utils.BadRequestResponse(w, r, columnIdErr)
-		return
-	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
 		utils.BadRequestResponse(w, r, cardIdErr)
-		return
-	}
-	ensureBoardErr := lc.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
-		return
-	}
-    ensureColumnErr := lc.ensureColumnOwnership.Execute(boardId, columnId)
-	if ensureColumnErr != nil {
-		utils.BadRequestResponse(w, r, ensureColumnErr)
-		return
-	}
-    ensureCardErr := lc.ensureCardOwnership.Execute(columnId, cardId)
-	if ensureCardErr != nil {
-		utils.BadRequestResponse(w, r, ensureCardErr)
 		return
 	}
 	card, findErr := lc.findCard.Execute(cardId)

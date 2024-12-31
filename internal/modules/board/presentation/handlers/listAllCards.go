@@ -9,20 +9,14 @@ import (
 )
 
 type listAllCards struct {
-	ensureBoardOwnership application.IEnsureBoardOwnership
-	ensureColumnOwnership application.IEnsureColumnOwnership
-    findAllCards application.IFindAllCards
+	findAllCards application.IFindAllCards
 }
 
 func NewListAllCards(
-	ensureBoardOwnership application.IEnsureBoardOwnership,
-	ensureColumnOwnership application.IEnsureColumnOwnership,
 	findAllCards application.IFindAllCards,
 ) *listAllCards {
     return &listAllCards {
-		ensureBoardOwnership,
-		ensureColumnOwnership,
-        findAllCards,
+	    findAllCards,
     }
 }
 
@@ -45,30 +39,9 @@ type ListAllCardsEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [get]
 func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
-	//TO-DO criar caso de uso para verificar se o usuário pertence ao time
-    teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
-	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
-	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
-	if boardIdErr != nil {
-		utils.NotFoundResponse(w, r)
-		return
-	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
 		utils.NotFoundResponse(w, r)
-		return
-	}
-	ensureBoardErr := lc.ensureBoardOwnership.Execute(teamId, boardId)
-	if ensureBoardErr != nil {
-		utils.BadRequestResponse(w, r, ensureBoardErr)
-		return
-	}
-    ensureColumnErr := lc.ensureColumnOwnership.Execute(boardId, columnId)
-	if ensureColumnErr != nil {
-		utils.BadRequestResponse(w, r, ensureColumnErr)
 		return
 	}
 	cards, findErr := lc.findAllCards.Execute(columnId)

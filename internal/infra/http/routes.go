@@ -10,7 +10,7 @@ import (
 	_ "github.com/GustavoCesarSantos/retro-board-api/docs"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
 	boardApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
-	boardDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/memory"
+	boardDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/nativeSql"
 	boardProvider "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/integration/provider"
 	board "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/handlers"
 	identityApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/application"
@@ -18,9 +18,10 @@ import (
 	identityProvider "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/integration/provider"
 	identity "github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity/presentation/handlers"
 	monitor "github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor/presentation/handlers"
-	pollApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/application"
-	pollDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/external/db/memory"
-	poll "github.com/GustavoCesarSantos/retro-board-api/internal/modules/pool/presentation/handlers"
+	pollApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/poll/application"
+	pollDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/poll/external/db/nativeSql"
+	pollProvider "github.com/GustavoCesarSantos/retro-board-api/internal/modules/poll/integration/provider"
+	poll "github.com/GustavoCesarSantos/retro-board-api/internal/modules/poll/presentation/handlers"
 	teamApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
 	teamDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/nativeSql"
 	teamMemberProvider "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/integration/provider"
@@ -34,26 +35,31 @@ func routes(db *sql.DB) http.Handler {
 	router.MethodNotAllowed = http.HandlerFunc(utils.MethodNotAllowedResponse)
 
 	//Init Repos
-	boardRepository := boardDb.NewBoardRepository()
-	cardRepository := boardDb.NewCardRepository()
-	columnRepository := boardDb.NewColumnRepository()
-	optionRepository := pollDb.NewOptionRepository()
-	pollRepository := pollDb.NewPollRepository()
+	boardRepository := boardDb.NewBoardRepository(db)
+	cardRepository := boardDb.NewCardRepository(db)
+	columnRepository := boardDb.NewColumnRepository(db)
+	optionRepository := pollDb.NewOptionRepository(db)
+	pollRepository := pollDb.NewPollRepository(db)
 	teamRepository := teamDb.NewTeamRepository(db)
 	teamMemberRepository := teamDb.NewTeamMemberRepository(db)
 	userRepository := userDb.NewUserRepository(db)
-	voteRepository := pollDb.NewVoteRepository()
+	voteRepository := pollDb.NewVoteRepository(db)
 
 	boardPublicApiProvider := boardProvider.NewBoardPublicApiProvider(
 		boardRepository,
 		cardRepository,
 		columnRepository,
 	)
+	pollPublicApiProvider := pollProvider.NewPollPublicApiProvider(
+		optionRepository, 
+		pollRepository,
+	)
 	teamMemberPublicApiProvider := teamMemberProvider.NewTeamMemberPublicApiProvider(teamMemberRepository)
 	userPublicApiProvider := identityProvider.NewUserPublicApiProvider(userRepository)
 
 	//Init Middlewares
 	boardValidator := middleware.NewBoardValidator(boardPublicApiProvider)
+	pollValidator := middleware.NewPollValidator(pollPublicApiProvider)
 	teamMemberValidator := middleware.NewTeamMemberValidator(teamMemberPublicApiProvider)
 	userAuthenticator := middleware.NewUserAuthenticator(userPublicApiProvider)
 
@@ -65,8 +71,6 @@ func routes(db *sql.DB) http.Handler {
 	createAuthToken := identityApplication.NewCreateAuthToken()
 	decodeAuthToken := identityApplication.NewDecodeAuthToken()
 	ensureAdminMembership := teamApplication.NewEnsureAdminMembership(teamMemberRepository)
-	ensureOptionOwnership := pollApplication.NewEnsureOptionOwnership(optionRepository)
-	ensurePollOwnership := pollApplication.NewEnsurePollOwnership(pollRepository)
 	findAllBoards := boardApplication.NewFindAllBoards(boardRepository)
 	findAllCards := boardApplication.NewFindAllCards(cardRepository)
 	findAllColumns := boardApplication.NewFindAllColumns(columnRepository)
@@ -131,8 +135,6 @@ func routes(db *sql.DB) http.Handler {
 		removeColumn,
 	)
 	deleteOption := poll.NewDeleteOption(
-		ensurePollOwnership, 
-		ensureOptionOwnership, 
 		removeOption,
 	)
 	editBoard := board.NewEditBoard(updateBoard)
@@ -146,7 +148,7 @@ func routes(db *sql.DB) http.Handler {
 	listAllTeams := team.NewListAllTeams(findAllTeams)
 	listBoard := board.NewListBoard(findBoard)
 	listCard := board.NewListCard(findCard)
-	listPoll := poll.NewListPoll(ensurePollOwnership, findPoll)
+	listPoll := poll.NewListPoll(findPoll)
 	moveCardtoAnotherColumn := board.NewMoveCardtoAnotherColumn(
 		moveCardBetweenColumns,
 	)
@@ -160,7 +162,6 @@ func routes(db *sql.DB) http.Handler {
 		removeMember,
 	)
 	showPollResult := poll.NewShowPollResult(
-		ensurePollOwnership, 
 		countVotesByPollId,
 	)
 	showTeam := team.NewShowTeam(findTeam)
@@ -175,7 +176,7 @@ func routes(db *sql.DB) http.Handler {
 		saveUser,
 	)
 	signoutUser := identity.NewSignoutUser(incrementVersion)
-	vote := poll.NewVote(ensurePollOwnership, ensureOptionOwnership, saveVote)
+	vote := poll.NewVote(saveVote)
 
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheck.Handle)
@@ -322,14 +323,50 @@ func routes(db *sql.DB) http.Handler {
 		),
 	))
 
-	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/polls", userAuthenticator.Authenticate(createPoll.Handle))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls", userAuthenticator.Authenticate(listAllPolls.Handle))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls/:pollId", userAuthenticator.Authenticate(listPoll.Handle))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls/:pollId/result", userAuthenticator.Authenticate(showPollResult.Handle))
+	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/polls", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			createPoll.Handle,
+		),
+	))
+	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			listAllPolls.Handle,
+		),
+	))
+	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls/:pollId", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			pollValidator.EnsurePollOwnership(
+				listPoll.Handle,
+			),
+		),
+	))
+	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls/:pollId/result", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			pollValidator.EnsurePollOwnership(
+				showPollResult.Handle,
+			),
+		),
+	))
 
-	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/polls/:pollId/options/:optionId", userAuthenticator.Authenticate(deleteOption.Handle))
+	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/polls/:pollId/options/:optionId", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			pollValidator.EnsurePollOwnership(
+				pollValidator.EnsureOptionOwnership(
+					deleteOption.Handle,
+				),
+			),
+		),
+	))
 
-	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/polls/:pollId/options/:optionId/vote", userAuthenticator.Authenticate(vote.Handle))
+	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/polls/:pollId/options/:optionId/vote", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			pollValidator.EnsurePollOwnership(
+				pollValidator.EnsureOptionOwnership(
+					vote.Handle,
+				),
+			),
+		),
+	))
 
 	router.Handler(http.MethodGet, "/v1/docs/*filepath", httpSwagger.WrapHandler)
 

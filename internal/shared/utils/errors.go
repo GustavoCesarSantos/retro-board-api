@@ -12,6 +12,8 @@ var (
 	ErrCardNotInColumn = errors.New("CARD DOES NOT BELONG TO THE SPECIFIED COLUMN")
 	ErrColumnNotInBoard = errors.New("COLUMN DOES NOT BELONG TO THE SPECIFIED BOARD")
 	ErrEditConflict = errors.New("EDIT CONFLICT")
+	ErrOptionNotInPoll = errors.New("OPTION DOES NOT BELONG TO THE SPECIFIED POLL")
+	ErrPollNotInTeam = errors.New("POLL DOES NOT BELONG TO THE SPECIFIED TEAM")
 	ErrRecordNotFound = errors.New("RECORD NOT FOUND")
 	ErrUserNoEditPermission = errors.New("USER DOES NOT HAVE EDIT PERMISSION")
 	ErrUserNotInTeam = errors.New("USER DOES NOT BELONG TO THE SPECIFIED TEAM")

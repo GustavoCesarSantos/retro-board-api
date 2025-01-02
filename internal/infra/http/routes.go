@@ -22,10 +22,12 @@ import (
 	pollDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/poll/external/db/nativeSql"
 	pollProvider "github.com/GustavoCesarSantos/retro-board-api/internal/modules/poll/integration/provider"
 	poll "github.com/GustavoCesarSantos/retro-board-api/internal/modules/poll/presentation/handlers"
+	realtime "github.com/GustavoCesarSantos/retro-board-api/internal/modules/realtime/presentation/handlers"
 	teamApplication "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
 	teamDb "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/external/db/nativeSql"
 	teamMemberProvider "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/integration/provider"
 	team "github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation/handlers"
+	providers "github.com/GustavoCesarSantos/retro-board-api/internal/shared/providers/webSocket"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
@@ -33,6 +35,9 @@ func routes(db *sql.DB) http.Handler {
 	router := httprouter.New()
 	router.NotFound = http.HandlerFunc(utils.NotFoundResponse)
 	router.MethodNotAllowed = http.HandlerFunc(utils.MethodNotAllowedResponse)
+
+    //Init Providers
+    gorillaWebSocketProvider := providers.NewGorillaWebSocket()
 
 	//Init Repos
 	boardRepository := boardDb.NewBoardRepository(db)
@@ -116,6 +121,7 @@ func routes(db *sql.DB) http.Handler {
 		saveMember,
 	)
 	changeMemberRole := team.NewChangeMemberRole(ensureAdminMembership, updateRole)
+    connectToBoardRoom := realtime.NewConnectToBoardRoom(gorillaWebSocketProvider)
 	createBoard := board.NewCreateBoard(saveBoard)
 	createCard := board.NewCreateCard(
 		saveCard,
@@ -186,6 +192,12 @@ func routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google", signinWithGoogle.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google/callback", signinWithGoogleCallback.Handle)
 	router.HandlerFunc(http.MethodPost, "/v1/auth/signout", userAuthenticator.Authenticate(signoutUser.Handle))
+
+    router.HandlerFunc(http.MethodGet, "/v1/ws/teams/:teamdId/boards/:boardId", userAuthenticator.Authenticate(
+        teamMemberValidator.EnsureMemberAccess(
+            connectToBoardRoom.Handle,
+        ),
+    ))
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))

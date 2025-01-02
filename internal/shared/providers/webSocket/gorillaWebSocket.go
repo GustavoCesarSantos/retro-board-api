@@ -10,7 +10,7 @@ import (
 )
 
 type BoardManager struct {
-	rooms map[int64]map[int64]*websocket.Conn
+	rooms map[string]map[int64]map[int64]*websocket.Conn
     mu    sync.Mutex
 }
 
@@ -21,7 +21,9 @@ type gorillaWebSocket struct {
 func NewGorillaWebSocket() interfaces.IRoomManagerIntegration {
     return &gorillaWebSocket{
         boardManager: BoardManager{
-            rooms: make(map[int64]map[int64]*websocket.Conn),
+            rooms: map[string]map[int64]map[int64]*websocket.Conn{
+                "boards": make(map[int64]map[int64]*websocket.Conn),
+            },
         },
     }
 }
@@ -39,49 +41,55 @@ func createConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, 
     return conn, nil
 }
 
-func (gws *gorillaWebSocket) AddUserToRoom(w http.ResponseWriter, r *http.Request, boardId int64, userId int64) error {
+func (gws *gorillaWebSocket) AddUserToRoom(w http.ResponseWriter, r *http.Request, category string, roomId int64, userId int64) error {
     conn, err := createConnection(w, r)
     if err != nil {
         return err
     }
     gws.boardManager.mu.Lock()
-	if _, ok := gws.boardManager.rooms[boardId]; !ok {
-		gws.boardManager.rooms[boardId] = make(map[int64]*websocket.Conn)
+	if _, ok := gws.boardManager.rooms[category]; !ok {
+		gws.boardManager.rooms[category] = make(map[int64]map[int64]*websocket.Conn)
 	}
-	gws.boardManager.rooms[boardId][userId] = conn
+    if _, ok := gws.boardManager.rooms[category][roomId]; !ok {
+		gws.boardManager.rooms[category][roomId] = make(map[int64]*websocket.Conn)
+	}
+	gws.boardManager.rooms[category][roomId][userId] = conn
 	gws.boardManager.mu.Unlock()
-    slog.Info("Conexão WebSocket estabelecida para o board: %s", boardId)
+    slog.Info("Conexão WebSocket estabelecida para a sala: %s", roomId)
     return nil
 }
 
-func (gws *gorillaWebSocket) BroadcastToBoard(boardId int64, message []byte) {
+func (gws *gorillaWebSocket) BroadcastMessage(category string, roomId int64, message []byte) {
 	gws.boardManager.mu.Lock()
 	defer gws.boardManager.mu.Unlock()
-	for userId := range gws.boardManager.rooms[boardId] {
-        conn := gws.boardManager.rooms[boardId][userId]
+	for userId := range gws.boardManager.rooms[category][roomId] {
+        conn := gws.boardManager.rooms[category][roomId][userId]
 		err := conn.WriteMessage(websocket.TextMessage, message)
 		if err != nil {
 			slog.Info("Erro ao enviar mensagem para WebSocket: %v", err)
 			conn.Close()
-			delete(gws.boardManager.rooms[boardId], userId)
+			delete(gws.boardManager.rooms[category][roomId], userId)
 		}
 	}
 }
 
-func (gws *gorillaWebSocket) CloseConnection(boardId int64, userId int64) {
+func (gws *gorillaWebSocket) CloseConnection(category string, roomId int64, userId int64) {
     gws.boardManager.mu.Lock()
-    conn := gws.boardManager.rooms[boardId][userId]
-    delete(gws.boardManager.rooms[boardId], userId)
-    if len(gws.boardManager.rooms[boardId]) == 0 {
-        delete(gws.boardManager.rooms, boardId)
+    conn := gws.boardManager.rooms[category][roomId][userId]
+    delete(gws.boardManager.rooms[category][roomId], userId)
+    if len(gws.boardManager.rooms[category][roomId]) == 0 {
+        delete(gws.boardManager.rooms[category], roomId)
+    }
+    if len(gws.boardManager.rooms[category]) == 0 {
+        delete(gws.boardManager.rooms, category)
     }
     gws.boardManager.mu.Unlock()
     conn.Close()
-    slog.Info("Conexão WebSocket encerrada para o board: %s", boardId)
+    slog.Info("Conexão WebSocket encerrada com a sala: %s", roomId)
 }
 
-func (gws *gorillaWebSocket) ReadMessage(boardId int64, userId int64) (int, []byte, error) {
-    conn := gws.boardManager.rooms[boardId][userId]
+func (gws *gorillaWebSocket) ReadMessage(category string, roomId int64, userId int64) (int, []byte, error) {
+    conn := gws.boardManager.rooms[category][roomId][userId]
     return conn.ReadMessage()
 }
 

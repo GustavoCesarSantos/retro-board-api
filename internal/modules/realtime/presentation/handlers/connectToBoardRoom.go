@@ -26,15 +26,15 @@ func(cbr *connectToBoardRoom) Handle(w http.ResponseWriter, r *http.Request) {
         utils.BadRequestResponse(w, r, boardIdErr)
 		return
 	}
-    addConnectionErr := cbr.roomManager.AddUserToRoom(w, r, boardId, user.ID)
+    addConnectionErr := cbr.roomManager.AddUserToRoom(w, r, "boards", boardId, user.ID)
     if addConnectionErr != nil {
         utils.BadRequestResponse(w, r, addConnectionErr)
         return
     }
     for {
-		_, _, err := cbr.roomManager.ReadMessage(boardId, user.ID)
+		_, _, err := cbr.roomManager.ReadMessage("boards", boardId, user.ID)
 		if err != nil {
-            cbr.roomManager.CloseConnection(boardId, user.ID)
+            cbr.roomManager.CloseConnection("boards", boardId, user.ID)
 			break
 		}
 	}

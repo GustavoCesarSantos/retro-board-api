@@ -36,9 +36,6 @@ func routes(db *sql.DB) http.Handler {
 	router.NotFound = http.HandlerFunc(utils.NotFoundResponse)
 	router.MethodNotAllowed = http.HandlerFunc(utils.MethodNotAllowedResponse)
 
-    //Init Providers
-    gorillaWebSocketProvider := providers.NewGorillaWebSocket()
-
 	//Init Repos
 	boardRepository := boardDb.NewBoardRepository(db)
 	cardRepository := boardDb.NewCardRepository(db)
@@ -50,6 +47,10 @@ func routes(db *sql.DB) http.Handler {
 	userRepository := userDb.NewUserRepository(db)
 	voteRepository := pollDb.NewVoteRepository(db)
 
+    //Init Provider
+    gorillaWebSocketProvider := providers.NewGorillaWebSocket()
+
+    //Init Public Api Provider
 	boardPublicApiProvider := boardProvider.NewBoardPublicApiProvider(
 		boardRepository,
 		cardRepository,
@@ -94,6 +95,11 @@ func routes(db *sql.DB) http.Handler {
 	moveCardBetweenColumns := boardApplication.NewMoveCardBetweenColumns(
 		cardRepository,
 	)
+    notifyCountVotes := pollApplication.NewNotifyCountVotes(gorillaWebSocketProvider)
+    notifyMoveCard := boardApplication.NewNotifyMoveCard(gorillaWebSocketProvider)
+    notifySaveCard := boardApplication.NewNotifySaveCard(gorillaWebSocketProvider)
+    notifySaveVote := pollApplication.NewNotifySaveVote(gorillaWebSocketProvider)
+    notifyUpdateCard := boardApplication.NewNotifyUpdateCard(gorillaWebSocketProvider)
 	removeBoard := boardApplication.NewRemoveBoard(boardRepository)
 	removeCard := boardApplication.NewRemoveCard(cardRepository)
 	removeColumn := boardApplication.NewRemoveColumn(columnRepository)
@@ -124,6 +130,7 @@ func routes(db *sql.DB) http.Handler {
     connectToBoardRoom := realtime.NewConnectToBoardRoom(gorillaWebSocketProvider)
 	createBoard := board.NewCreateBoard(saveBoard)
 	createCard := board.NewCreateCard(
+        notifySaveCard,
 		saveCard,
 	)
 	createColumn := board.NewCreateColumn(
@@ -144,7 +151,7 @@ func routes(db *sql.DB) http.Handler {
 		removeOption,
 	)
 	editBoard := board.NewEditBoard(updateBoard)
-	editCard := board.NewEditCard(updateCard)
+	editCard := board.NewEditCard(notifyUpdateCard, updateCard)
 	editColumn := board.NewEditColumn(updateColumn)
 	healthcheck := monitor.NewHealthcheck()
 	listAllBoards := board.NewListAllBoards(findAllBoards)
@@ -157,6 +164,7 @@ func routes(db *sql.DB) http.Handler {
 	listPoll := poll.NewListPoll(findPoll)
 	moveCardtoAnotherColumn := board.NewMoveCardtoAnotherColumn(
 		moveCardBetweenColumns,
+        notifyMoveCard,
 	)
 	refreshAuthToken := identity.NewRefreshAuthToken(
 		createAuthToken, 
@@ -169,6 +177,7 @@ func routes(db *sql.DB) http.Handler {
 	)
 	showPollResult := poll.NewShowPollResult(
 		countVotesByPollId,
+        notifyCountVotes,
 	)
 	showTeam := team.NewShowTeam(findTeam)
 	signinUser := identity.NewSigninUser(
@@ -182,7 +191,7 @@ func routes(db *sql.DB) http.Handler {
 		saveUser,
 	)
 	signoutUser := identity.NewSignoutUser(incrementVersion)
-	vote := poll.NewVote(saveVote)
+	vote := poll.NewVote(notifySaveVote, saveVote)
 
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheck.Handle)

@@ -8,13 +8,16 @@ import (
 )
 
 type vote struct {
+    notifySaveVote application.INotifySaveVote
 	saveVote application.ISaveVote
 }
 
 func NewVote(
+    notifySaveVote application.INotifySaveVote,
 	saveVote application.ISaveVote,
 ) *vote {
     return &vote{
+        notifySaveVote,
         saveVote,
     }
 }
@@ -36,6 +39,11 @@ func NewVote(
 // @Router       /teams/:teamId/polls/:pollId/options/:optionId/vote [post]
 func(v *vote) Handle(w http.ResponseWriter, r *http.Request) {
 	user := utils.ContextGetUser(r)
+	pollId, pollIdErr := utils.ReadIDParam(r, "pollId")
+	if pollIdErr != nil {
+		utils.BadRequestResponse(w, r, pollIdErr)
+		return
+	}
 	optionId, optionIdErr := utils.ReadIDParam(r, "optionId")
 	if optionIdErr != nil {
 		utils.BadRequestResponse(w, r, optionIdErr)
@@ -46,6 +54,7 @@ func(v *vote) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.ServerErrorResponse(w, r, saveErr)
 		return
 	}
+    v.notifySaveVote.Execute(pollId, optionId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

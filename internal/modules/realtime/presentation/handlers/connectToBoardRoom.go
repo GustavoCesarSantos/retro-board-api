@@ -8,11 +8,11 @@ import (
 )
 
 type connectToBoardRoom struct {
-    roomManager interfaces.IRoomManagerIntegration
+    roomManager interfaces.IRoomManagerApi
 }
 
 func NewConnectToBoardRoom (
-    roomManager interfaces.IRoomManagerIntegration,
+    roomManager interfaces.IRoomManagerApi,
 ) *connectToBoardRoom {
     return &connectToBoardRoom{
         roomManager,

@@ -9,13 +9,16 @@ import (
 )
 
 type createCard struct {
+    notifySaveCard application.INotifySaveCard
 	saveCard application.ISaveCard
 }
 
 func NewCreateCard(
+    notifySaveCard application.INotifySaveCard,
 	saveCard application.ISaveCard,
 ) *createCard {
     return &createCard{
+        notifySaveCard,
 	    saveCard,
     }
 }
@@ -41,9 +44,14 @@ type CreateCardEnvelop struct {
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [post]
 func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 	user := utils.ContextGetUser(r)
+	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
+	if boardIdErr != nil {
+		utils.BadRequestResponse(w, r, boardIdErr)
+		return
+	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.BadRequestResponse(w, r, columnIdErr)
 		return
 	}
 	var input dtos.CreateCardRequest
@@ -57,6 +65,7 @@ func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.ServerErrorResponse(w, r, saveErr)
 		return
 	}
+    cc.notifySaveCard.Execute(boardId, columnId, card)
 	response := dtos.NewCreateCardResponse(card.ID, card.Text, card.CreatedAt)
     writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"card": response}, nil)
 	if writeJsonErr != nil {

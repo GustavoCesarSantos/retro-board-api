@@ -10,13 +10,16 @@ import (
 )
 
 type editCard struct {
+    notifyUpdateCard application.INotifyUpdateCard
 	updateCard application.IUpdateCard
 }
 
 func NewEditCard(
+    notifyUpdateCard application.INotifyUpdateCard,
 	updateCard application.IUpdateCard,
 ) *editCard {
     return &editCard{
+        notifyUpdateCard,
 	    updateCard,
     }
 }
@@ -38,6 +41,16 @@ func NewEditCard(
 // @Failure      500       {object} utils.ErrorEnvelope           "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [put]
 func(ec *editCard) Handle(w http.ResponseWriter, r *http.Request) {
+	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
+	if boardIdErr != nil {
+		utils.BadRequestResponse(w, r, boardIdErr)
+		return
+	}
+	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
+	if columnIdErr != nil {
+		utils.BadRequestResponse(w, r, columnIdErr)
+		return
+	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
 		utils.NotFoundResponse(w, r)
@@ -59,6 +72,7 @@ func(ec *editCard) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 		return
     }
+    ec.notifyUpdateCard.Execute(boardId, columnId, *input.Text)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

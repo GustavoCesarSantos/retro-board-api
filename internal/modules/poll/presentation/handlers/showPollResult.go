@@ -10,13 +10,16 @@ import (
 
 type showPollResult struct {
 	countVotesByPollId application.ICountVotesByPollId
+    notifyCountVotes application.INotifyCountVotes
 }
 
 func NewShowPollResult(
 	countVotesByPollId application.ICountVotesByPollId,
+    notifyCountVotes application.INotifyCountVotes,
 ) *showPollResult {
     return &showPollResult {
 		countVotesByPollId,
+        notifyCountVotes,
     }
 }
 
@@ -48,6 +51,7 @@ func(spr *showPollResult) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, resultErr)
 		return
 	}
+    spr.notifyCountVotes.Execute(pollId, result)
 	response := dtos.NewShowPollResultResponse(
 		result.Options,
 		result.Winner,

@@ -11,13 +11,16 @@ import (
 
 type moveCardtoAnotherColumn struct {
 	moveCardBetweenColumn application.IMoveCardBetweenColumns
+    notifyMoveCard application.INotifyMoveCard
 }
 
 func NewMoveCardtoAnotherColumn(
 	moveCardBetweenColumn application.IMoveCardBetweenColumns,
+    notifyMoveCard application.INotifyMoveCard,
 ) *moveCardtoAnotherColumn {
     return &moveCardtoAnotherColumn{
 	    moveCardBetweenColumn,
+        notifyMoveCard,
     }
 }
 
@@ -38,6 +41,16 @@ func NewMoveCardtoAnotherColumn(
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move [put]
 func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
+	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
+	if boardIdErr != nil {
+		utils.BadRequestResponse(w, r, boardIdErr)
+		return
+	}
+	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
+	if columnIdErr != nil {
+		utils.BadRequestResponse(w, r, columnIdErr)
+		return
+	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
 		utils.BadRequestResponse(w, r, cardIdErr)
@@ -59,6 +72,7 @@ func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request)
 		}
 		return
     }
+    mc.notifyMoveCard.Execute(boardId, columnId, cardId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr)

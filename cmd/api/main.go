@@ -25,13 +25,13 @@ import (
 // @in header
 
 func main() {
-	//if os.Getenv("LOAD_ENV_FILE") == "true" {
+	if os.Getenv("LOAD_ENV_FILE") == "true" {
 		loadEnvErr := godotenv.Load()
 		if loadEnvErr != nil {
 			slog.Error("failed to load .env file", "error", loadEnvErr)
 			os.Exit(1)
 		}
-	//}
+	}
 	DB, DBErr := database.OpenDB()
 	if DBErr != nil {
 		slog.Error(DBErr.Error())

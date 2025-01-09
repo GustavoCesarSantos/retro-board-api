@@ -19,15 +19,22 @@ func NewTeamMemberValidator(provider interfaces.ITeamMemberApi) *teamMemberValid
 
 func (tmv *teamMemberValidator) EnsureMemberAccess(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metadataErr := utils.Envelope{
+			"file": "teamMemberValidator.go",
+			"func": "teamMemberValidator.EnsureMemberAccess",
+			"line": 0,
+		}
 		user := utils.ContextGetUser(r)
 		teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 		if teamIdErr != nil {
-			utils.BadRequestResponse(w, r, teamIdErr)
+			metadataErr["line"] = 30
+			utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 			return
 		}
 		teamMembers, findErr := tmv.provider.FindAllByTeamId(teamId)
 		if findErr != nil {
-			utils.NotFoundResponse(w, r)
+			metadataErr["line"] = 36
+			utils.NotFoundResponse(w, r, metadataErr)
 			return
 		}
 		found := false
@@ -42,11 +49,13 @@ func (tmv *teamMemberValidator) EnsureMemberAccess(next http.HandlerFunc) http.H
 			}
 		}
 		if !found {
-			utils.ForbiddenResponse(w, r, utils.ErrUserNotInTeam)
+			metadataErr["line"] = 52
+			utils.ForbiddenResponse(w, r, utils.ErrUserNotInTeam, metadataErr)
 			return 
 		}
 		if !canEdit {
-			utils.ForbiddenResponse(w, r, utils.ErrUserNoEditPermission)
+			metadataErr["line"] = 57
+			utils.ForbiddenResponse(w, r, utils.ErrUserNoEditPermission, metadataErr)
 			return
 		}
 		r = utils.ContextSetUser(r, user)

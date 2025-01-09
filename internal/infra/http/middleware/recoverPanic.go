@@ -9,10 +9,21 @@ import (
 
 func RecoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metadataErr := utils.Envelope{
+			"file": "recoverPanic.go",
+			"func": "recoverPanic.RecoverPanic",
+			"line": 0,
+		}
 		defer func() {
 			if err := recover(); err != nil {
 				w.Header().Set("Connection", "close")
-				utils.ServerErrorResponse(w, r, fmt.Errorf("%s", err))
+				metadataErr["line"] = 20
+				utils.ServerErrorResponse(
+					w, 
+					r, 
+					fmt.Errorf("%s", err), 
+					metadataErr,
+				)
 			}
 		}()
 		next.ServeHTTP(w, r)

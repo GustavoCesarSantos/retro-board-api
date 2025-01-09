@@ -43,16 +43,28 @@ type CreateTeamEnvelop struct {
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams [post]
 func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "createTeam.go",
+		"func": "createTeam.Handle",
+		"line": 0,
+	}
 	user := utils.ContextGetUser(r)
 	var input dtos.CreateTeamRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+        metadataErr["line"] = 56
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
     team, saveTeamErr := ct.saveTeam.Execute(input.Name, user.ID)
+	if team == nil {
+		metadataErr["line"] = 61
+		utils.ServerErrorResponse(w, r, errors.New("NIL TEAM"), metadataErr)
+		return
+	}
 	if saveTeamErr != nil {
-		utils.ServerErrorResponse(w, r, saveTeamErr)
+        metadataErr["line"] = 66
+		utils.ServerErrorResponse(w, r, saveTeamErr, metadataErr)
 		return
 	}
 	adminRoleId := int64(1)
@@ -62,18 +74,22 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		if removeErr != nil {
 			switch {
 			case errors.Is(removeErr, utils.ErrRecordNotFound):
-				utils.NotFoundResponse(w, r)
+                metadataErr["line"] = 73
+				utils.NotFoundResponse(w, r, metadataErr)
 			default:
-				utils.ServerErrorResponse(w, r, removeErr)
+                metadataErr["line"] = 76
+				utils.ServerErrorResponse(w, r, removeErr, metadataErr)
 			}
 			return
 		}
-		utils.ServerErrorResponse(w, r, saveTeamErr)
+        metadataErr["line"] = 81
+		utils.ServerErrorResponse(w, r, saveTeamErr, metadataErr)
 		return
 	}
 	response := dtos.NewCreateTeamResponse(team.ID, team.Name, team.CreatedAt)
 	writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"team": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+        metadataErr["line"] = 88
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

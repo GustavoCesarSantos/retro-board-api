@@ -40,35 +40,40 @@ func NewAddMemberToTeam(
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams/:teamId/members [post]
 func(amt *addMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "addMemberToTeam.go",
+		"func": "addMemberToTeam.Handle",
+		"line": 0,
+	}
     user := utils.ContextGetUser(r)
 	teamId, readIDErr := utils.ReadIDParam(r, "teamId")
 	if readIDErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
 	var input dtos.AddMemberToTeamRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
 	ensureAdminErr := amt.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
-		utils.BadRequestResponse(w, r, ensureAdminErr)
+		utils.BadRequestResponse(w, r, ensureAdminErr, metadataErr)
 		return
 	}
 	memberInfo, findErr := amt.findMemberInfoByEmail.Execute(input.Email)
 	if findErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
     saveErr := amt.saveMember.Execute(teamId, memberInfo.ID, input.RoleId)
     if saveErr != nil {
-		utils.ServerErrorResponse(w, r, saveErr)
+		utils.ServerErrorResponse(w, r, saveErr, metadataErr)
 		return
 	}
 	writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

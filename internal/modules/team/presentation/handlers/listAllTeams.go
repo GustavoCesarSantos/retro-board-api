@@ -32,10 +32,15 @@ type ListAllTeamsEnvelop struct {
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams [get]
 func(lt *listAllTeams) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "listAllTeams.go",
+		"func": "listAllTeams.Handle",
+		"line": 0,
+	}
     user := utils.ContextGetUser(r)
 	teams, findErr := lt.findAllTeams.Execute(user.ID)
 	if findErr != nil {
-		utils.ServerErrorResponse(w, r, findErr)
+		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
 	}
 	var response []*dtos.ListAllTeamsResponse
@@ -49,6 +54,6 @@ func(lt *listAllTeams) Handle(w http.ResponseWriter, r *http.Request) {
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"teams": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

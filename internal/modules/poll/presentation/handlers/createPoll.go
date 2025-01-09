@@ -36,20 +36,25 @@ func NewCreatePoll(
 // @Failure      500        {object}  utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/polls [post]
 func(cp *createPoll) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "createPoll.go",
+		"func": "createPoll.Handle",
+		"line": 0,
+	}
 	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
-        utils.BadRequestResponse(w, r, teamIdErr)
+        utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 		return
 	}
 	var input dtos.CreatePollRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
     poll, savePollErr := cp.savePoll.Execute(teamId, input.Poll.Name)
 	if savePollErr != nil {
-		utils.ServerErrorResponse(w, r, savePollErr)
+		utils.ServerErrorResponse(w, r, savePollErr, metadataErr)
 		return
 	}
     for _, option := range input.Poll.Options {
@@ -57,6 +62,6 @@ func(cp *createPoll) Handle(w http.ResponseWriter, r *http.Request) {
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

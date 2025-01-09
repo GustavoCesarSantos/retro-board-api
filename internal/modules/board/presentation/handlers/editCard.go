@@ -20,7 +20,7 @@ func NewEditCard(
 ) *editCard {
     return &editCard{
         notifyUpdateCard,
-	    updateCard,
+		updateCard,
     }
 }
 
@@ -41,40 +41,45 @@ func NewEditCard(
 // @Failure      500       {object} utils.ErrorEnvelope           "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [put]
 func(ec *editCard) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "editCard.go",
+		"func": "editCard.Handle",
+		"line": 0,
+	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.BadRequestResponse(w, r, boardIdErr)
+		utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
 		return
 	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
-		utils.BadRequestResponse(w, r, columnIdErr)
+		utils.BadRequestResponse(w, r, columnIdErr, metadataErr)
 		return
 	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
 	var input dtos.EditCardRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
     updateErr := ec.updateCard.Execute(cardId, input.Text)
 	if updateErr != nil {
 		switch {
 		case errors.Is(updateErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, updateErr)
+            utils.ServerErrorResponse(w, r, updateErr, metadataErr)
 		}
 		return
     }
     ec.notifyUpdateCard.Execute(boardId, columnId, *input.Text)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

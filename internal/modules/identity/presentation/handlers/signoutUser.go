@@ -31,19 +31,24 @@ func NewSignoutUser(
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /auth/signout [post]
 func(su *signoutUser) Handle(w http.ResponseWriter, r *http.Request) {
-    user := utils.ContextGetUser(r)
+    metadataErr := utils.Envelope{
+		"file": "signoutUser.go",
+		"func": "signoutUser.Handle",
+		"line": 0,
+	}
+	user := utils.ContextGetUser(r)
     incrementErr := su.incrementVersion.Execute(user)
     if incrementErr != nil {
 		switch {
 		case errors.Is(incrementErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, incrementErr)
+            utils.ServerErrorResponse(w, r, incrementErr, metadataErr)
 		}
 		return
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

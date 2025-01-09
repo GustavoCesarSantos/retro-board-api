@@ -17,7 +17,7 @@ func NewListCard(
 	findCard application.IFindCard,
 ) *listCard {
     return &listCard {
-	    findCard,
+		findCard,
     }
 }
 
@@ -41,18 +41,23 @@ type ListCardEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [get]
 func(lc *listCard) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "listCard.go",
+		"func": "listCard.Handle",
+		"line": 0,
+	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
-		utils.BadRequestResponse(w, r, cardIdErr)
+		utils.BadRequestResponse(w, r, cardIdErr, metadataErr)
 		return
 	}
 	card, findErr := lc.findCard.Execute(cardId)
 	if findErr != nil {
 		switch {
 		case errors.Is(findErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, findErr)
+            utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		}
 		return
     }
@@ -66,6 +71,6 @@ func(lc *listCard) Handle(w http.ResponseWriter, r *http.Request) {
 	)
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"card": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

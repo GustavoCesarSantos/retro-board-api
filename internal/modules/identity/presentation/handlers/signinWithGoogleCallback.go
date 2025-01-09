@@ -23,12 +23,17 @@ func NewSigninWithGoogleCallback(findUserByEmail application.IFindUserByEmail, s
 }
 
 func(sgc *signinWithGoogleCallback) Handle(w http.ResponseWriter, r *http.Request) {
+    metadataErr := utils.Envelope{
+		"file": "signinWithGoogleCallback.go",
+		"func": "signinWithGoogleCallback.Handle",
+		"line": 0,
+	}
     q := r.URL.Query()
     q.Add("provider", "google")
     r.URL.RawQuery = q.Encode()
     userFromGoogle, err := gothic.CompleteUserAuth(w, r)
     if err != nil {
-        utils.ServerErrorResponse(w, r, err)
+        utils.ServerErrorResponse(w, r, err, metadataErr)
         return
     }
     user, userErr := sgc.findUserByEmail.Execute(userFromGoogle.Email);
@@ -37,12 +42,12 @@ func(sgc *signinWithGoogleCallback) Handle(w http.ResponseWriter, r *http.Reques
 		case errors.Is(userErr, utils.ErrRecordNotFound):
             user, userErr = sgc.saveUser.Execute(userFromGoogle.Name, userFromGoogle.Email)
             if userErr != nil {
-                utils.ServerErrorResponse(w, r, userErr)
+                utils.ServerErrorResponse(w, r, userErr, metadataErr)
                 return
             }
 		default:
-            utils.ServerErrorResponse(w, r, userErr)
-		    return
+            utils.ServerErrorResponse(w, r, userErr, metadataErr)
+            return
 		}
     }
     frontendURL := fmt.Sprintf("http://localhost:8000/users/authentica?email=%s", user.Email)

@@ -33,14 +33,19 @@ func NewDeleteOption(
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router       /teams/:teamId/polls/:pollId/options/:optionId [delete]
 func(do *deleteOption) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "deleteOption.go",
+		"func": "deleteOption.Handle",
+		"line": 0,
+	}
 	optionId, optionIdErr := utils.ReadIDParam(r, "optionId")
 	if optionIdErr != nil {
-		utils.BadRequestResponse(w, r, optionIdErr)
+		utils.BadRequestResponse(w, r, optionIdErr, metadataErr)
 		return
 	}
     do.removeOption.Execute(optionId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

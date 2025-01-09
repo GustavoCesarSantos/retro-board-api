@@ -38,25 +38,30 @@ func NewVote(
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router       /teams/:teamId/polls/:pollId/options/:optionId/vote [post]
 func(v *vote) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "vote.go",
+		"func": "vote.Handle",
+		"line": 0,
+	}
 	user := utils.ContextGetUser(r)
 	pollId, pollIdErr := utils.ReadIDParam(r, "pollId")
 	if pollIdErr != nil {
-		utils.BadRequestResponse(w, r, pollIdErr)
+		utils.BadRequestResponse(w, r, pollIdErr, metadataErr)
 		return
 	}
 	optionId, optionIdErr := utils.ReadIDParam(r, "optionId")
 	if optionIdErr != nil {
-		utils.BadRequestResponse(w, r, optionIdErr)
+		utils.BadRequestResponse(w, r, optionIdErr, metadataErr)
 		return
 	}
     _, saveErr := v.saveVote.Execute(user.ID, optionId)
 	if saveErr != nil {
-		utils.ServerErrorResponse(w, r, saveErr)
+		utils.ServerErrorResponse(w, r, saveErr, metadataErr)
 		return
 	}
     v.notifySaveVote.Execute(pollId, optionId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

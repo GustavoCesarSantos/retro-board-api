@@ -16,7 +16,7 @@ func NewListAllCards(
 	findAllCards application.IFindAllCards,
 ) *listAllCards {
     return &listAllCards {
-	    findAllCards,
+		findAllCards,
     }
 }
 
@@ -39,14 +39,19 @@ type ListAllCardsEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [get]
 func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "listAllCards.go",
+		"func": "listAllCards.Handle",
+		"line": 0,
+	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
 	cards, findErr := lc.findAllCards.Execute(columnId)
 	if findErr != nil {
-		utils.ServerErrorResponse(w, r, findErr)
+		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
     }
 	var response []*dtos.ListAllCardsResponse
@@ -62,6 +67,6 @@ func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"cards": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

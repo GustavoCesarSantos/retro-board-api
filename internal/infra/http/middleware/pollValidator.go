@@ -20,19 +20,27 @@ func NewPollValidator(provider interfaces.IPollApi) *pollValidator {
 
 func (pv *pollValidator) EnsurePollOwnership(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metadataErr := utils.Envelope{
+			"file": "pollValidator.go",
+			"func": "pollValidator.EnsurePollOwnership",
+			"line": 0,
+		}
 		teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 		if teamIdErr != nil {
-			utils.BadRequestResponse(w, r, teamIdErr)
+			metadataErr["line"] = 30
+			utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 			return
 		}
 		pollId, pollIdErr := utils.ReadIDParam(r, "pollId")
 		if pollIdErr != nil {
-			utils.BadRequestResponse(w, r, pollIdErr)
+			metadataErr["line"] = 36
+			utils.BadRequestResponse(w, r, pollIdErr, metadataErr)
 			return
 		}
 		polls, findErr := pv.provider.FindAllPollsByTeamId(teamId)
 		if findErr != nil {
-			utils.NotFoundResponse(w, r)
+			metadataErr["line"] = 42
+			utils.NotFoundResponse(w, r, metadataErr)
 			return 
 		}
 		found := false
@@ -43,7 +51,8 @@ func (pv *pollValidator) EnsurePollOwnership(next http.HandlerFunc) http.Handler
 			}
 		}
 		if !found {
-			utils.ForbiddenResponse(w, r, utils.ErrPollNotInTeam)
+			metadataErr["line"] = 54
+			utils.ForbiddenResponse(w, r, utils.ErrPollNotInTeam, metadataErr)
 			return 
 		}
 		next.ServeHTTP(w, r)
@@ -52,19 +61,27 @@ func (pv *pollValidator) EnsurePollOwnership(next http.HandlerFunc) http.Handler
 
 func (pv *pollValidator) EnsureOptionOwnership(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metadataErr := utils.Envelope{
+			"file": "pollValidator.go",
+			"func": "pollValidator.EnsureOptionOwnership",
+			"line": 0,
+		}
 		pollId, pollIdErr := utils.ReadIDParam(r, "pollId")
 		if pollIdErr != nil {
-			utils.BadRequestResponse(w, r, pollIdErr)
+			metadataErr["line"] = 71
+			utils.BadRequestResponse(w, r, pollIdErr, metadataErr)
 			return
 		}
 		optionId, optionIdErr := utils.ReadIDParam(r, "optionId")
 		if optionIdErr != nil {
-			utils.BadRequestResponse(w, r, optionIdErr)
+			metadataErr["line"] = 77
+			utils.BadRequestResponse(w, r, optionIdErr, metadataErr)
 			return
 		}
 		options, findErr := pv.provider.FindAllOptionsByPollId(pollId)
 		if findErr != nil {
-			utils.NotFoundResponse(w, r)
+			metadataErr["line"] = 83
+			utils.NotFoundResponse(w, r, metadataErr)
 			return 
 		}
 		found := false
@@ -75,7 +92,8 @@ func (pv *pollValidator) EnsureOptionOwnership(next http.HandlerFunc) http.Handl
 			}
 		}
 		if !found {
-			utils.ForbiddenResponse(w, r, utils.ErrOptionNotInPoll)
+			metadataErr["line"] = 95
+			utils.ForbiddenResponse(w, r, utils.ErrOptionNotInPoll, metadataErr)
 			return 
 		}
 		next.ServeHTTP(w, r)

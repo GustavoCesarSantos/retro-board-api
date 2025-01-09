@@ -37,34 +37,39 @@ func NewRemoveMemberFromTeam(
 }
 
 func(rmt *removeMemberFromTeam) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "removeMemberFromTeam.go",
+		"func": "removeMemberFromTeam.Handle",
+		"line": 0,
+	}
     user := utils.ContextGetUser(r)
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
     memberId, memberIdErr := utils.ReadIDParam(r, "memberId")
 	if memberIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
 	ensureAdminErr := rmt.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
-		utils.BadRequestResponse(w, r, ensureAdminErr)
+		utils.BadRequestResponse(w, r, ensureAdminErr, metadataErr)
 		return
 	}
     removeErr := rmt.removeMember.Execute(teamId, memberId)
 	if removeErr != nil {
 		switch {
 		case errors.Is(removeErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, removeErr)
+            utils.ServerErrorResponse(w, r, removeErr, metadataErr)
 		}
 		return
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

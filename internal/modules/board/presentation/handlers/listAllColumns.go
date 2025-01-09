@@ -16,7 +16,7 @@ func NewListAllColumns(
 	findAllColumns application.IFindAllColumns,
 ) *listAllColumns {
     return &listAllColumns {
-	    findAllColumns,
+		findAllColumns,
     }
 }
 
@@ -37,14 +37,19 @@ type ListAllColumnsEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns [get]
 func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "listAllColumns.go",
+		"func": "listAllColumns.Handle",
+		"line": 0,
+	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.BadRequestResponse(w, r, boardIdErr)
+		utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
 		return
 	}
 	columns, findErr := lc.findAllColumns.Execute(boardId)
 	if findErr != nil {
-		utils.ServerErrorResponse(w, r, findErr)
+		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
     }
 	var response []*dtos.ListAllColumnsResponse
@@ -61,6 +66,6 @@ func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"columns": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

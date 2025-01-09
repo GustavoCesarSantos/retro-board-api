@@ -17,7 +17,7 @@ func NewListBoard(
 	findBoard application.IFindBoard,
 ) *listBoard {
     return &listBoard {
-	    findBoard,
+		findBoard,
     }
 }
 
@@ -40,18 +40,23 @@ type ListBoardEnvelop struct {
 // @Router       /teams/:teamId/boards/:boardId [get]
 
 func(lb *listBoard) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "listBoard.go",
+		"func": "listBoard.Handle",
+		"line": 0,
+	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.BadRequestResponse(w, r, boardIdErr)
+		utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
 		return
 	}
 	board, findErr := lb.findBoard.Execute(boardId)
 	if findErr != nil {
 		switch {
 		case errors.Is(findErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, findErr)
+            utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		}
 		return
     }
@@ -65,6 +70,6 @@ func(lb *listBoard) Handle(w http.ResponseWriter, r *http.Request) {
 	)
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"board": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

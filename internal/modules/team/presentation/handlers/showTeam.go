@@ -35,19 +35,24 @@ type ShowTeamEnvelop struct {
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams/:teamId [get]
 func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
-    user := utils.ContextGetUser(r)
-	id, err := utils.ReadIDParam(r, "teamId")
-	if err != nil {
-		utils.NotFoundResponse(w, r)
+    metadataErr := utils.Envelope{
+		"file": "showTeam.go",
+		"func": "showTeam.Handle",
+		"line": 0,
+	}
+	user := utils.ContextGetUser(r)
+	id, readErr := utils.ReadIDParam(r, "teamId")
+	if readErr != nil {
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
     team, findErr := st.findTeam.Execute(id, user.ID)
 	if findErr != nil {
 		switch {
 		case errors.Is(findErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, findErr)
+            utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		}
 		return
     }
@@ -59,6 +64,6 @@ func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	)
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"team": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

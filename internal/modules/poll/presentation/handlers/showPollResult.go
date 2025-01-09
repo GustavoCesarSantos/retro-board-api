@@ -41,14 +41,19 @@ type ShowPollResultEnvelop struct {
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router      /teams/:teamId/polls/:pollId/result [get]
 func(spr *showPollResult) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "showPollResult.go",
+		"func": "showPollResult.Handle",
+		"line": 0,
+	}
 	pollId, pollIdErr := utils.ReadIDParam(r, "pollId")
 	if pollIdErr != nil {
-		utils.BadRequestResponse(w, r, pollIdErr)
+		utils.BadRequestResponse(w, r, pollIdErr, metadataErr)
 		return
 	}
 	result, resultErr := spr.countVotesByPollId.Execute(pollId)
 	if resultErr == nil {
-		utils.BadRequestResponse(w, r, resultErr)
+		utils.BadRequestResponse(w, r, resultErr, metadataErr)
 		return
 	}
     spr.notifyCountVotes.Execute(pollId, result)
@@ -59,6 +64,6 @@ func(spr *showPollResult) Handle(w http.ResponseWriter, r *http.Request) {
 	)
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"result": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

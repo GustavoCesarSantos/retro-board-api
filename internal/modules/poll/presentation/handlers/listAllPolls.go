@@ -34,14 +34,19 @@ type ListAllPollsEnvelop struct {
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router       /teams/:teamId/polls [get]
 func(lp *listAllPolls) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "listAllPolls.go",
+		"func": "listAllPolls.Handle",
+		"line": 0,
+	}
 	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
-		utils.BadRequestResponse(w, r, teamIdErr)
+		utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 		return
 	}
 	polls, findErr := lp.findAllPolls.Execute(teamId)
 	if findErr != nil {
-		utils.ServerErrorResponse(w, r, findErr)
+		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
 	}
 	var response []*dtos.ListAllPollsResponse
@@ -56,6 +61,6 @@ func(lp *listAllPolls) Handle(w http.ResponseWriter, r *http.Request) {
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"polls": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

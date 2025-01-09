@@ -20,15 +20,20 @@ func NewConnectToBoardRoom (
 }
 
 func(cbr *connectToBoardRoom) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "connectToBoardRoom.go",
+		"func": "connectToBoardRoom.Handle",
+		"line": 0,
+	}
 	user := utils.ContextGetUser(r)
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-        utils.BadRequestResponse(w, r, boardIdErr)
+        utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
 		return
 	}
     addConnectionErr := cbr.roomManager.AddUserToRoom(w, r, "boards", boardId, user.ID)
     if addConnectionErr != nil {
-        utils.BadRequestResponse(w, r, addConnectionErr)
+        utils.BadRequestResponse(w, r, addConnectionErr, metadataErr)
         return
     }
     for {

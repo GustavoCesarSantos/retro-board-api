@@ -45,34 +45,39 @@ type RefreshAuthTokenEnvelope struct {
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /auth/refresh-token [post]
 func(rt *refreshAuthToken) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "refreshAuthToken.go",
+		"func": "refreshAuthToken.Handle",
+		"line": 0,
+	}
 	var input dtos.RefreshAuthTokenRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
 	decodedToken, decodedErr := rt.decodeAuthToken.Execute(input.RefreshToken)
 	if decodedErr != nil {
-		utils.BadRequestResponse(w, r, decodedErr)
+		utils.BadRequestResponse(w, r, decodedErr, metadataErr)
 		return
 	}
 	user, findUserErr := rt.findUserByEmail.Execute(decodedToken.Email)
     if findUserErr != nil {
 		switch {
 		case errors.Is(findUserErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, findUserErr)
+            utils.ServerErrorResponse(w, r, findUserErr, metadataErr)
 		}
 		return
     }
 	if user.Version != decodedToken.Version {
-		utils.BadRequestResponse(w, r, errors.New("INVALID CREDENTIALS"))
+		utils.BadRequestResponse(w, r, errors.New("INVALID CREDENTIALS"), metadataErr)
 		return
 	}
 	accessToken, accessTokenErr := rt.createAuthToken.Execute(*user, 15 * time.Minute)
 	if accessTokenErr != nil {
-		utils.ServerErrorResponse(w, r, accessTokenErr)
+		utils.ServerErrorResponse(w, r, accessTokenErr, metadataErr)
 	}
 	response := dtos.NewRefreshAuthTokenResponse(accessToken)
 	data := utils.Envelope{
@@ -80,6 +85,6 @@ func(rt *refreshAuthToken) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 	writeErr := utils.WriteJSON(w, http.StatusOK, data, nil)
 	if writeErr != nil {
-		utils.ServerErrorResponse(w, r, writeErr)
+		utils.ServerErrorResponse(w, r, writeErr, metadataErr)
 	}
 }

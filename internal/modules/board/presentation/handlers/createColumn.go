@@ -45,30 +45,35 @@ type CreateColumnEnvelop struct {
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards/:boardId/columns [post]
 func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
-    boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
+    metadataErr := utils.Envelope{
+		"file": "createColumn.go",
+		"func": "createColumn.Handle",
+		"line": 0,
+	}
+	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
 	var input dtos.CreateColumnRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
     position, getErr := cc.getNextColumnPosition.Execute(boardId)
 	if getErr != nil {
-		utils.ServerErrorResponse(w, r, getErr)
+		utils.ServerErrorResponse(w, r, getErr, metadataErr)
 		return
 	}
     column, saveErr := cc.saveColumn.Execute(boardId, input.Name, input.Color, position)
 	if saveErr != nil {
-		utils.ServerErrorResponse(w, r, saveErr)
+		utils.ServerErrorResponse(w, r, saveErr, metadataErr)
 		return
 	}
 	response := dtos.NewCreateColumnResponse(column.ID, column.Name, column.Color, column.CreatedAt)
     writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"column": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

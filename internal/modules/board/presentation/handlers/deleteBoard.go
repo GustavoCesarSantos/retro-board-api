@@ -34,23 +34,28 @@ func NewDeleteBoard(
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId [delete]
 func(db *deleteBoard) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "deleteBoard.go",
+		"func": "deleteBoard.Handle",
+		"line": 0,
+	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
     removeErr := db.removeBoard.Execute(boardId)
 	if removeErr != nil {
 		switch {
 		case errors.Is(removeErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, removeErr)
+            utils.ServerErrorResponse(w, r, removeErr, metadataErr)
 		}
 		return
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

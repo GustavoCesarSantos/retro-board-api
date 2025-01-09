@@ -19,7 +19,7 @@ func NewMoveCardtoAnotherColumn(
     notifyMoveCard application.INotifyMoveCard,
 ) *moveCardtoAnotherColumn {
     return &moveCardtoAnotherColumn{
-	    moveCardBetweenColumn,
+		moveCardBetweenColumn,
         notifyMoveCard,
     }
 }
@@ -41,40 +41,45 @@ func NewMoveCardtoAnotherColumn(
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move [put]
 func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "moveCardtoAnotherColumn.go",
+		"func": "moveCardtoAnotherColumn.Handle",
+		"line": 0,
+	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.BadRequestResponse(w, r, boardIdErr)
+		utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
 		return
 	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
-		utils.BadRequestResponse(w, r, columnIdErr)
+		utils.BadRequestResponse(w, r, columnIdErr, metadataErr)
 		return
 	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
-		utils.BadRequestResponse(w, r, cardIdErr)
+		utils.BadRequestResponse(w, r, cardIdErr, metadataErr)
 		return
 	}
 	var input dtos.MoveCardtoAnotherColumnRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
     moveErr := mc.moveCardBetweenColumn.Execute(cardId, input.NewColumnId)
 	if moveErr != nil {
 		switch {
 		case errors.Is(moveErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, moveErr)
+            utils.ServerErrorResponse(w, r, moveErr, metadataErr)
 		}
 		return
     }
     mc.notifyMoveCard.Execute(boardId, columnId, cardId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

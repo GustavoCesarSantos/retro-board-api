@@ -32,9 +32,22 @@ import (
 )
 
 func routes(db *sql.DB) http.Handler {
+	metadataErr := utils.Envelope{
+		"file": "routes.go",
+		"func": "routes.routes",
+		"line": 0,
+	}
 	router := httprouter.New()
-	router.NotFound = http.HandlerFunc(utils.NotFoundResponse)
-	router.MethodNotAllowed = http.HandlerFunc(utils.MethodNotAllowedResponse)
+	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metadataErr["line"] = 42
+		utils.NotFoundResponse(w, r, metadataErr)
+		return 
+	})
+	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metadataErr["line"] = 47
+		utils.MethodNotAllowedResponse(w, r, metadataErr)
+		return 
+	})
 
 	//Init Repos
 	boardRepository := boardDb.NewBoardRepository(db)

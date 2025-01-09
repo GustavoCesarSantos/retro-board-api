@@ -16,7 +16,7 @@ func NewDeleteColumn(
 	removeColumn application.IRemoveColumn,
 ) *deleteColumn {
     return &deleteColumn{
-	    removeColumn,
+		removeColumn,
     }
 }
 
@@ -35,23 +35,28 @@ func NewDeleteColumn(
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId [delete]
 func(dc *deleteColumn) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "deleteColumn.go",
+		"func": "deleteColumn.Handle",
+		"line": 0,
+	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
     removeErr := dc.removeColumn.Execute(columnId)
 	if removeErr != nil {
 		switch {
 		case errors.Is(removeErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, removeErr)
+            utils.ServerErrorResponse(w, r, removeErr, metadataErr)
 		}
 		return
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

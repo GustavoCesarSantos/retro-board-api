@@ -39,40 +39,45 @@ func NewChangeMemberRole(
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams/:teamId/members/:memberId/roles [patch]
 func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "changeMemberRole.go",
+		"func": "changeMemberRole.Handle",
+		"line": 0,
+	}
 	user := utils.ContextGetUser(r)
 	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
     memberId, memberIdErr := utils.ReadIDParam(r, "memberId")
 	if memberIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
 	var input dtos.ChangeMemberRoleRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
 	ensureAdminErr := cmp.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
-		utils.BadRequestResponse(w, r, ensureAdminErr)
+		utils.BadRequestResponse(w, r, ensureAdminErr, metadataErr)
 		return
 	}
     updateErr := cmp.updateRole.Execute(teamId, memberId, input.Role)
 	if updateErr != nil {
 		switch {
 		case errors.Is(updateErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, updateErr)
+            utils.ServerErrorResponse(w, r, updateErr, metadataErr)
 		}
 		return
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

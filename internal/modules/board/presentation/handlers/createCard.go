@@ -19,7 +19,7 @@ func NewCreateCard(
 ) *createCard {
     return &createCard{
         notifySaveCard,
-	    saveCard,
+		saveCard,
     }
 }
 
@@ -43,32 +43,37 @@ type CreateCardEnvelop struct {
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [post]
 func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "createCard.go",
+		"func": "createCard.Handle",
+		"line": 0,
+	}
 	user := utils.ContextGetUser(r)
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
 	if boardIdErr != nil {
-		utils.BadRequestResponse(w, r, boardIdErr)
+		utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
 		return
 	}
 	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
 	if columnIdErr != nil {
-		utils.BadRequestResponse(w, r, columnIdErr)
+		utils.BadRequestResponse(w, r, columnIdErr, metadataErr)
 		return
 	}
 	var input dtos.CreateCardRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
     card, saveErr := cc.saveCard.Execute(columnId, user.ID, input.Text)
 	if saveErr != nil {
-		utils.ServerErrorResponse(w, r, saveErr)
+		utils.ServerErrorResponse(w, r, saveErr, metadataErr)
 		return
 	}
     cc.notifySaveCard.Execute(boardId, columnId, card)
 	response := dtos.NewCreateCardResponse(card.ID, card.Text, card.CreatedAt)
     writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"card": response}, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

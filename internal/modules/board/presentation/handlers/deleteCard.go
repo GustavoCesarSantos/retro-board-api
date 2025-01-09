@@ -16,7 +16,7 @@ func NewDeleteCard(
 	removeCard application.IRemoveCard,
 ) *deleteCard {
     return &deleteCard{
-	    removeCard,
+		removeCard,
     }
 }
 
@@ -36,23 +36,28 @@ func NewDeleteCard(
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [delete]
 func(dc *deleteCard) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "deleteCard.go",
+		"func": "deleteCard.Handle",
+		"line": 0,
+	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
-		utils.NotFoundResponse(w, r)
+		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
     removeErr := dc.removeCard.Execute(cardId)
     if removeErr != nil {
 		switch {
 		case errors.Is(removeErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, removeErr)
+            utils.ServerErrorResponse(w, r, removeErr, metadataErr)
 		}
 		return
     }
 	writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
-		utils.ServerErrorResponse(w, r, writeJsonErr)
+		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

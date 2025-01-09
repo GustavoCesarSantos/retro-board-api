@@ -45,19 +45,24 @@ type SigninUserEnvelope struct {
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /auth/signin [post]
 func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
+	metadataErr := utils.Envelope{
+		"file": "signinUser.go",
+		"func": "signinUser.Handle",
+		"line": 0,
+	}
 	var input dtos.SigninUserRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-		utils.BadRequestResponse(w, r, readErr)
+		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
 	user, findUserErr := su.findUserByEmail.Execute(input.Email)
     if findUserErr != nil {
 		switch {
 		case errors.Is(findUserErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, findUserErr)
+            utils.ServerErrorResponse(w, r, findUserErr, metadataErr)
 		}
 		return
     }
@@ -65,19 +70,19 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
     if incrementErr != nil {
 		switch {
 		case errors.Is(incrementErr, utils.ErrRecordNotFound):
-            utils.NotFoundResponse(w, r)
+            utils.NotFoundResponse(w, r, metadataErr)
 		default:
-            utils.ServerErrorResponse(w, r, incrementErr)
+            utils.ServerErrorResponse(w, r, incrementErr, metadataErr)
 		}
 		return
     }
     accessToken, accessTokenErr := su.creatAuthToken.Execute(*user, 15 * time.Minute)
 	if accessTokenErr != nil {
-		utils.ServerErrorResponse(w, r, accessTokenErr)
+		utils.ServerErrorResponse(w, r, accessTokenErr, metadataErr)
 	}
     refreshToken, refreshTokenErr := su.creatAuthToken.Execute(*user, 24 * time.Hour * time.Duration(7))
     if refreshTokenErr != nil {
-		utils.ServerErrorResponse(w, r, refreshTokenErr)
+		utils.ServerErrorResponse(w, r, refreshTokenErr, metadataErr)
 	}
 	response := dtos.NewSigninUserResponse(accessToken, refreshToken)
 	data := utils.Envelope{
@@ -85,6 +90,6 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 	writeErr := utils.WriteJSON(w, http.StatusOK, data, nil)
 	if writeErr != nil {
-		utils.ServerErrorResponse(w, r, writeErr)
+		utils.ServerErrorResponse(w, r, writeErr, metadataErr)
 	}
 }

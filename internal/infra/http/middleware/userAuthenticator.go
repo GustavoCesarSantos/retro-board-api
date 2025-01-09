@@ -33,15 +33,22 @@ func contains(slice []string, item string) bool {
 
 func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metadataErr := utils.Envelope{
+			"file": "userAuthenticator.go",
+			"func": "userAuthenticator.Authenticate",
+			"line": 0,
+		}
 		w.Header().Add("Vary", "Authorization")
 		authorizationHeader := r.Header.Get("Authorization")
 		if authorizationHeader == "" {
-            utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 44
+            utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
 		}
 		headerParts := strings.Split(authorizationHeader, " ")
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-            utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 49
+            utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
 		}
         jwtConfigs := configs.LoadJwtConfig()
@@ -52,33 +59,39 @@ func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFun
             return nil, errors.New("INVALID TOKEN VALUE") 
         })
 		if err != nil {
-            utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 60
+            utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
 		}
         mappedClaims, ok := claims.Claims.(jwt.MapClaims)
 		if !ok ||  !claims.Valid {
-            utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 65
+            utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
 		}
 		issuer := mappedClaims["issuer"].(string) 
 		if issuer != jwtConfigs.Issuer {
-            utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 70
+            utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
 		}
         authorizedIssuer := contains(jwtConfigs.Audiences, issuer)
 		if !authorizedIssuer {
-			utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 75
+			utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
 		}
         email := mappedClaims["email"].(string)
         user, userErr := ua.provider.FindByEmail(email)
 		if userErr != nil {
-            utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 81
+            utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
 		}
         version := int(mappedClaims["version"].(float64))
         if  version != user.Version {
-            utils.InvalidAuthenticationTokenResponse(w, r)
+			metadataErr["line"] = 86
+            utils.InvalidAuthenticationTokenResponse(w, r, metadataErr)
 			return
         }
 		r = utils.ContextSetUser(r, user)

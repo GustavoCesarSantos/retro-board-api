@@ -33,14 +33,17 @@ func (cr *cardRepository) Delete(cardId int64) error {
     return nil
 }
 
-func (cr *cardRepository) FindAllByColumnId(columnId int64) ([]*domain.Card, error) {
-    var cards []*domain.Card
+func (cr *cardRepository) FindAllByColumnId(columnId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Card], error) {
+    var cards []domain.Card
     for _, card := range cr.cards {
         if card.ColumnId == columnId {
-            cards = append(cards, &card)
+            cards = append(cards, card)
         }
     }
-    return cards, nil
+    return &utils.ResultPaginated[domain.Card]{
+        Items: cards,
+        NextCursor: 0,
+    }, nil
 }
 
 func (cr *cardRepository) FindById(cardId int64) (*domain.Card, error) {

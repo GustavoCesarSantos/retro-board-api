@@ -45,7 +45,7 @@ func (cr *cardRepository) Delete(cardId int64) error {
     return nil
 }
 
-func (cr *cardRepository) FindAllByColumnId(columnId int64) ([]*domain.Card, error) {
+func (cr *cardRepository) FindAllByColumnId(columnId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Card], error) {
     query := `
         SELECT
             id,
@@ -57,15 +57,20 @@ func (cr *cardRepository) FindAllByColumnId(columnId int64) ([]*domain.Card, err
            board_cards 
         WHERE
             column_id = $1
+            AND id < $2
+        ORDER BY
+            id DESC
+        LIMIT $3;
     `
+    args := []any{columnId, lastId, limit}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	rows, err := cr.DB.QueryContext(ctx, query, columnId)
+	rows, err := cr.DB.QueryContext(ctx, query, args...)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
-    cards := []*domain.Card{}
+    cards := []domain.Card{}
     for rows.Next() {
         var card domain.Card
         err := rows.Scan(
@@ -78,12 +83,19 @@ func (cr *cardRepository) FindAllByColumnId(columnId int64) ([]*domain.Card, err
         if err != nil {
             return nil, err
         }
-        cards = append(cards, &card)
+        cards = append(cards, card)
     }
     if rowsErr := rows.Err(); rowsErr != nil {
         return nil, rowsErr
     }
-    return cards, nil
+    var nextCursor int
+	if len(cards) > 0 {
+		nextCursor = int(cards[len(cards)-1].ID)
+	}
+    return &utils.ResultPaginated[domain.Card]{
+        Items: cards,
+        NextCursor: nextCursor,
+    }, nil
 }
 
 func (cr *cardRepository) FindById(cardId int64) (*domain.Card, error) {

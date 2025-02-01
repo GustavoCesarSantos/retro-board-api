@@ -3,6 +3,7 @@ package db
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
 	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
 
@@ -37,14 +38,17 @@ func (cr *columnRepository) Delete(columnId int64) error {
     return nil
 }
 
-func (cr *columnRepository) FindAllByBoardId(boardId int64) ([]*domain.Column, error) {
-    var columns []*domain.Column
+func (cr *columnRepository) FindAllByBoardId(boardId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Column], error) {
+    var columns []domain.Column
     for _, column := range cr.columns {
         if column.BoardId == boardId {
-            columns = append(columns, &column)
+            columns = append(columns, column)
         }
     }
-    return columns, nil
+	return &utils.ResultPaginated[domain.Column]{
+        Items: columns,
+        NextCursor: 0,
+    }, nil
 }
 
 func (cr *columnRepository) Save(column *domain.Column) error {

@@ -13,10 +13,10 @@ type teamMemberRepository struct {
 func NewTeamMemberRepository() db.ITeamMemberRepository {
 	return &teamMemberRepository{
 		teamMembers: []domain.TeamMember{
-			*domain.NewTeamMember(1, 1, 1, 1),
-			*domain.NewTeamMember(2, 1, 2, 2),
-			*domain.NewTeamMember(3, 1, 3, 2),
-			*domain.NewTeamMember(4, 1, 4, 2),
+			*domain.NewTeamMember(1, 1, 1, 1, "active"),
+			*domain.NewTeamMember(2, 1, 2, 2, "active"),
+			*domain.NewTeamMember(3, 1, 3, 2, "active"),
+			*domain.NewTeamMember(4, 1, 4, 2, "active"),
 		},
 	}
 }

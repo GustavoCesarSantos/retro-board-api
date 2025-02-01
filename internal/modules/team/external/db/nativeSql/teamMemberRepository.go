@@ -52,7 +52,7 @@ func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMem
             id,
             team_id,
             member_id,
-            role,
+            role_id,
             created_at,
             updated_at
         FROM
@@ -127,18 +127,20 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
         INSERT INTO team_members (
             member_id,
             team_id,
-            role_id
+            role_id,
+            status
         )
         VALUES (
             $1,
             $2,
-            $3
+            $3,
+            $4
         )
         RETURNING
             id,
             created_at
     `
-	args := []any{teamMember.MemberId, teamMember.TeamId, teamMember.RoleId}
+	args := []any{teamMember.MemberId, teamMember.TeamId, teamMember.RoleId, teamMember.Status}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
     return tm.DB.QueryRowContext(ctx, query, args...).Scan(

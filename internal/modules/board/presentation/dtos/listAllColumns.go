@@ -12,6 +12,11 @@ type ListAllColumnsResponse struct {
     UpdatedAt *time.Time `json:"updated_at"`
 }
 
+type ListAllColumnsResponsePaginated struct {
+	Items []*ListAllColumnsResponse `json:"items"`
+	NextCursor int `json:"next_cursor" example:"0"`
+}
+
 func NewListAllColumnsResponse(
 	id int64,
 	boardId int64,

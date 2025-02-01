@@ -6,7 +6,7 @@ import (
 )
 
 type ISaveMember interface {
-    Execute(teamId int64, memberId int64, roleId int64) error
+    Execute(teamId int64, memberId int64, roleId int64, status string) error
 }
 
 type saveMember struct {
@@ -19,7 +19,7 @@ func NewSaveMember(repository db.ITeamMemberRepository) ISaveMember {
     }
 }
 
-func (sm *saveMember) Execute(teamId int64, memberId int64, roleId int64) error {
-    teamMember := domain.NewTeamMember(0, teamId, memberId, roleId)
+func (sm *saveMember) Execute(teamId int64, memberId int64, roleId int64, status string) error {
+    teamMember := domain.NewTeamMember(0, teamId, memberId, roleId, status)
     return sm.repository.Save(teamMember)
 }

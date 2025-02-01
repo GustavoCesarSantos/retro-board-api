@@ -1,7 +1,9 @@
 package board
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
@@ -21,7 +23,7 @@ func NewListAllColumns(
 }
 
 type ListAllColumnsEnvelop struct {
-	Columns []*dtos.ListAllColumnsResponse `json:"columns"`
+	Columns dtos.ListAllColumnsResponsePaginated `json:"columns"`
 }
 
 // @Summary      List all columns for a board
@@ -47,14 +49,31 @@ func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
 		return
 	}
-	columns, findErr := lc.findAllColumns.Execute(boardId)
+	limitStr := r.URL.Query().Get("limit")
+	lastIDStr := r.URL.Query().Get("lastId")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		metadataErr["line"] = 47
+		utils.BadRequestResponse(w, r, utils.ErrMissingOrInvalidLimitQueryParam, metadataErr)
+		return
+	}
+	lastID := math.MaxInt64
+	if lastIDStr != "" {
+		lastID, err = strconv.Atoi(lastIDStr)
+		if err != nil {
+			metadataErr["line"] = 55
+			utils.BadRequestResponse(w, r, utils.ErrInvalidLimitQueryParam, metadataErr)
+			return
+		}
+	}
+	columns, findErr := lc.findAllColumns.Execute(boardId, limit, lastID)
 	if findErr != nil {
 		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
     }
-	var response []*dtos.ListAllColumnsResponse
-    for _, column := range columns {
-        response = append(response, dtos.NewListAllColumnsResponse(
+	var response dtos.ListAllColumnsResponsePaginated
+    for _, column := range columns.Items {
+        response.Items = append(response.Items, dtos.NewListAllColumnsResponse(
 			column.ID,
 			column.BoardId,
 			column.Name,
@@ -64,6 +83,7 @@ func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
 			column.UpdatedAt,
 		))
     }
+	response.NextCursor = columns.NextCursor
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"columns": response}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)

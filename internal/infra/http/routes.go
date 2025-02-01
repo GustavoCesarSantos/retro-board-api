@@ -224,10 +224,14 @@ func routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId", userAuthenticator.Authenticate(showTeam.Handle))
+	//TO-DO: criar endpoint para editar time
+	//TO-DO: criar endpoint para excluir time
 
-	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(addMemberToTeam.Handle))
+	//TO-DO: criar listagem de membros do time router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(listAllMembers.Handle))
 	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/members/:memberId", userAuthenticator.Authenticate(removeMemberFromTeam.Handle))
 	router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/roles", userAuthenticator.Authenticate(changeMemberRole.Handle))
+	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/members/invite", userAuthenticator.Authenticate(addMemberToTeam.Handle))
+	//TO-DO: criar endpoint para aceitar convite e mudar o status do membro para ativo router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/accept-invite", userAuthenticator.Authenticate(acceptInvite.Handle))
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards", userAuthenticator.Authenticate(
 		teamMemberValidator.EnsureMemberAccess(

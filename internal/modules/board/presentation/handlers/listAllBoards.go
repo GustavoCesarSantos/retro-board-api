@@ -1,7 +1,9 @@
 package board
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
@@ -21,7 +23,7 @@ func NewListAllBoards(
 }
 
 type ListAllBoardsEnvelop struct {
-	Boards []*dtos.ListAllBoardsResponse `json:"boards"`
+	Boards dtos.ListAllBoardsResponsePaginated `json:"boards"`
 }
 
 // @Summary      List all boards for a team
@@ -44,17 +46,34 @@ func(lb *listAllBoards) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r, metadataErr)
+		utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 		return
 	}
-	boards, findErr := lb.findAllBoards.Execute(teamId)
+	limitStr := r.URL.Query().Get("limit")
+	lastIDStr := r.URL.Query().Get("lastId")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		metadataErr["line"] = 47
+		utils.BadRequestResponse(w, r, utils.ErrMissingOrInvalidLimitQueryParam, metadataErr)
+		return
+	}
+	lastID := math.MaxInt64
+	if lastIDStr != "" {
+		lastID, err = strconv.Atoi(lastIDStr)
+		if err != nil {
+			metadataErr["line"] = 55
+			utils.BadRequestResponse(w, r, utils.ErrInvalidLimitQueryParam, metadataErr)
+			return
+		}
+	}
+	boards, findErr := lb.findAllBoards.Execute(teamId, limit, lastID)
 	if findErr != nil {
 		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
     }
-	var response []*dtos.ListAllBoardsResponse
-    for _, board := range boards {
-        response = append(response, dtos.NewListAllBoardsResponse(
+	var response dtos.ListAllBoardsResponsePaginated
+    for _, board := range boards.Items {
+        response.Items = append(response.Items, dtos.NewListAllBoardsResponse(
 			board.ID,
 			board.TeamId,
 			board.Name,
@@ -63,6 +82,7 @@ func(lb *listAllBoards) Handle(w http.ResponseWriter, r *http.Request) {
 			board.UpdatedAt,
 		))
     }
+	response.NextCursor = boards.NextCursor
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"boards": response}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)

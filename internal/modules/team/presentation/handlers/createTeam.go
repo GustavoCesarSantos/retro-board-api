@@ -68,7 +68,7 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	adminRoleId := int64(1)
-	saveAdminErr := ct.saveMember.Execute(team.ID, team.AdminId, adminRoleId)
+	saveAdminErr := ct.saveMember.Execute(team.ID, team.AdminId, adminRoleId, "active")
 	if saveAdminErr != nil {
 		removeErr := ct.removeTeam.Execute(team.ID, team.AdminId)
 		if removeErr != nil {

@@ -1,7 +1,9 @@
 package board
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/application"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/presentation/dtos"
@@ -21,7 +23,7 @@ func NewListAllCards(
 }
 
 type ListAllCardsEnvelop struct {
-	Cards []*dtos.ListAllCardsResponse `json:"cards"`
+	Cards dtos.ListAllCardsResponsePaginated `json:"cards"`
 }
 
 // @Summary      List all cards for a column on a board
@@ -49,14 +51,31 @@ func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
-	cards, findErr := lc.findAllCards.Execute(columnId)
+	limitStr := r.URL.Query().Get("limit")
+	lastIDStr := r.URL.Query().Get("lastId")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		metadataErr["line"] = 47
+		utils.BadRequestResponse(w, r, utils.ErrMissingOrInvalidLimitQueryParam, metadataErr)
+		return
+	}
+	lastID := math.MaxInt64
+	if lastIDStr != "" {
+		lastID, err = strconv.Atoi(lastIDStr)
+		if err != nil {
+			metadataErr["line"] = 55
+			utils.BadRequestResponse(w, r, utils.ErrInvalidLimitQueryParam, metadataErr)
+			return
+		}
+	}
+	cards, findErr := lc.findAllCards.Execute(columnId, limit, lastID)
 	if findErr != nil {
 		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
     }
-	var response []*dtos.ListAllCardsResponse
-    for _, card := range cards {
-        response = append(response, dtos.NewListAllCardsResponse(
+	var response dtos.ListAllCardsResponsePaginated
+    for _, card := range cards.Items {
+        response.Items = append(response.Items, dtos.NewListAllCardsResponse(
 			card.ID,
 			card.ColumnId,
 			card.MemberId,
@@ -65,6 +84,7 @@ func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
 			card.UpdatedAt,
 		))
     }
+	response.NextCursor = cards.NextCursor
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"cards": response}, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)

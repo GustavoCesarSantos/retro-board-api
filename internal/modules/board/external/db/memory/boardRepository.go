@@ -32,14 +32,17 @@ func (br *boardRepository) Delete(boardId int64) error {
     return nil
 }
 
-func (br *boardRepository) FindAllByTeamId(teamId int64) ([]*domain.Board, error) {
-    var boards []*domain.Board
+func (br *boardRepository) FindAllByTeamId(teamId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Board], error) {
+    var boards []domain.Board
     for _, board := range br.boards {
         if board.TeamId == teamId {
-            boards = append(boards, &board)
+            boards = append(boards, board)
         }
     }
-    return boards, nil
+	return &utils.ResultPaginated[domain.Board]{
+        Items: boards,
+        NextCursor: 0,
+    }, nil
 }
 
 func (br *boardRepository) FindById(boardId int64) (*domain.Board, error) {

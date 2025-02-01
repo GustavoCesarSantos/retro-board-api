@@ -3,10 +3,11 @@ package application
 import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
 	db "github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/external/db/interfaces"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
 type IFindAllCards interface {
-    Execute(columnId int64) ([]*domain.Card, error)
+    Execute(columnId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Card], error)
 }
 
 type findAllCards struct {
@@ -19,6 +20,6 @@ func NewFindAllCards(repository db.ICardRepository) IFindAllCards {
     }
 }
 
-func (fac *findAllCards) Execute(columnId int64) ([]*domain.Card, error) {
-    return fac.repository.FindAllByColumnId(columnId)
+func (fac *findAllCards) Execute(columnId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Card], error) {
+    return fac.repository.FindAllByColumnId(columnId, limit, lastId)
 }

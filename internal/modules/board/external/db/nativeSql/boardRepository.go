@@ -44,7 +44,7 @@ func (br *boardRepository) Delete(boardId int64) error {
     return nil
 }
 
-func (br *boardRepository) FindAllByTeamId(teamId int64) ([]*domain.Board, error) {
+func (br *boardRepository) FindAllByTeamId(teamId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Board], error) {
     query := `
         SELECT
             id,
@@ -56,15 +56,20 @@ func (br *boardRepository) FindAllByTeamId(teamId int64) ([]*domain.Board, error
             boards
         WHERE
             team_id = $1
+            AND id < $2
+        ORDER BY
+            id DESC
+        LIMIT $3;
     `
+    args := []any{teamId, lastId, limit}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	rows, err := br.DB.QueryContext(ctx, query, teamId)
+	rows, err := br.DB.QueryContext(ctx, query, args...)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
-    boards := []*domain.Board{}
+    boards := []domain.Board{}
     for rows.Next() {
         var board domain.Board
         err := rows.Scan(
@@ -77,12 +82,19 @@ func (br *boardRepository) FindAllByTeamId(teamId int64) ([]*domain.Board, error
         if err != nil {
             return nil, err
         }
-        boards = append(boards, &board)
+        boards = append(boards, board)
     }
     if rowsErr := rows.Err(); rowsErr != nil {
         return nil, rowsErr
     }
-    return boards, nil
+    var nextCursor int
+	if len(boards) > 0 {
+		nextCursor = int(boards[len(boards)-1].ID)
+	}
+    return &utils.ResultPaginated[domain.Board]{
+        Items: boards,
+        NextCursor: nextCursor,
+    }, nil
 }
 
 func (br *boardRepository) FindById(boardId int64) (*domain.Board, error) {
@@ -122,11 +134,13 @@ func (br *boardRepository) FindById(boardId int64) (*domain.Board, error) {
 func (br *boardRepository) Save(board *domain.Board) error {
     query := `
         INSERT INTO boards (
+            team_id,
             name,
             active
         )
         VALUES (
             $1,
+            $2,
             true
         )
         RETURNING
@@ -134,9 +148,13 @@ func (br *boardRepository) Save(board *domain.Board) error {
             active,
             created_at
     `
+    args := []any{
+        board.TeamId,
+        board.Name,
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-    return br.DB.QueryRowContext(ctx, query, board.Name).Scan(
+    return br.DB.QueryRowContext(ctx, query, args...).Scan(
         &board.ID,
         &board.Active,
         &board.CreatedAt,

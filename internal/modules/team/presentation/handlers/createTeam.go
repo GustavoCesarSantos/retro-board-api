@@ -52,7 +52,7 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	var input dtos.CreateTeamRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
-        metadataErr["line"] = 56
+        metadataErr["line"] = 55
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
@@ -74,22 +74,22 @@ func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		if removeErr != nil {
 			switch {
 			case errors.Is(removeErr, utils.ErrRecordNotFound):
-                metadataErr["line"] = 73
+                metadataErr["line"] = 77
 				utils.NotFoundResponse(w, r, metadataErr)
 			default:
-                metadataErr["line"] = 76
+                metadataErr["line"] = 80
 				utils.ServerErrorResponse(w, r, removeErr, metadataErr)
 			}
 			return
 		}
-        metadataErr["line"] = 81
+        metadataErr["line"] = 85
 		utils.ServerErrorResponse(w, r, saveTeamErr, metadataErr)
 		return
 	}
 	response := dtos.NewCreateTeamResponse(team.ID, team.Name, team.CreatedAt)
 	writeJsonErr := utils.WriteJSON(w, http.StatusCreated, utils.Envelope{"team": response}, nil)
 	if writeJsonErr != nil {
-        metadataErr["line"] = 88
+        metadataErr["line"] = 92
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

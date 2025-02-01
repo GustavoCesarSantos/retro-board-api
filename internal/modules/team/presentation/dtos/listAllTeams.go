@@ -9,6 +9,11 @@ type ListAllTeamsResponse struct {
     UpdatedAt *time.Time `json:"updated_at"`
 }
 
+type ListAllTeamsResponsePaginated struct {
+	Items []*ListAllTeamsResponse `json:"items"`
+	NextCursor int `json:"next_cursor" example:"0"`
+}
+
 func NewListAllTeamsResponse(
 	id int64, 
 	name string, 

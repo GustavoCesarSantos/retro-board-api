@@ -42,14 +42,17 @@ func (tr *teamRepository) FindAllByAdminId(adminId int64) ([]*domain.Team, error
     return teams, nil
 }
 
-func (tr *teamRepository) FindAllByMemberId(memberId int64) ([]*domain.Team, error) {
-    var teams []*domain.Team
+func (tr *teamRepository) FindAllByMemberId(memberId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Team], error) {
+    var teams []domain.Team
     for _, team := range tr.teams {
         if team.AdminId == memberId {
-            teams = append(teams, &team)
+            teams = append(teams, team)
         }
     }
-    return teams, nil
+    return &utils.ResultPaginated[domain.Team]{
+        Items: teams,
+        NextCursor: 0,
+    }, nil
 }
 
 func (tr *teamRepository) FindById(teamId int64, memberId int64) (*domain.Team, error) {

@@ -47,22 +47,26 @@ func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
 	user := utils.ContextGetUser(r)
 	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r, metadataErr)
+		metadataErr["line"] = 50
+		utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 		return
 	}
     memberId, memberIdErr := utils.ReadIDParam(r, "memberId")
 	if memberIdErr != nil {
-		utils.NotFoundResponse(w, r, metadataErr)
+		metadataErr["line"] = 56
+		utils.BadRequestResponse(w, r, memberIdErr, metadataErr)
 		return
 	}
 	var input dtos.ChangeMemberRoleRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
+		metadataErr["line"] = 63
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
 	ensureAdminErr := cmp.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
+		metadataErr["line"] = 69
 		utils.BadRequestResponse(w, r, ensureAdminErr, metadataErr)
 		return
 	}
@@ -70,14 +74,17 @@ func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
 	if updateErr != nil {
 		switch {
 		case errors.Is(updateErr, utils.ErrRecordNotFound):
+			metadataErr["line"] = 77
             utils.NotFoundResponse(w, r, metadataErr)
 		default:
+			metadataErr["line"] = 80
             utils.ServerErrorResponse(w, r, updateErr, metadataErr)
 		}
 		return
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
+		metadataErr["line"] = 87
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

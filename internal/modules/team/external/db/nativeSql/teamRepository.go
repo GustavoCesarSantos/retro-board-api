@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/domain"
@@ -94,7 +96,7 @@ func (tr *teamRepository) FindAllByAdminId(adminId int64) ([]*domain.Team, error
     return teams, nil
 }
 
-func (tr *teamRepository) FindAllByMemberId(memberId int64) ([]*domain.Team, error) {
+func (tr *teamRepository) FindAllByMemberId(memberId int64, limit int, lastId int) (*utils.ResultPaginated[domain.Team], error) {
     query := `
         SELECT
             t.id,
@@ -108,16 +110,21 @@ func (tr *teamRepository) FindAllByMemberId(memberId int64) ([]*domain.Team, err
         ON
             tm.team_id = t.id
         WHERE
-            tm.member_id = $1;
+            tm.member_id = $1
+            AND t.id < $2
+        ORDER BY
+            t.id DESC
+        LIMIT $3;
     `
+    args := []any{memberId, lastId, limit}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	rows, err := tr.DB.QueryContext(ctx, query, memberId)
+	rows, err := tr.DB.QueryContext(ctx, query, args...)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
-    teams := []*domain.Team{}
+    teams := []domain.Team{}
     for rows.Next() {
         var team domain.Team
         err := rows.Scan(
@@ -129,12 +136,19 @@ func (tr *teamRepository) FindAllByMemberId(memberId int64) ([]*domain.Team, err
         if err != nil {
             return nil, err
         }
-        teams = append(teams, &team)
+        teams = append(teams, team)
     }
     if rowsErr := rows.Err(); rowsErr != nil {
         return nil, rowsErr
     }
-    return teams, nil
+    var nextCursor int
+	if len(teams) > 0 {
+		nextCursor = int(teams[len(teams)-1].ID)
+	}
+    return &utils.ResultPaginated[domain.Team]{
+        Items: teams,
+        NextCursor: nextCursor,
+    }, nil
 }
 
 func (tr *teamRepository) FindById(teamId int64, memberId int64) (*domain.Team, error) {
@@ -189,8 +203,10 @@ func (tr *teamRepository) Save(team *domain.Team) error {
     `
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-    return tr.DB.QueryRowContext(ctx, query, team.Name).Scan(
-        &team.ID,
-        &team.CreatedAt,
-    )
+    row := tr.DB.QueryRowContext(ctx, query, team.Name)
+    if err := row.Scan(&team.ID, &team.CreatedAt); err != nil {
+        slog.Error(fmt.Sprintf("FAILED TO EXECUTE QUERY: %v, CONTEXT ERROR: %v", err, ctx.Err()))
+        return err
+    }
+    return nil
 }

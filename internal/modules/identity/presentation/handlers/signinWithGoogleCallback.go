@@ -50,6 +50,6 @@ func(sgc *signinWithGoogleCallback) Handle(w http.ResponseWriter, r *http.Reques
             return
 		}
     }
-    frontendURL := fmt.Sprintf("http://localhost:8000/users/authentica?email=%s", user.Email)
+    frontendURL := fmt.Sprintf("http://localhost:5173/identity/auth?code=%s", user.Email)
 	http.Redirect(w, r, frontendURL, http.StatusPermanentRedirect)
 }

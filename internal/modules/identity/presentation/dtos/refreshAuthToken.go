@@ -1,7 +1,7 @@
 package dtos
 
 type RefreshAuthTokenRequest struct {
-	RefreshToken   string       `json:"refreshToken"`
+	RefreshToken   string       `json:"refresh_token"`
 }
 
 type RefreshAuthTokenResponse struct {

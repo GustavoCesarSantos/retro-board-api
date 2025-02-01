@@ -43,6 +43,7 @@ func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	user := utils.ContextGetUser(r)
 	id, readErr := utils.ReadIDParam(r, "teamId")
 	if readErr != nil {
+		metadataErr["line"] = 46
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
@@ -50,8 +51,10 @@ func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	if findErr != nil {
 		switch {
 		case errors.Is(findErr, utils.ErrRecordNotFound):
+			metadataErr["line"] = 54
             utils.NotFoundResponse(w, r, metadataErr)
 		default:
+			metadataErr["line"] = 57
             utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		}
 		return
@@ -64,6 +67,7 @@ func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	)
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"team": response}, nil)
 	if writeJsonErr != nil {
+		metadataErr["line"] = 70
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

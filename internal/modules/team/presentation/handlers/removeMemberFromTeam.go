@@ -45,16 +45,19 @@ func(rmt *removeMemberFromTeam) Handle(w http.ResponseWriter, r *http.Request) {
     user := utils.ContextGetUser(r)
     teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
 	if teamIdErr != nil {
-		utils.NotFoundResponse(w, r, metadataErr)
+		metadataErr["line"] = 48
+		utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 		return
 	}
     memberId, memberIdErr := utils.ReadIDParam(r, "memberId")
 	if memberIdErr != nil {
-		utils.NotFoundResponse(w, r, metadataErr)
+		metadataErr["line"] = 54
+		utils.BadRequestResponse(w, r, memberIdErr, metadataErr)
 		return
 	}
 	ensureAdminErr := rmt.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
+		metadataErr["line"] = 60
 		utils.BadRequestResponse(w, r, ensureAdminErr, metadataErr)
 		return
 	}
@@ -62,14 +65,17 @@ func(rmt *removeMemberFromTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	if removeErr != nil {
 		switch {
 		case errors.Is(removeErr, utils.ErrRecordNotFound):
+			metadataErr["line"] = 68
             utils.NotFoundResponse(w, r, metadataErr)
 		default:
+			metadataErr["line"] = 71
             utils.ServerErrorResponse(w, r, removeErr, metadataErr)
 		}
 		return
     }
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
+		metadataErr["line"] = 78
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

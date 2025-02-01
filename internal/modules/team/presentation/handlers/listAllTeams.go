@@ -1,7 +1,9 @@
 package team
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/application"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/team/presentation/dtos"
@@ -19,7 +21,7 @@ func NewListAllTeams(findAllTeams application.IFindAllTeams) *listAllTeams {
 }
 
 type ListAllTeamsEnvelop struct {
-	Teams []*dtos.ListAllTeamsResponse `json:"teams"`
+	Teams dtos.ListAllTeamsResponsePaginated `json:"teams"`
 }
 
 // ListAllTeams retrieves all teams associated with the authenticated user.
@@ -38,22 +40,42 @@ func(lt *listAllTeams) Handle(w http.ResponseWriter, r *http.Request) {
 		"line": 0,
 	}
     user := utils.ContextGetUser(r)
-	teams, findErr := lt.findAllTeams.Execute(user.ID)
+	limitStr := r.URL.Query().Get("limit")
+	lastIDStr := r.URL.Query().Get("lastId")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		metadataErr["line"] = 47
+		utils.BadRequestResponse(w, r, utils.ErrMissingOrInvalidLimitQueryParam, metadataErr)
+		return
+	}
+	lastID := math.MaxInt64
+	if lastIDStr != "" {
+		lastID, err = strconv.Atoi(lastIDStr)
+		if err != nil {
+			metadataErr["line"] = 55
+			utils.BadRequestResponse(w, r, utils.ErrInvalidLimitQueryParam, metadataErr)
+			return
+		}
+	}
+	teams, findErr := lt.findAllTeams.Execute(user.ID, limit, lastID)
 	if findErr != nil {
+		metadataErr["line"] = 61
 		utils.ServerErrorResponse(w, r, findErr, metadataErr)
 		return
 	}
-	var response []*dtos.ListAllTeamsResponse
-    for _, team := range teams {
-        response = append(response, dtos.NewListAllTeamsResponse(
+	var response dtos.ListAllTeamsResponsePaginated
+    for _, team := range teams.Items {
+        response.Items = append(response.Items, dtos.NewListAllTeamsResponse(
 			team.ID,
 			team.Name,
 			team.CreatedAt,
 			team.UpdatedAt,
 		))
     }
+	response.NextCursor = teams.NextCursor
     writeJsonErr := utils.WriteJSON(w, http.StatusOK, utils.Envelope{"teams": response}, nil)
 	if writeJsonErr != nil {
+		metadataErr["line"] = 77
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

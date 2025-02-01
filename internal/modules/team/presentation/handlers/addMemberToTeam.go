@@ -48,32 +48,38 @@ func(amt *addMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
     user := utils.ContextGetUser(r)
 	teamId, readIDErr := utils.ReadIDParam(r, "teamId")
 	if readIDErr != nil {
-		utils.NotFoundResponse(w, r, metadataErr)
+		metadataErr["line"] = 51
+		utils.BadRequestResponse(w, r, readIDErr, metadataErr)
 		return
 	}
 	var input dtos.AddMemberToTeamRequest
 	readErr := utils.ReadJSON(w, r, &input)
 	if readErr != nil {
+		metadataErr["line"] = 58
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
 	ensureAdminErr := amt.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
+		metadataErr["line"] = 64
 		utils.BadRequestResponse(w, r, ensureAdminErr, metadataErr)
 		return
 	}
 	memberInfo, findErr := amt.findMemberInfoByEmail.Execute(input.Email)
 	if findErr != nil {
+		metadataErr["line"] = 70
 		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
     saveErr := amt.saveMember.Execute(teamId, memberInfo.ID, input.RoleId)
     if saveErr != nil {
+		metadataErr["line"] = 76
 		utils.ServerErrorResponse(w, r, saveErr, metadataErr)
 		return
 	}
 	writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
+		metadataErr["line"] = 82
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)
 	}
 }

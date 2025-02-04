@@ -12,17 +12,17 @@ import (
 )
 
 type teamMemberRepository struct {
-    DB *sql.DB
+	DB *sql.DB
 }
 
 func NewTeamMemberRepository(db *sql.DB) db.ITeamMemberRepository {
 	return &teamMemberRepository{
-        DB:db,
+		DB: db,
 	}
 }
 
-func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
-    query := `
+func (tm *teamMemberRepository) Delete(teamId int64, memberId int64) error {
+	query := `
         DELETE FROM
             team_members
         WHERE
@@ -33,64 +33,70 @@ func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	result, err := tm.DB.ExecContext(ctx, query, args...)
-    if err != nil {
-        return err
-    }
-    rowsAffected, rowsAffectedErr := result.RowsAffected()
-    if rowsAffectedErr != nil {
-        return rowsAffectedErr
-    }
-    if rowsAffected == 0 {
-        return utils.ErrRecordNotFound
-    }
-    return nil
+	if err != nil {
+		return err
+	}
+	rowsAffected, rowsAffectedErr := result.RowsAffected()
+	if rowsAffectedErr != nil {
+		return rowsAffectedErr
+	}
+	if rowsAffected == 0 {
+		return utils.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMember, error) {
-    query := `
+	query := `
         SELECT
             id,
             team_id,
             member_id,
             role_id,
+            status,
             created_at,
             updated_at
         FROM
             team_members
         WHERE
             team_id = $1
+            AND status = 'active';
     `
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	rows, err := tm.DB.QueryContext(ctx, query, teamId)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-    teamMembers := []*domain.TeamMember{}
-    for rows.Next() {
-        var teamMember  domain.TeamMember
-        err := rows.Scan(
-            &teamMember.ID,
-            &teamMember.TeamId,
-            &teamMember.MemberId,
-            &teamMember.RoleId,
-            &teamMember.CreatedAt,
-            &teamMember.UpdatedAt,
-        )
-        if err != nil {
-            return nil, err
-        }
-        teamMembers = append(teamMembers, &teamMember)
-    }
-    if rowsErr := rows.Err(); rowsErr != nil {
-        return nil, rowsErr
-    }
-    return teamMembers, nil
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	teamMembers := []*domain.TeamMember{}
+	for rows.Next() {
+		var teamMember domain.TeamMember
+		err := rows.Scan(
+			&teamMember.ID,
+			&teamMember.TeamId,
+			&teamMember.MemberId,
+			&teamMember.RoleId,
+            &teamMember.Status,
+			&teamMember.CreatedAt,
+			&teamMember.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		teamMembers = append(teamMembers, &teamMember)
+	}
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, rowsErr
+	}
+	return teamMembers, nil
 }
 
-func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId int64) (*domain.TeamMember, error) {
-    query := `
+func (tm *teamMemberRepository) FindTeamAdminByMemberId(
+	teamId int64,
+	memberId int64,
+) (*domain.TeamMember, error) {
+	query := `
         SELECT
             id,
             created_at,
@@ -100,15 +106,16 @@ func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId i
         WHERE
             member_id = $1
             AND role_id = 1
-            AND team_id = $2;
+            AND team_id = $2
+            AND status = 'active';
     `
-    args := []any{memberId, teamId}
+	args := []any{memberId, teamId}
 	var teamMember domain.TeamMember
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err := tm.DB.QueryRowContext(ctx, query, args...).Scan(
 		&teamMember.ID,
-        &teamMember.CreatedAt,
+		&teamMember.CreatedAt,
 		&teamMember.UpdatedAt,
 	)
 	if err != nil {
@@ -123,7 +130,7 @@ func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId i
 }
 
 func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
-    query := `
+	query := `
         INSERT INTO team_members (
             member_id,
             team_id,
@@ -143,25 +150,23 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
 	args := []any{teamMember.MemberId, teamMember.TeamId, teamMember.RoleId, teamMember.Status}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-    return tm.DB.QueryRowContext(ctx, query, args...).Scan(
-        &teamMember.ID,
-        &teamMember.CreatedAt,
-    )
+	return tm.DB.QueryRowContext(ctx, query, args...).Scan(
+		&teamMember.ID,
+		&teamMember.CreatedAt,
+	)
 }
 
-func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, roleId int64) error {
+func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateParams) error {
     query := `
         UPDATE
-            team_members 
+            team_members
         SET
-            role_id = $1
+            status = $1
         WHERE
-            team_id = $2
-            AND member_id = $3;
+            memberId = $2;
     `
 	args := []any{
-        roleId,
-        teamId,
+        member.Status,
         memberId,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -178,4 +183,35 @@ func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, roleId 
         return utils.ErrRecordNotFound
     }
     return nil
+}
+
+func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, roleId int64) error {
+	query := `
+        UPDATE
+            team_members 
+        SET
+            role_id = $1
+        WHERE
+            team_id = $2
+            AND member_id = $3;
+    `
+	args := []any{
+		roleId,
+		teamId,
+		memberId,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	result, err := tm.DB.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	rowsAffected, rowsAffectedErr := result.RowsAffected()
+	if rowsAffectedErr != nil {
+		return rowsAffectedErr
+	}
+	if rowsAffected == 0 {
+		return utils.ErrRecordNotFound
+	}
+	return nil
 }

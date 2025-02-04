@@ -7,7 +7,7 @@ type TeamMember struct {
     TeamId int64
     MemberId int64
 	RoleId int64
-    Status string
+    Status string //active - deactivated - invited
     CreatedAt time.Time
     UpdatedAt *time.Time
 }

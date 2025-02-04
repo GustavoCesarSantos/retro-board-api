@@ -36,7 +36,7 @@ func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
 func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMember, error) {
 	var teamMembers []*domain.TeamMember
     for _, teamMember := range tm.teamMembers {
-        if teamMember.TeamId == teamId {
+        if teamMember.TeamId == teamId && teamMember.Status == "active" {
             teamMembers = append(teamMembers, &teamMember)
         }
     }
@@ -54,6 +54,18 @@ func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId i
 
 func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
 	tm.teamMembers = append(tm.teamMembers, *teamMember)
+    return nil
+}
+
+func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateParams) error {
+	for i := range tm.teamMembers {
+		if tm.teamMembers[i].MemberId == memberId {
+            if member.Status != nil {
+                tm.teamMembers[i].Status = *member.Status
+            }
+			break
+		}
+	}
     return nil
 }
 

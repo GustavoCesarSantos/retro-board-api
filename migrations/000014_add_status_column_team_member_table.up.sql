@@ -1,0 +1,1 @@
+ALTER TABLE team_members ADD COLUMN status VARCHAR(25) DEFAULT 'active' NOT NULL

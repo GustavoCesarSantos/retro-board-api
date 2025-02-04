@@ -93,6 +93,7 @@ func routes(db *sql.DB) http.Handler {
 	findAllBoards := boardApplication.NewFindAllBoards(boardRepository)
 	findAllCards := boardApplication.NewFindAllCards(cardRepository)
 	findAllColumns := boardApplication.NewFindAllColumns(columnRepository)
+    findAllMembers := teamApplication.NewFindAllMembers(teamMemberRepository)
 	findAllPolls := pollApplication.NewFindAllPolls(pollRepository)
 	findAllTeams := teamApplication.NewFindAllTeams(teamRepository)
 	findBoard := boardApplication.NewFindBoard(boardRepository)
@@ -131,6 +132,7 @@ func routes(db *sql.DB) http.Handler {
 	updateBoard := boardApplication.NewUpdateBoard(boardRepository)
 	updateCard := boardApplication.NewUpdateCard(cardRepository)
 	updateColumn := boardApplication.NewUpdateColumn(columnRepository)
+    updateMember := teamApplication.NewUpdateMember(teamMemberRepository)
 	updateRole := teamApplication.NewUpdateRole(teamMemberRepository)
 
 	//Init Handlers
@@ -166,10 +168,12 @@ func routes(db *sql.DB) http.Handler {
 	editBoard := board.NewEditBoard(updateBoard)
 	editCard := board.NewEditCard(notifyUpdateCard, updateCard)
 	editColumn := board.NewEditColumn(updateColumn)
+    editMember := team.NewEditMember(updateMember)
 	healthcheck := monitor.NewHealthcheck()
 	listAllBoards := board.NewListAllBoards(findAllBoards)
 	listAllCards := board.NewListAllCards(findAllCards)
 	listAllColumns := board.NewListAllColumns(findAllColumns)
+    listAllMembers := team.NewListAllMembers(findAllMembers)
 	listAllPolls := poll.NewListAllPolls(findAllPolls)
 	listAllTeams := team.NewListAllTeams(findAllTeams)
 	listBoard := board.NewListBoard(findBoard)
@@ -227,11 +231,11 @@ func routes(db *sql.DB) http.Handler {
 	//TO-DO: criar endpoint para editar time
 	//TO-DO: criar endpoint para excluir time
 
-	//TO-DO: criar listagem de membros do time router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(listAllMembers.Handle))
+	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(listAllMembers.Handle))
 	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/members/:memberId", userAuthenticator.Authenticate(removeMemberFromTeam.Handle))
 	router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/roles", userAuthenticator.Authenticate(changeMemberRole.Handle))
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/members/invite", userAuthenticator.Authenticate(addMemberToTeam.Handle))
-	//TO-DO: criar endpoint para aceitar convite e mudar o status do membro para ativo router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/accept-invite", userAuthenticator.Authenticate(acceptInvite.Handle))
+    router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/accept-invite", userAuthenticator.Authenticate(editMember.Handle))
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards", userAuthenticator.Authenticate(
 		teamMemberValidator.EnsureMemberAccess(

@@ -71,7 +71,6 @@ func(amt *addMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.NotFoundResponse(w, r, metadataErr)
 		return
 	}
-	// TO-DO: Adicionar a coluna status: 'ativo', 'desativado', 'convidado' e adicionar o status convidado para os usuários que ainda n aceitaram o convite para entrar no time
     saveErr := amt.saveMember.Execute(teamId, memberInfo.ID, input.RoleId, "invited")
     if saveErr != nil {
 		metadataErr["line"] = 76

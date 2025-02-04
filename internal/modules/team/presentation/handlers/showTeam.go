@@ -20,7 +20,7 @@ func NewShowTeam(findTeam application.IFindTeam) *showTeam {
 }
 
 type ShowTeamEnvelop struct {
-	Team []*dtos.ShowTeamResponse `json:"team"`
+	Team *dtos.ShowTeamResponse `json:"team"`
 }
 
 // ShowTeam retrieves details of a specific team.

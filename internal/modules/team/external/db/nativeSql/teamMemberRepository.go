@@ -156,7 +156,7 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
 	)
 }
 
-func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateParams) error {
+func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateMemberParams) error {
     query := `
         UPDATE
             team_members

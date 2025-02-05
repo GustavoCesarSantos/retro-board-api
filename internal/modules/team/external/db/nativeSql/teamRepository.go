@@ -210,3 +210,32 @@ func (tr *teamRepository) Save(team *domain.Team) error {
     }
     return nil
 }
+
+func (tr *teamRepository) Update(teamId int64, team db.UpdateTeamParams) error {
+    query := `
+        UPDATE
+            teams
+        SET
+            name = $1
+        WHERE
+            id = $2;
+    `
+	args := []any{
+        team.Name,
+        teamId,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	result, err := tr.DB.ExecContext(ctx, query, args...)
+    if err != nil {
+        return err
+    }
+    rowsAffected, rowsAffectedErr := result.RowsAffected()
+    if rowsAffectedErr != nil {
+        return rowsAffectedErr
+    }
+    if rowsAffected == 0 {
+        return utils.ErrRecordNotFound
+    }
+    return nil
+}

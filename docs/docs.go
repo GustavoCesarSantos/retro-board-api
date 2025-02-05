@@ -1886,10 +1886,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "boards": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.ListAllBoardsResponse"
-                    }
+                    "$ref": "#/definitions/dtos.ListAllBoardsResponsePaginated"
                 }
             }
         },
@@ -1897,10 +1894,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cards": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.ListAllCardsResponse"
-                    }
+                    "$ref": "#/definitions/dtos.ListAllCardsResponsePaginated"
                 }
             }
         },
@@ -1908,10 +1902,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "columns": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.ListAllColumnsResponse"
-                    }
+                    "$ref": "#/definitions/dtos.ListAllColumnsResponsePaginated"
                 }
             }
         },
@@ -2103,7 +2094,7 @@ const docTemplate = `{
                     "example": "available"
                 },
                 "system_info": {
-                    "$ref": "#/definitions/internal_modules_monitor_presentation_dtos.SystemInfo"
+                    "$ref": "#/definitions/dtos.SystemInfo"
                 }
             }
         },
@@ -2134,6 +2125,21 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.ListAllBoardsResponsePaginated": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllBoardsResponse"
+                    }
+                },
+                "next_cursor": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
         "dtos.ListAllCardsResponse": {
             "type": "object",
             "properties": {
@@ -2158,6 +2164,21 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.ListAllCardsResponsePaginated": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllCardsResponse"
+                    }
+                },
+                "next_cursor": {
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -2189,6 +2210,21 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.ListAllColumnsResponsePaginated": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllColumnsResponse"
+                    }
+                },
+                "next_cursor": {
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -2231,6 +2267,21 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.ListAllTeamsResponsePaginated": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ListAllTeamsResponse"
+                    }
+                },
+                "next_cursor": {
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -2318,7 +2369,7 @@ const docTemplate = `{
         "dtos.RefreshAuthTokenRequest": {
             "type": "object",
             "properties": {
-                "refreshToken": {
+                "refresh_token": {
                     "type": "string"
                 }
             }
@@ -2382,6 +2433,15 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.SystemInfo": {
+            "type": "object",
+            "properties": {
+                "environment": {
+                    "type": "string",
+                    "example": "develop"
+                }
+            }
+        },
         "identity.RefreshAuthTokenEnvelope": {
             "type": "object",
             "properties": {
@@ -2395,15 +2455,6 @@ const docTemplate = `{
             "properties": {
                 "signin_tokens": {
                     "$ref": "#/definitions/dtos.SigninUserResponse"
-                }
-            }
-        },
-        "internal_modules_monitor_presentation_dtos.SystemInfo": {
-            "type": "object",
-            "properties": {
-                "environment": {
-                    "type": "string",
-                    "example": "develop"
                 }
             }
         },
@@ -2454,10 +2505,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "teams": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.ListAllTeamsResponse"
-                    }
+                    "$ref": "#/definitions/dtos.ListAllTeamsResponsePaginated"
                 }
             }
         },
@@ -2465,10 +2513,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "team": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dtos.ShowTeamResponse"
-                    }
+                    "$ref": "#/definitions/dtos.ShowTeamResponse"
                 }
             }
         },

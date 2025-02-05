@@ -68,3 +68,15 @@ func (tr *teamRepository) Save(team *domain.Team) error {
 	tr.teams = append(tr.teams, *team)
     return nil
 }
+
+func (tr *teamRepository) Update(teamId int64, team db.UpdateTeamParams) error {
+	for i := range tr.teams {
+		if tr.teams[i].ID == teamId {
+            if team.Name != nil {
+                tr.teams[i].Name = *team.Name
+            }
+			break
+		}
+    }
+    return nil
+}

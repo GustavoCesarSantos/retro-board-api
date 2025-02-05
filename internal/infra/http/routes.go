@@ -134,6 +134,7 @@ func routes(db *sql.DB) http.Handler {
 	updateColumn := boardApplication.NewUpdateColumn(columnRepository)
     updateMember := teamApplication.NewUpdateMember(teamMemberRepository)
 	updateRole := teamApplication.NewUpdateRole(teamMemberRepository)
+    updateTeam := teamApplication.NewUpdateTeam(teamRepository)
 
 	//Init Handlers
 	addMemberToTeam := team.NewAddMemberToTeam(
@@ -165,10 +166,12 @@ func routes(db *sql.DB) http.Handler {
 	deleteOption := poll.NewDeleteOption(
 		removeOption,
 	)
+    deleteTeam := team.NewDeleteTeam(ensureAdminMembership, removeTeam)
 	editBoard := board.NewEditBoard(updateBoard)
 	editCard := board.NewEditCard(notifyUpdateCard, updateCard)
 	editColumn := board.NewEditColumn(updateColumn)
     editMember := team.NewEditMember(updateMember)
+    editTeam := team.NewEditTeam(updateTeam)
 	healthcheck := monitor.NewHealthcheck()
 	listAllBoards := board.NewListAllBoards(findAllBoards)
 	listAllCards := board.NewListAllCards(findAllCards)
@@ -228,8 +231,8 @@ func routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId", userAuthenticator.Authenticate(showTeam.Handle))
-	//TO-DO: criar endpoint para editar time
-	//TO-DO: criar endpoint para excluir time
+	router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId", userAuthenticator.Authenticate(editTeam.Handle))
+	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId", userAuthenticator.Authenticate(deleteTeam.Handle))
 
 	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(listAllMembers.Handle))
 	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/members/:memberId", userAuthenticator.Authenticate(removeMemberFromTeam.Handle))

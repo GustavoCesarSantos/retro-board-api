@@ -39,23 +39,17 @@ definitions:
   board.ListAllBoardsEnvelop:
     properties:
       boards:
-        items:
-          $ref: '#/definitions/dtos.ListAllBoardsResponse'
-        type: array
+        $ref: '#/definitions/dtos.ListAllBoardsResponsePaginated'
     type: object
   board.ListAllCardsEnvelop:
     properties:
       cards:
-        items:
-          $ref: '#/definitions/dtos.ListAllCardsResponse'
-        type: array
+        $ref: '#/definitions/dtos.ListAllCardsResponsePaginated'
     type: object
   board.ListAllColumnsEnvelop:
     properties:
       columns:
-        items:
-          $ref: '#/definitions/dtos.ListAllColumnsResponse'
-        type: array
+        $ref: '#/definitions/dtos.ListAllColumnsResponsePaginated'
     type: object
   board.ListCardEnvelop:
     properties:
@@ -185,7 +179,7 @@ definitions:
         example: available
         type: string
       system_info:
-        $ref: '#/definitions/internal_modules_monitor_presentation_dtos.SystemInfo'
+        $ref: '#/definitions/dtos.SystemInfo'
     type: object
   dtos.ListAllBoardsResponse:
     properties:
@@ -206,6 +200,16 @@ definitions:
       updated_at:
         type: string
     type: object
+  dtos.ListAllBoardsResponsePaginated:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dtos.ListAllBoardsResponse'
+        type: array
+      next_cursor:
+        example: 0
+        type: integer
+    type: object
   dtos.ListAllCardsResponse:
     properties:
       column_id:
@@ -224,6 +228,16 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  dtos.ListAllCardsResponsePaginated:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dtos.ListAllCardsResponse'
+        type: array
+      next_cursor:
+        example: 0
+        type: integer
     type: object
   dtos.ListAllColumnsResponse:
     properties:
@@ -246,6 +260,16 @@ definitions:
         type: integer
       updated_at:
         type: string
+    type: object
+  dtos.ListAllColumnsResponsePaginated:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dtos.ListAllColumnsResponse'
+        type: array
+      next_cursor:
+        example: 0
+        type: integer
     type: object
   dtos.ListAllPollsResponse:
     properties:
@@ -275,6 +299,16 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  dtos.ListAllTeamsResponsePaginated:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dtos.ListAllTeamsResponse'
+        type: array
+      next_cursor:
+        example: 0
+        type: integer
     type: object
   dtos.ListCardResponse:
     properties:
@@ -333,7 +367,7 @@ definitions:
     type: object
   dtos.RefreshAuthTokenRequest:
     properties:
-      refreshToken:
+      refresh_token:
         type: string
     type: object
   dtos.ShowPollResultResponse:
@@ -375,6 +409,12 @@ definitions:
       refresh_token:
         type: string
     type: object
+  dtos.SystemInfo:
+    properties:
+      environment:
+        example: develop
+        type: string
+    type: object
   identity.RefreshAuthTokenEnvelope:
     properties:
       refreshed_token:
@@ -384,12 +424,6 @@ definitions:
     properties:
       signin_tokens:
         $ref: '#/definitions/dtos.SigninUserResponse'
-    type: object
-  internal_modules_monitor_presentation_dtos.SystemInfo:
-    properties:
-      environment:
-        example: develop
-        type: string
     type: object
   monitor.HealthCheckEnvelope:
     properties:
@@ -421,16 +455,12 @@ definitions:
   team.ListAllTeamsEnvelop:
     properties:
       teams:
-        items:
-          $ref: '#/definitions/dtos.ListAllTeamsResponse'
-        type: array
+        $ref: '#/definitions/dtos.ListAllTeamsResponsePaginated'
     type: object
   team.ShowTeamEnvelop:
     properties:
       team:
-        items:
-          $ref: '#/definitions/dtos.ShowTeamResponse'
-        type: array
+        $ref: '#/definitions/dtos.ShowTeamResponse'
     type: object
   utils.ErrorEnvelope:
     properties:

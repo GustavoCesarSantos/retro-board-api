@@ -57,7 +57,7 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
     return nil
 }
 
-func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateParams) error {
+func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateMemberParams) error {
 	for i := range tm.teamMembers {
 		if tm.teamMembers[i].MemberId == memberId {
             if member.Status != nil {

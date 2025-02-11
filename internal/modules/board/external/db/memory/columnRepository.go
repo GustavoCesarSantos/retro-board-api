@@ -51,6 +51,33 @@ func (cr *columnRepository) FindAllByBoardId(boardId int64, limit int, lastId in
     }, nil
 }
 
+func (cr *columnRepository) FindById(columnId int64) (*domain.Column, error) {
+    for _, column := range cr.columns {
+        if column.ID == columnId {
+            return &column, nil
+        }
+    }
+    return nil, utils.ErrRecordNotFound
+}
+
+func (cr *columnRepository) MoveOtherColumnsToLeftByColumnId(columnId int64, positionFrom int, positionTo int) error {
+    for i := range cr.columns {
+		if cr.columns[i].Position > positionFrom && cr.columns[i].Position <= positionTo && cr.columns[i].ID != columnId {
+            cr.columns[i].Position--
+		}
+	}
+    return nil
+}
+
+func (cr *columnRepository) MoveOtherColumnsToRightByColumnId(columnId int64, positionFrom int, positionTo int) error {
+    for i := range cr.columns {
+		if cr.columns[i].Position < positionFrom && cr.columns[i].Position >= positionTo && cr.columns[i].ID != columnId {
+            cr.columns[i].Position++
+		}
+	}
+    return nil
+}
+
 func (cr *columnRepository) Save(column *domain.Column) error {
 	cr.columns = append(cr.columns, *column)
     return nil
@@ -64,6 +91,9 @@ func (cr *columnRepository) Update(columnId int64, column db.UpdateColumnParams)
 			}
 			if column.Color != nil {
 				cr.columns[i].Color = *column.Color
+			}
+			if column.Position != nil {
+				cr.columns[i].Position = *column.Position
 			}
 			break
 		}

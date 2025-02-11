@@ -56,9 +56,11 @@ func(ec *editColumn) Handle(w http.ResponseWriter, r *http.Request) {
     updateErr := ec.updateColumn.Execute(columnId, struct {
 		Name *string
 		Color *string
+        Position *int
 	}{ 
 		Name: input.Name,
 		Color: input.Color,
+            Position: input.Position, 
 	})
 	if updateErr != nil {
 		switch {

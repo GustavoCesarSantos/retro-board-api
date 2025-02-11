@@ -109,6 +109,9 @@ func routes(db *sql.DB) http.Handler {
 	moveCardBetweenColumns := boardApplication.NewMoveCardBetweenColumns(
 		cardRepository,
 	)
+    moveColumn := boardApplication.NewMoveColumn(
+		columnRepository,
+	)
     notifyCountVotes := pollApplication.NewNotifyCountVotes(gorillaWebSocketProvider)
     notifyMoveCard := boardApplication.NewNotifyMoveCard(gorillaWebSocketProvider)
     notifySaveCard := boardApplication.NewNotifySaveCard(gorillaWebSocketProvider)
@@ -182,10 +185,13 @@ func routes(db *sql.DB) http.Handler {
 	listBoard := board.NewListBoard(findBoard)
 	listCard := board.NewListCard(findCard)
 	listPoll := poll.NewListPoll(findPoll)
-	moveCardtoAnotherColumn := board.NewMoveCardtoAnotherColumn(
+	moveCardToAnotherColumn := board.NewMoveCardtoAnotherColumn(
 		moveCardBetweenColumns,
         notifyMoveCard,
 	)
+    moveColumnToAnotherPosition := board.NewMoveColumnToAnotherPosition(
+        moveColumn,
+    )
 	refreshAuthToken := identity.NewRefreshAuthToken(
 		createAuthToken, 
 		decodeAuthToken,
@@ -305,6 +311,16 @@ func routes(db *sql.DB) http.Handler {
 		),
 	))
 
+	router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/move", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			boardValidator.EnsureBoardOwnership(
+				boardValidator.EnsureColumnOwnership(
+					moveColumnToAnotherPosition.Handle,
+				),
+			),
+		),
+	))
+
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards", userAuthenticator.Authenticate(
 		teamMemberValidator.EnsureMemberAccess(
 			boardValidator.EnsureBoardOwnership(
@@ -361,7 +377,7 @@ func routes(db *sql.DB) http.Handler {
 			boardValidator.EnsureBoardOwnership(
 				boardValidator.EnsureColumnOwnership(
 					boardValidator.EnsureCardOwnership(
-						moveCardtoAnotherColumn.Handle,
+						moveCardToAnotherColumn.Handle,
 					),
 				),
 			),

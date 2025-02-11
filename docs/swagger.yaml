@@ -172,6 +172,9 @@ definitions:
       name:
         example: new-column1
         type: string
+      position:
+        example: 1
+        type: integer
     type: object
   dtos.HealthCheckResponse:
     properties:

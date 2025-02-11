@@ -2083,6 +2083,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "new-column1"
+                },
+                "position": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },

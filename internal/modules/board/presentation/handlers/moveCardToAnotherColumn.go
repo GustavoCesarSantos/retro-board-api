@@ -9,7 +9,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type moveCardtoAnotherColumn struct {
+type moveCardToAnotherColumn struct {
 	moveCardBetweenColumn application.IMoveCardBetweenColumns
     notifyMoveCard application.INotifyMoveCard
 }
@@ -17,8 +17,8 @@ type moveCardtoAnotherColumn struct {
 func NewMoveCardtoAnotherColumn(
 	moveCardBetweenColumn application.IMoveCardBetweenColumns,
     notifyMoveCard application.INotifyMoveCard,
-) *moveCardtoAnotherColumn {
-    return &moveCardtoAnotherColumn{
+) *moveCardToAnotherColumn {
+    return &moveCardToAnotherColumn{
 		moveCardBetweenColumn,
         notifyMoveCard,
     }
@@ -40,10 +40,10 @@ func NewMoveCardtoAnotherColumn(
 // @Failure      404        {object} utils.ErrorEnvelope "Card or column not found"
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move [put]
-func(mc *moveCardtoAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
+func(mc *moveCardToAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
-		"file": "moveCardtoAnotherColumn.go",
-		"func": "moveCardtoAnotherColumn.Handle",
+		"file": "moveCardToAnotherColumn.go",
+		"func": "moveCardToAnotherColumn.Handle",
 		"line": 0,
 	}
 	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")

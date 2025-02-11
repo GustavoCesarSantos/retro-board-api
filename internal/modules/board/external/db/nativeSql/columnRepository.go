@@ -125,6 +125,106 @@ func (cr *columnRepository) FindAllByBoardId(boardId int64, limit int, lastId in
     }, nil
 }
 
+func (cr *columnRepository) FindById(columnId int64) (*domain.Column, error) {
+    query := `
+        SELECT
+            id,
+            name,
+            color,
+            position,
+            created_at,
+            updated_at
+        FROM
+            board_columns
+        WHERE
+            id = $1;
+    `
+	var column domain.Column
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	err := cr.DB.QueryRowContext(ctx, query, columnId).Scan(
+		&column.ID,
+        &column.Name,
+        &column.Color,
+        &column.Position,
+		&column.CreatedAt,
+		&column.UpdatedAt,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, utils.ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &column, nil
+}
+
+func (cr *columnRepository) MoveOtherColumnsToLeftByColumnId(columnId int64, positionFrom int, positionTo int) error {
+    query := `
+        UPDATE
+           board_columns 
+        SET
+            position = position - 1
+        WHERE
+            id <> $1
+            AND position > $2
+            AND position <= $3;
+    `
+	args := []any{
+        columnId,
+        positionFrom,
+        positionTo,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	result, err := cr.DB.ExecContext(ctx, query, args...)
+    if err != nil {
+        return err
+    }
+    rowsAffected, rowsAffectedErr := result.RowsAffected()
+    if rowsAffectedErr != nil {
+        return rowsAffectedErr
+    }
+    if rowsAffected == 0 {
+        return utils.ErrRecordNotFound
+    }
+    return nil
+}
+
+func (cr *columnRepository) MoveOtherColumnsToRightByColumnId(columnId int64, positionFrom int, positionTo int) error {
+    query := `
+        UPDATE
+           board_columns 
+        SET
+            position = position + 1
+        WHERE
+            id <> $1
+            AND position < $2
+            AND position >= $3;
+    `
+	args := []any{
+        columnId,
+        positionFrom,
+        positionTo,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	result, err := cr.DB.ExecContext(ctx, query, args...)
+    if err != nil {
+        return err
+    }
+    rowsAffected, rowsAffectedErr := result.RowsAffected()
+    if rowsAffectedErr != nil {
+        return rowsAffectedErr
+    }
+    if rowsAffected == 0 {
+        return utils.ErrRecordNotFound
+    }
+    return nil
+}
+
 func (cr *columnRepository) Save(column *domain.Column) error {
     query := `
         INSERT INTO board_columns (
@@ -158,13 +258,15 @@ func (cr *columnRepository) Update(columnId int64, column db.UpdateColumnParams)
            board_columns 
         SET
             name = $1,
-            color = $2
+            color = $2,
+            position = $3
         WHERE
-            id = $3;
+            id = $4;
     `
 	args := []any{
         column.Name,
         column.Color,
+        column.Position,
         columnId,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

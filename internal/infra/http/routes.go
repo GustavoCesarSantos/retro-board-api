@@ -98,6 +98,7 @@ func routes(db *sql.DB) http.Handler {
 	findAllTeams := teamApplication.NewFindAllTeams(teamRepository)
 	findBoard := boardApplication.NewFindBoard(boardRepository)
 	findCard := boardApplication.NewFindCard(cardRepository)
+	findColumn := boardApplication.NewFindColumn(columnRepository)
 	findMemberInfosByEmail := teamApplication.NewFindMemberInfoByEmail(userPublicApiProvider)
 	findPoll := pollApplication.NewFindPoll(pollRepository)
 	findTeam := teamApplication.NewFindTeam(teamRepository)
@@ -184,6 +185,7 @@ func routes(db *sql.DB) http.Handler {
 	listAllTeams := team.NewListAllTeams(findAllTeams)
 	listBoard := board.NewListBoard(findBoard)
 	listCard := board.NewListCard(findCard)
+	listColumn := board.NewListColumn(findColumn)
 	listPoll := poll.NewListPoll(findPoll)
 	moveCardToAnotherColumn := board.NewMoveCardtoAnotherColumn(
 		moveCardBetweenColumns,
@@ -289,6 +291,13 @@ func routes(db *sql.DB) http.Handler {
 		teamMemberValidator.EnsureMemberAccess(
 			boardValidator.EnsureBoardOwnership(
 				listAllColumns.Handle,
+			),
+		),
+	))
+	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns/:columnId", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			boardValidator.EnsureBoardOwnership(
+				listColumn.Handle,
 			),
 		),
 	))

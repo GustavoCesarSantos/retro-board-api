@@ -34,7 +34,7 @@ func (cr *columnRepository) CountColumnsByBoardId(boardId int64) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err := cr.DB.QueryRowContext(ctx, query, boardId).Scan(
-        total,
+        &total,
 	)
 	if err != nil {
 		switch {
@@ -166,7 +166,8 @@ func (cr *columnRepository) MoveOtherColumnsToLeftByColumnId(columnId int64, pos
         UPDATE
            board_columns 
         SET
-            position = position - 1
+            position = position - 1,
+            updated_at = NOW()
         WHERE
             id <> $1
             AND position > $2
@@ -198,7 +199,8 @@ func (cr *columnRepository) MoveOtherColumnsToRightByColumnId(columnId int64, po
         UPDATE
            board_columns 
         SET
-            position = position + 1
+            position = position + 1,
+            updated_at = NOW()
         WHERE
             id <> $1
             AND position < $2
@@ -259,7 +261,8 @@ func (cr *columnRepository) Update(columnId int64, column db.UpdateColumnParams)
         SET
             name = $1,
             color = $2,
-            position = $3
+            position = $3,
+            updated_at = NOW()
         WHERE
             id = $4;
     `

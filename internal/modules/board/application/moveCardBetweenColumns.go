@@ -23,7 +23,6 @@ func (mc *moveCardBetweenColumns) Execute(cardId int64, columnId int64) error {
         Text *string
         ColumnId *int64
     }{
-        Text: nil,
         ColumnId: &columnId,
     }
     return mc.repository.Update(cardId, card)

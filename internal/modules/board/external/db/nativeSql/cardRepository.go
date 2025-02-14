@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
@@ -49,6 +51,7 @@ func (cr *cardRepository) FindAllByColumnId(columnId int64, limit int, lastId in
     query := `
         SELECT
             id,
+            column_id,
             member_id,
             text,
             created_at,
@@ -75,6 +78,7 @@ func (cr *cardRepository) FindAllByColumnId(columnId int64, limit int, lastId in
         var card domain.Card
         err := rows.Scan(
             &card.ID,
+            &card.ColumnId,
             &card.MemberId,
             &card.Text,
             &card.CreatedAt,
@@ -160,20 +164,25 @@ func (cr *cardRepository) Save(card *domain.Card) error {
 }
 
 func (cr *cardRepository) Update(cardId int64, card db.UpdateCardParams) error {
-    query := `
-        UPDATE
-            board_cards 
-        SET
-            text = $1,
-            column_id = $2
-        WHERE
-            id = $3;
-    `
-	args := []any{
-        card.Text,
-        card.ColumnId,
-        cardId,
+    if card.Text == nil && card.ColumnId == nil {
+		return errors.New("NO CARD FIELD PROVIDED FOR UPDATING")
 	}
+    query := "UPDATE board_cards SET"
+	var args []interface{}
+	argPos := 1
+    if card.Text != nil {
+		query += " text = $" + strconv.Itoa(argPos) + ","
+		args = append(args, *card.Text)
+		argPos++
+	}
+	if card.ColumnId != nil {
+		query += " column_id = $" + strconv.Itoa(argPos) + ","
+		args = append(args, *card.ColumnId)
+		argPos++
+	}
+    query += " updated_at = NOW()"
+    query = strings.TrimSuffix(query, ",") + " WHERE id = $" + strconv.Itoa(argPos)
+	args = append(args, cardId)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	result, err := cr.DB.ExecContext(ctx, query, args...)

@@ -115,6 +115,7 @@ func routes(db *sql.DB) http.Handler {
 	)
     notifyCountVotes := pollApplication.NewNotifyCountVotes(gorillaWebSocketProvider)
     notifyMoveCard := boardApplication.NewNotifyMoveCard(gorillaWebSocketProvider)
+    notifyRemoveCard := boardApplication.NewNotifyRemoveCard(gorillaWebSocketProvider)
     notifySaveCard := boardApplication.NewNotifySaveCard(gorillaWebSocketProvider)
     notifySaveVote := pollApplication.NewNotifySaveVote(gorillaWebSocketProvider)
     notifyUpdateCard := boardApplication.NewNotifyUpdateCard(gorillaWebSocketProvider)
@@ -162,6 +163,7 @@ func routes(db *sql.DB) http.Handler {
 	createTeam := team.NewCreateTeam(removeTeam, saveMember, saveTeam)
 	deleteBoard := board.NewDeleteBoard(removeBoard)
 	deleteCard := board.NewDeleteCard(
+		notifyRemoveCard,
 		removeCard,
 	)
 	deleteColumn := board.NewDeleteColumn(
@@ -229,12 +231,6 @@ func routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google", signinWithGoogle.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google/callback", signinWithGoogleCallback.Handle)
 	router.HandlerFunc(http.MethodPost, "/v1/auth/signout", userAuthenticator.Authenticate(signoutUser.Handle))
-
-    router.HandlerFunc(http.MethodGet, "/v1/ws/teams/:teamdId/boards/:boardId", userAuthenticator.Authenticate(
-        teamMemberValidator.EnsureMemberAccess(
-            connectToBoardRoom.Handle,
-        ),
-    ))
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
 	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))
@@ -439,6 +435,12 @@ func routes(db *sql.DB) http.Handler {
 	))
 
 	router.Handler(http.MethodGet, "/v1/docs/*filepath", httpSwagger.WrapHandler)
+
+	router.HandlerFunc(http.MethodGet, "/v1/ws/teams/:teamId/boards/:boardId", userAuthenticator.AuthenticateWebSocket(
+        teamMemberValidator.EnsureMemberAccess(
+            connectToBoardRoom.Handle,
+        ),
+	))
 
 	return middleware.RecoverPanic(middleware.EnableCORS(router))
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
@@ -162,20 +164,25 @@ func (br *boardRepository) Save(board *domain.Board) error {
 }
 
 func (br *boardRepository) Update(boardId int64, board db.UpdateBoardParams) error {
-    query := `
-        UPDATE
-            boards
-        SET
-            name = $1,
-            active = $2
-        WHERE
-            id = $3;
-    `
-	args := []any{
-        board.Name,
-        board.Active,
-        boardId,
+    if board.Name == nil && board.Active == nil {
+		return errors.New("NO BOARD FIELD PROVIDED FOR UPDATING")
 	}
+    query := "UPDATE boards SET"
+	var args []interface{}
+	argPos := 1
+    if board.Name != nil {
+		query += " name = $" + strconv.Itoa(argPos) + ","
+		args = append(args, *board.Name)
+		argPos++
+	}
+	if board.Active != nil {
+		query += " active = $" + strconv.Itoa(argPos) + ","
+		args = append(args, *board.Active)
+		argPos++
+	}
+    query += " updated_at = NOW()"
+    query = strings.TrimSuffix(query, ",") + " WHERE id = $" + strconv.Itoa(argPos)
+	args = append(args,boardId) 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	result, err := br.DB.ExecContext(ctx, query, args...)

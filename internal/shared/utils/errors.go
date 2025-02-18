@@ -37,7 +37,7 @@ func errorResponse(w http.ResponseWriter, r *http.Request, status int, message a
 	data := Envelope{"error": message}
 	err := WriteJSON(w, status, data, nil)
 	if err != nil {
-        logError(r, err, Envelope{"file": "errors.go", "func": "errorResponse", "line": 39})
+        logError(r, err, Envelope{"file": "errors.go", "func": "errorResponse", "line": 40})
 		w.WriteHeader(500)
 	}
 }

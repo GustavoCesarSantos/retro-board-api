@@ -9,13 +9,16 @@ import (
 )
 
 type deleteCard struct {
+	notifyRemoveCard application.INotifyRemoveCard
 	removeCard application.IRemoveCard
 }
 
 func NewDeleteCard(
+	notifyRemoveCard application.INotifyRemoveCard,
 	removeCard application.IRemoveCard,
 ) *deleteCard {
     return &deleteCard{
+		notifyRemoveCard,
 		removeCard,
     }
 }
@@ -41,6 +44,16 @@ func(dc *deleteCard) Handle(w http.ResponseWriter, r *http.Request) {
 		"func": "deleteCard.Handle",
 		"line": 0,
 	}
+	boardId, boardIdErr := utils.ReadIDParam(r, "boardId")
+	if boardIdErr != nil {
+		utils.BadRequestResponse(w, r, boardIdErr, metadataErr)
+		return
+	}
+	columnId, columnIdErr := utils.ReadIDParam(r, "columnId")
+	if columnIdErr != nil {
+		utils.BadRequestResponse(w, r, columnIdErr, metadataErr)
+		return
+	}
 	cardId, cardIdErr := utils.ReadIDParam(r, "cardId")
 	if cardIdErr != nil {
 		utils.NotFoundResponse(w, r, metadataErr)
@@ -56,6 +69,7 @@ func(dc *deleteCard) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 		return
     }
+	dc.notifyRemoveCard.Execute(boardId, columnId, cardId)
 	writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)

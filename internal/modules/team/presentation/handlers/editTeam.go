@@ -27,9 +27,9 @@ func(et *editTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		"func": "editTeam.Handle",
 		"line": 0,
 	}
-	memberId, memberIdErr := utils.ReadIDParam(r, "memberId")
-	if memberIdErr != nil {
-		utils.BadRequestResponse(w, r, memberIdErr, metadataErr)
+	teamId, teamIdErr := utils.ReadIDParam(r, "teamId")
+	if teamIdErr != nil {
+		utils.BadRequestResponse(w, r, teamIdErr, metadataErr)
 		return
 	}
 	var input dtos.EditTeamRequest
@@ -38,7 +38,7 @@ func(et *editTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
-    updateErr := et.updateTeam.Execute(memberId, input.Name)
+    updateErr := et.updateTeam.Execute(teamId, input.Name)
 	if updateErr != nil {
 		switch {
 		case errors.Is(updateErr, utils.ErrRecordNotFound):

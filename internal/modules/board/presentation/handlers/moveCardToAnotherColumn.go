@@ -77,7 +77,7 @@ func(mc *moveCardToAnotherColumn) Handle(w http.ResponseWriter, r *http.Request)
 		}
 		return
     }
-    mc.notifyMoveCard.Execute(boardId, columnId, cardId)
+    mc.notifyMoveCard.Execute(boardId, columnId, input.NewColumnId, cardId)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board/domain"
@@ -255,23 +257,30 @@ func (cr *columnRepository) Save(column *domain.Column) error {
 }
 
 func (cr *columnRepository) Update(columnId int64, column db.UpdateColumnParams) error {
-    query := `
-        UPDATE
-           board_columns 
-        SET
-            name = $1,
-            color = $2,
-            position = $3,
-            updated_at = NOW()
-        WHERE
-            id = $4;
-    `
-	args := []any{
-        column.Name,
-        column.Color,
-        column.Position,
-        columnId,
+    if column.Name == nil && column.Color == nil && column.Position == nil {
+		return errors.New("NO COLUMN FIELD PROVIDED FOR UPDATING")
 	}
+    query := "UPDATE board_columns SET"
+	var args []interface{}
+	argPos := 1
+    if column.Name != nil {
+		query += " name = $" + strconv.Itoa(argPos) + ","
+		args = append(args, *column.Name)
+		argPos++
+	}
+	if column.Color != nil {
+		query += " color = $" + strconv.Itoa(argPos) + ","
+		args = append(args, *column.Color)
+		argPos++
+	}
+    if column.Position != nil {
+		query += " position = $" + strconv.Itoa(argPos) + ","
+		args = append(args, *column.Position)
+		argPos++
+	}
+    query += " updated_at = NOW()"
+    query = strings.TrimSuffix(query, ",") + " WHERE id = $" + strconv.Itoa(argPos)
+	args = append(args, columnId)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	result, err := cr.DB.ExecContext(ctx, query, args...)

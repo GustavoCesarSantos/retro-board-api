@@ -24,7 +24,7 @@ func NewTeamMemberRepository() db.ITeamMemberRepository {
 func (tm *teamMemberRepository) Delete(teamId int64, memberId int64,) error {
 	i := 0
 	for _, member := range tm.teamMembers {
-		if !(member.TeamId == teamId && member.MemberId == memberId) {
+		if !(member.TeamId == teamId && member.User.ID == memberId) {
 			tm.teamMembers[i] = member
 			i++
 		}
@@ -43,9 +43,18 @@ func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMem
     return teamMembers, nil
 }
 
+func (tm *teamMemberRepository) FindById(memberId int64) (*domain.TeamMember, error) {
+    for _, teamMember := range tm.teamMembers {
+        if teamMember.ID == memberId {
+            return &teamMember, nil
+        }
+    }
+    return nil, utils.ErrRecordNotFound
+}
+
 func (tm *teamMemberRepository) FindTeamAdminByMemberId(teamId int64, memberId int64) (*domain.TeamMember, error) {
     for _, teamMember := range tm.teamMembers {
-        if teamMember.TeamId == teamId && teamMember.MemberId == memberId && teamMember.RoleId == 1 {
+        if teamMember.TeamId == teamId && teamMember.User.ID == memberId && teamMember.Role.ID == 1 {
             return &teamMember, nil
         }
     }
@@ -59,7 +68,7 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
 
 func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateMemberParams) error {
 	for i := range tm.teamMembers {
-		if tm.teamMembers[i].MemberId == memberId {
+		if tm.teamMembers[i].User.ID == memberId {
             if member.Status != nil {
                 tm.teamMembers[i].Status = *member.Status
             }
@@ -71,8 +80,8 @@ func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateMemberPar
 
 func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, roleId int64) error {
 	for i := range tm.teamMembers {
-		if tm.teamMembers[i].TeamId == teamId && tm.teamMembers[i].MemberId == memberId {
-			tm.teamMembers[i].RoleId = roleId
+		if tm.teamMembers[i].TeamId == teamId && tm.teamMembers[i].User.ID == memberId {
+			tm.teamMembers[i].Role.ID = roleId
 			break
 		}
 	}

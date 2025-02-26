@@ -45,8 +45,10 @@ func (lt *listAllMembers) Handle(w http.ResponseWriter, r *http.Request) {
 		response = append(response, dtos.NewListAllMembersResponse(
 			member.ID,
 			member.TeamId,
-			member.MemberId,
-			member.RoleId,
+			member.User.Name,
+			member.User.Email,
+			member.Role.ID,
+			member.Role.Name,
 			member.Status,
 			member.CreatedAt,
 			member.UpdatedAt,

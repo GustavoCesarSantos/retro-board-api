@@ -8,7 +8,7 @@ import (
 )
 
 type INotifyUpdateCard interface { 
-    Execute(boardId int64, columnId int64, cardText string)
+    Execute(boardId int64, columnId int64, cardId int64, cardText string)
 }
 
 type notifyUpdateCard struct {
@@ -21,13 +21,14 @@ func NewNotifyUpdateCard(roomManager interfaces.IRoomManagerApi) INotifyUpdateCa
     }
 }
 
-func (nsc *notifyUpdateCard) Execute(boardId int64, columnId int64, cardText string) {
+func (nsc *notifyUpdateCard) Execute(boardId int64, columnId int64, cardId int64, cardText string) {
     message := []byte(
         fmt.Sprintf(
-            `{ "event": %s, "data": { "boardId": %d,  "columnId": %d, "cardText": %s  } }`,
+            `{ "event": "%s", "data": { "boardId": %d,  "columnId": %d, "cardId": %d, "cardText": "%s" } }`,
             utils.EditCardEvent,
             boardId,
             columnId,
+            cardId,
             cardText,
         ),
     )

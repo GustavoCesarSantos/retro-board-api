@@ -40,9 +40,9 @@ func (tmv *teamMemberValidator) EnsureMemberAccess(next http.HandlerFunc) http.H
 		found := false
 		canEdit := false
 		for _, teamMember := range teamMembers {
-			if teamMember.MemberId == user.ID  {
+			if teamMember.User.ID == user.ID  {
 				found = true
-				if teamMember.RoleId != 3 {
+				if teamMember.Role.ID != 3 {
 					canEdit = true
 				} 
 				break

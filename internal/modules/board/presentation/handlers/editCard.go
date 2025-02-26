@@ -77,7 +77,7 @@ func(ec *editCard) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 		return
     }
-    ec.notifyUpdateCard.Execute(boardId, columnId, *input.Text)
+    ec.notifyUpdateCard.Execute(boardId, columnId, cardId, *input.Text)
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)

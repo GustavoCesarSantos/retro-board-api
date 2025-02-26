@@ -24,7 +24,7 @@ func NewNotifyMoveCard(roomManager interfaces.IRoomManagerApi) INotifyMoveCard {
 func (nmc *notifyMoveCard) Execute(boardId int64, fromColumnId int64, toColumnId int64, cardId int64) {
     message := []byte(
         fmt.Sprintf(
-            `{ "event": %s, "data": { "boardId": %d,  "fromColumnId": %d,  "toColumnId": %d, "cardId": %d  } }`,
+            `{ "event": "%s", "data": { "boardId": %d,  "fromColumnId": %d,  "toColumnId": %d, "cardId": %d  } }`,
             utils.MoveCardEvent,
             boardId,
             fromColumnId,

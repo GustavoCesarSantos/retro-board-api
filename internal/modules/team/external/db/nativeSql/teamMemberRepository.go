@@ -49,15 +49,26 @@ func (tm *teamMemberRepository) Delete(teamId int64, memberId int64) error {
 func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMember, error) {
 	query := `
         SELECT
-            id,
-            team_id,
-            member_id,
-            role_id,
-            status,
-            created_at,
-            updated_at
+            tm.id,
+            tm.team_id,
+            u.id,
+            u.name,
+            u.email,
+            tr.id,
+            tr.name,
+            tm.status,
+            tm.created_at,
+            tm.updated_at
         FROM
-            team_members
+            team_members tm
+        INNER JOIN
+            users u
+        ON
+            tm.member_id = u.id
+        INNER JOIN
+            team_roles tr
+        ON
+           tr.id = tm.role_id 
         WHERE
             team_id = $1
             AND status = 'active';
@@ -75,9 +86,12 @@ func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMem
 		err := rows.Scan(
 			&teamMember.ID,
 			&teamMember.TeamId,
-			&teamMember.MemberId,
-			&teamMember.RoleId,
-            &teamMember.Status,
+			&teamMember.User.ID,
+			&teamMember.User.Name,
+			&teamMember.User.Email,
+			&teamMember.Role.ID,
+			&teamMember.Role.Name,
+			&teamMember.Status,
 			&teamMember.CreatedAt,
 			&teamMember.UpdatedAt,
 		)
@@ -90,6 +104,44 @@ func (tm *teamMemberRepository) FindAllByTeamId(teamId int64) ([]*domain.TeamMem
 		return nil, rowsErr
 	}
 	return teamMembers, nil
+}
+
+func (tm *teamMemberRepository) FindById(memberId int64) (*domain.TeamMember, error) {
+	query := `
+        SELECT
+            id,
+            team_id,
+            member_id,
+            role_id,
+            status,
+            created_at,
+            updated_at
+        FROM
+            team_members
+        WHERE
+            id = $1;
+    `
+	var teamMember domain.TeamMember
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	err := tm.DB.QueryRowContext(ctx, query, memberId).Scan(
+		&teamMember.ID,
+		&teamMember.TeamId,
+		&teamMember.User.ID,
+		&teamMember.Role.ID,
+		&teamMember.Status,
+		&teamMember.CreatedAt,
+		&teamMember.UpdatedAt,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, utils.ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &teamMember, nil
 }
 
 func (tm *teamMemberRepository) FindTeamAdminByMemberId(
@@ -147,7 +199,12 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
             id,
             created_at
     `
-	args := []any{teamMember.MemberId, teamMember.TeamId, teamMember.RoleId, teamMember.Status}
+	args := []any{
+        teamMember.User.ID, 
+        teamMember.TeamId, 
+        teamMember.Role.ID, 
+        teamMember.Status,
+    }
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	return tm.DB.QueryRowContext(ctx, query, args...).Scan(
@@ -157,7 +214,7 @@ func (tm *teamMemberRepository) Save(teamMember *domain.TeamMember) error {
 }
 
 func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateMemberParams) error {
-    query := `
+	query := `
         UPDATE
             team_members
         SET
@@ -166,23 +223,23 @@ func (tm *teamMemberRepository) Update(memberId int64, member db.UpdateMemberPar
             memberId = $2;
     `
 	args := []any{
-        member.Status,
-        memberId,
+		member.Status,
+		memberId,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	result, err := tm.DB.ExecContext(ctx, query, args...)
-    if err != nil {
-        return err
-    }
-    rowsAffected, rowsAffectedErr := result.RowsAffected()
-    if rowsAffectedErr != nil {
-        return rowsAffectedErr
-    }
-    if rowsAffected == 0 {
-        return utils.ErrRecordNotFound
-    }
-    return nil
+	if err != nil {
+		return err
+	}
+	rowsAffected, rowsAffectedErr := result.RowsAffected()
+	if rowsAffectedErr != nil {
+		return rowsAffectedErr
+	}
+	if rowsAffected == 0 {
+		return utils.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (tm *teamMemberRepository) UpdateRole(teamId int64, memberId int64, roleId int64) error {

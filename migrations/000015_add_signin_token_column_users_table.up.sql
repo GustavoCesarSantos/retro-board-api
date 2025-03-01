@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN signin_token JSONB NULL;

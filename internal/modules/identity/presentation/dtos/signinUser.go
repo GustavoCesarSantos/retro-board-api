@@ -1,7 +1,7 @@
 package dtos
 
 type SigninUserRequest struct {
-	Email string `json:"email" example:"teste@teste.com"`
+	SigninToken string `json:"signin_token" example:"asdfasdfasd"`
 }
 
 type SigninUserResponse struct {

@@ -12,18 +12,18 @@ import (
 
 type signinUser struct {
     creatAuthToken application.ICreateAuthToken
-    findUserByEmail application.IFindUserByEmail
+    findUserBySigninToken application.IFindUserBySigninToken
 	incrementVersion application.IIncrementVersion
 }
 
 func NewSigninUser(
 	createAuthToken application.ICreateAuthToken,  
-	findUserByEmail application.IFindUserByEmail,
+	findUserBySigninToken application.IFindUserBySigninToken,
 	incrementVersion application.IIncrementVersion,
 ) *signinUser {
     return &signinUser{
         createAuthToken,
-        findUserByEmail,
+        findUserBySigninToken,
 		incrementVersion,
     }
 }
@@ -56,7 +56,7 @@ func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
-	user, findUserErr := su.findUserByEmail.Execute(input.Email)
+	user, findUserErr := su.findUserBySigninToken.Execute(input.SigninToken)
     if findUserErr != nil {
 		switch {
 		case errors.Is(findUserErr, utils.ErrRecordNotFound):

@@ -55,9 +55,14 @@ func(rmt *removeMemberFromTeam) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, memberIdErr, metadataErr)
 		return
 	}
+    if memberId == user.ID {
+		metadataErr["line"] = 59
+		utils.BadRequestResponse(w, r, errors.New("CAN'T REMOVE THIS USER."), metadataErr)
+		return
+    }
 	ensureAdminErr := rmt.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
-		metadataErr["line"] = 60
+		metadataErr["line"] = 65
 		utils.BadRequestResponse(w, r, ensureAdminErr, metadataErr)
 		return
 	}
@@ -65,7 +70,7 @@ func(rmt *removeMemberFromTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	if removeErr != nil {
 		switch {
 		case errors.Is(removeErr, utils.ErrRecordNotFound):
-			metadataErr["line"] = 68
+			metadataErr["line"] = 73
             utils.NotFoundResponse(w, r, metadataErr)
 		default:
 			metadataErr["line"] = 71

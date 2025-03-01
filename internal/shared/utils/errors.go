@@ -67,7 +67,7 @@ func MethodNotAllowedResponse(w http.ResponseWriter, r *http.Request, metadataEr
 }
 
 func NotFoundResponse(w http.ResponseWriter, r *http.Request, metadataErr Envelope) {
-	message := "The requeted resource could not be found"
+	message := "The requested resource could not be found"
 	errorResponse(w, r, http.StatusNotFound, message, metadataErr)
 }
 

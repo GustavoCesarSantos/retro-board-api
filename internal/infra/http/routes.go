@@ -41,12 +41,12 @@ func routes(db *sql.DB) http.Handler {
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr["line"] = 42
 		utils.NotFoundResponse(w, r, metadataErr)
-		return 
+		return
 	})
 	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr["line"] = 47
 		utils.MethodNotAllowedResponse(w, r, metadataErr)
-		return 
+		return
 	})
 
 	//Init Repos
@@ -60,20 +60,22 @@ func routes(db *sql.DB) http.Handler {
 	userRepository := userDb.NewUserRepository(db)
 	voteRepository := pollDb.NewVoteRepository(db)
 
-    //Init Provider
-    gorillaWebSocketProvider := providers.NewGorillaWebSocket()
+	//Init Provider
+	gorillaWebSocketProvider := providers.NewGorillaWebSocket()
 
-    //Init Public Api Provider
+	//Init Public Api Provider
 	boardPublicApiProvider := boardProvider.NewBoardPublicApiProvider(
 		boardRepository,
 		cardRepository,
 		columnRepository,
 	)
 	pollPublicApiProvider := pollProvider.NewPollPublicApiProvider(
-		optionRepository, 
+		optionRepository,
 		pollRepository,
 	)
-	teamMemberPublicApiProvider := teamMemberProvider.NewTeamMemberPublicApiProvider(teamMemberRepository)
+	teamMemberPublicApiProvider := teamMemberProvider.NewTeamMemberPublicApiProvider(
+		teamMemberRepository,
+	)
 	userPublicApiProvider := identityProvider.NewUserPublicApiProvider(userRepository)
 
 	//Init Middlewares
@@ -84,7 +86,7 @@ func routes(db *sql.DB) http.Handler {
 
 	//Init Use Cases
 	countVotesByPollId := pollApplication.NewCountVotesByPollId(
-		optionRepository, 
+		optionRepository,
 		voteRepository,
 	)
 	createAuthToken := identityApplication.NewCreateAuthToken()
@@ -93,7 +95,7 @@ func routes(db *sql.DB) http.Handler {
 	findAllBoards := boardApplication.NewFindAllBoards(boardRepository)
 	findAllCards := boardApplication.NewFindAllCards(cardRepository)
 	findAllColumns := boardApplication.NewFindAllColumns(columnRepository)
-    findAllMembers := teamApplication.NewFindAllMembers(teamMemberRepository)
+	findAllMembers := teamApplication.NewFindAllMembers(teamMemberRepository)
 	findAllPolls := pollApplication.NewFindAllPolls(pollRepository)
 	findAllTeams := teamApplication.NewFindAllTeams(teamRepository)
 	findBoard := boardApplication.NewFindBoard(boardRepository)
@@ -103,6 +105,7 @@ func routes(db *sql.DB) http.Handler {
 	findPoll := pollApplication.NewFindPoll(pollRepository)
 	findTeam := teamApplication.NewFindTeam(teamRepository)
 	findUserByEmail := identityApplication.NewFindUserByEmail(userRepository)
+	findUserBySigninToken := identityApplication.NewFindUserBySigninToken(userRepository)
 	getNextColumnPosition := boardApplication.NewGetNextColumnPosition(
 		columnRepository,
 	)
@@ -110,15 +113,15 @@ func routes(db *sql.DB) http.Handler {
 	moveCardBetweenColumns := boardApplication.NewMoveCardBetweenColumns(
 		cardRepository,
 	)
-    moveColumn := boardApplication.NewMoveColumn(
+	moveColumn := boardApplication.NewMoveColumn(
 		columnRepository,
 	)
-    notifyCountVotes := pollApplication.NewNotifyCountVotes(gorillaWebSocketProvider)
-    notifyMoveCard := boardApplication.NewNotifyMoveCard(gorillaWebSocketProvider)
-    notifyRemoveCard := boardApplication.NewNotifyRemoveCard(gorillaWebSocketProvider)
-    notifySaveCard := boardApplication.NewNotifySaveCard(gorillaWebSocketProvider)
-    notifySaveVote := pollApplication.NewNotifySaveVote(gorillaWebSocketProvider)
-    notifyUpdateCard := boardApplication.NewNotifyUpdateCard(gorillaWebSocketProvider)
+	notifyCountVotes := pollApplication.NewNotifyCountVotes(gorillaWebSocketProvider)
+	notifyMoveCard := boardApplication.NewNotifyMoveCard(gorillaWebSocketProvider)
+	notifyRemoveCard := boardApplication.NewNotifyRemoveCard(gorillaWebSocketProvider)
+	notifySaveCard := boardApplication.NewNotifySaveCard(gorillaWebSocketProvider)
+	notifySaveVote := pollApplication.NewNotifySaveVote(gorillaWebSocketProvider)
+	notifyUpdateCard := boardApplication.NewNotifyUpdateCard(gorillaWebSocketProvider)
 	removeBoard := boardApplication.NewRemoveBoard(boardRepository)
 	removeCard := boardApplication.NewRemoveCard(cardRepository)
 	removeColumn := boardApplication.NewRemoveColumn(columnRepository)
@@ -137,21 +140,22 @@ func routes(db *sql.DB) http.Handler {
 	updateBoard := boardApplication.NewUpdateBoard(boardRepository)
 	updateCard := boardApplication.NewUpdateCard(cardRepository)
 	updateColumn := boardApplication.NewUpdateColumn(columnRepository)
-    updateMember := teamApplication.NewUpdateMember(teamMemberRepository)
+	updateMember := teamApplication.NewUpdateMember(teamMemberRepository)
 	updateRole := teamApplication.NewUpdateRole(teamMemberRepository)
-    updateTeam := teamApplication.NewUpdateTeam(teamRepository)
+    updateSigninToken := identityApplication.NewUpdateSigninToken(userRepository)
+	updateTeam := teamApplication.NewUpdateTeam(teamRepository)
 
 	//Init Handlers
 	addMemberToTeam := team.NewAddMemberToTeam(
-		ensureAdminMembership, 
-		findMemberInfosByEmail, 
+		ensureAdminMembership,
+		findMemberInfosByEmail,
 		saveMember,
 	)
 	changeMemberRole := team.NewChangeMemberRole(ensureAdminMembership, updateRole)
-    connectToBoardRoom := realtime.NewConnectToBoardRoom(gorillaWebSocketProvider)
+	connectToBoardRoom := realtime.NewConnectToBoardRoom(gorillaWebSocketProvider)
 	createBoard := board.NewCreateBoard(saveBoard)
 	createCard := board.NewCreateCard(
-        notifySaveCard,
+		notifySaveCard,
 		saveCard,
 	)
 	createColumn := board.NewCreateColumn(
@@ -172,17 +176,17 @@ func routes(db *sql.DB) http.Handler {
 	deleteOption := poll.NewDeleteOption(
 		removeOption,
 	)
-    deleteTeam := team.NewDeleteTeam(ensureAdminMembership, removeTeam)
+	deleteTeam := team.NewDeleteTeam(ensureAdminMembership, removeTeam)
 	editBoard := board.NewEditBoard(updateBoard)
 	editCard := board.NewEditCard(notifyUpdateCard, updateCard)
 	editColumn := board.NewEditColumn(updateColumn)
-    editMember := team.NewEditMember(updateMember)
-    editTeam := team.NewEditTeam(updateTeam)
+	editMember := team.NewEditMember(updateMember)
+	editTeam := team.NewEditTeam(updateTeam)
 	healthcheck := monitor.NewHealthcheck()
 	listAllBoards := board.NewListAllBoards(findAllBoards)
 	listAllCards := board.NewListAllCards(findAllCards)
 	listAllColumns := board.NewListAllColumns(findAllColumns)
-    listAllMembers := team.NewListAllMembers(findAllMembers)
+	listAllMembers := team.NewListAllMembers(findAllMembers)
 	listAllPolls := poll.NewListAllPolls(findAllPolls)
 	listAllTeams := team.NewListAllTeams(findAllTeams)
 	listBoard := board.NewListBoard(findBoard)
@@ -191,58 +195,118 @@ func routes(db *sql.DB) http.Handler {
 	listPoll := poll.NewListPoll(findPoll)
 	moveCardToAnotherColumn := board.NewMoveCardtoAnotherColumn(
 		moveCardBetweenColumns,
-        notifyMoveCard,
+		notifyMoveCard,
 	)
-    moveColumnToAnotherPosition := board.NewMoveColumnToAnotherPosition(
-        moveColumn,
-    )
+	moveColumnToAnotherPosition := board.NewMoveColumnToAnotherPosition(
+		moveColumn,
+	)
 	refreshAuthToken := identity.NewRefreshAuthToken(
-		createAuthToken, 
+		createAuthToken,
 		decodeAuthToken,
 		findUserByEmail,
 	)
 	removeMemberFromTeam := team.NewRemoveMemberFromTeam(
-		ensureAdminMembership, 
+		ensureAdminMembership,
 		removeMember,
 	)
 	showPollResult := poll.NewShowPollResult(
 		countVotesByPollId,
-        notifyCountVotes,
+		notifyCountVotes,
 	)
 	showTeam := team.NewShowTeam(findTeam)
 	signinUser := identity.NewSigninUser(
-		createAuthToken, 
-		findUserByEmail, 
+		createAuthToken,
+		findUserBySigninToken,
 		incrementVersion,
 	)
 	signinWithGoogle := identity.NewSigninWithGoogle()
 	signinWithGoogleCallback := identity.NewSigninWithGoogleCallback(
-		findUserByEmail, 
+		findUserByEmail,
 		saveUser,
+        updateSigninToken,
 	)
-	signoutUser := identity.NewSignoutUser(incrementVersion)
+	signoutUser := identity.NewSignoutUser(incrementVersion, updateSigninToken)
 	vote := poll.NewVote(notifySaveVote, saveVote)
-
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", healthcheck.Handle)
 
 	router.HandlerFunc(http.MethodPost, "/v1/auth/refresh-token", refreshAuthToken.Handle)
 	router.HandlerFunc(http.MethodPost, "/v1/auth/signin", signinUser.Handle)
 	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google", signinWithGoogle.Handle)
-	router.HandlerFunc(http.MethodGet, "/v1/auth/signin/google/callback", signinWithGoogleCallback.Handle)
-	router.HandlerFunc(http.MethodPost, "/v1/auth/signout", userAuthenticator.Authenticate(signoutUser.Handle))
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/auth/signin/google/callback",
+		signinWithGoogleCallback.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodPost,
+		"/v1/auth/signout",
+		userAuthenticator.Authenticate(signoutUser.Handle),
+	)
 
-	router.HandlerFunc(http.MethodPost, "/v1/teams", userAuthenticator.Authenticate(createTeam.Handle))
-	router.HandlerFunc(http.MethodGet, "/v1/teams", userAuthenticator.Authenticate(listAllTeams.Handle))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId", userAuthenticator.Authenticate(showTeam.Handle))
-	router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId", userAuthenticator.Authenticate(editTeam.Handle))
-	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId", userAuthenticator.Authenticate(deleteTeam.Handle))
+	router.HandlerFunc(
+		http.MethodPost,
+		"/v1/teams",
+		userAuthenticator.Authenticate(createTeam.Handle),
+	)
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams",
+		userAuthenticator.Authenticate(listAllTeams.Handle),
+	)
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId",
+		userAuthenticator.Authenticate(showTeam.Handle),
+	)
+	router.HandlerFunc(
+		http.MethodPatch,
+		"/v1/teams/:teamId",
+		userAuthenticator.Authenticate(editTeam.Handle),
+	)
+	router.HandlerFunc(
+		http.MethodDelete,
+		"/v1/teams/:teamId",
+		userAuthenticator.Authenticate(deleteTeam.Handle),
+	)
 
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(listAllMembers.Handle))
-	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/members/:memberId", userAuthenticator.Authenticate(removeMemberFromTeam.Handle))
-	router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/roles", userAuthenticator.Authenticate(changeMemberRole.Handle))
-	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/members/invite", userAuthenticator.Authenticate(addMemberToTeam.Handle))
-    router.HandlerFunc(http.MethodPatch, "/v1/teams/:teamId/members/:memberId/accept-invite", userAuthenticator.Authenticate(editMember.Handle))
+	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/members", userAuthenticator.Authenticate(
+		teamMemberValidator.EnsureMemberAccess(
+			listAllMembers.Handle,
+		),
+	))
+	router.HandlerFunc(
+		http.MethodDelete,
+		"/v1/teams/:teamId/members/:memberId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				removeMemberFromTeam.Handle,
+			),
+		),
+	)
+	router.HandlerFunc(
+		http.MethodPatch,
+		"/v1/teams/:teamId/members/:memberId/roles",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				changeMemberRole.Handle,
+			),
+		),
+	)
+	router.HandlerFunc(
+		http.MethodPost,
+		"/v1/teams/:teamId/members/invite",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				addMemberToTeam.Handle,
+			),
+		),
+	)
+	router.HandlerFunc(
+		http.MethodPatch,
+		"/v1/teams/:teamId/members/:memberId/accept-invite",
+		userAuthenticator.Authenticate(editMember.Handle),
+	)
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards", userAuthenticator.Authenticate(
 		teamMemberValidator.EnsureMemberAccess(
@@ -254,140 +318,200 @@ func routes(db *sql.DB) http.Handler {
 			listAllBoards.Handle,
 		),
 	))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				listBoard.Handle,
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId/boards/:boardId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					listBoard.Handle,
+				),
 			),
 		),
-	))
-	router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				editBoard.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodPut,
+		"/v1/teams/:teamId/boards/:boardId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					editBoard.Handle,
+				),
 			),
 		),
-	))
-	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/boards/:boardId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				deleteBoard.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodDelete,
+		"/v1/teams/:teamId/boards/:boardId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					deleteBoard.Handle,
+				),
 			),
 		),
-	))
+	)
 
-	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards/:boardId/columns", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				createColumn.Handle,
-			),
-		),
-	))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				listAllColumns.Handle,
-			),
-		),
-	))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns/:columnId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				listColumn.Handle,
-			),
-		),
-	))
-	router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					editColumn.Handle,
+	router.HandlerFunc(
+		http.MethodPost,
+		"/v1/teams/:teamId/boards/:boardId/columns",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					createColumn.Handle,
 				),
 			),
 		),
-	))
-	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/boards/:boardId/columns/:columnId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					deleteColumn.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId/boards/:boardId/columns",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					listAllColumns.Handle,
 				),
 			),
 		),
-	))
+	)
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					listColumn.Handle,
+				),
+			),
+		),
+	)
+	router.HandlerFunc(
+		http.MethodPut,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						editColumn.Handle,
+					),
+				),
+			),
+		),
+	)
+	router.HandlerFunc(
+		http.MethodDelete,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						deleteColumn.Handle,
+					),
+				),
+			),
+		),
+	)
 
-	router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/move", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					moveColumnToAnotherPosition.Handle,
+	router.HandlerFunc(
+		http.MethodPut,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId/move",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						moveColumnToAnotherPosition.Handle,
+					),
 				),
 			),
 		),
-	))
+	)
 
-	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					createCard.Handle,
-				),
-			),
-		),
-	))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					listAllCards.Handle,
-				),
-			),
-		),
-	))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					boardValidator.EnsureCardOwnership(
-						listCard.Handle,
+	router.HandlerFunc(
+		http.MethodPost,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						createCard.Handle,
 					),
 				),
 			),
 		),
-	))
-	router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					boardValidator.EnsureCardOwnership(
-						editCard.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						listAllCards.Handle,
 					),
 				),
 			),
 		),
-	))
-	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					boardValidator.EnsureCardOwnership(
-						deleteCard.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						boardValidator.EnsureCardOwnership(
+							listCard.Handle,
+						),
 					),
 				),
 			),
 		),
-	))
-	router.HandlerFunc(http.MethodPut, "/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			boardValidator.EnsureBoardOwnership(
-				boardValidator.EnsureColumnOwnership(
-					boardValidator.EnsureCardOwnership(
-						moveCardToAnotherColumn.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodPut,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						boardValidator.EnsureCardOwnership(
+							editCard.Handle,
+						),
 					),
 				),
 			),
 		),
-	))
+	)
+	router.HandlerFunc(
+		http.MethodDelete,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						boardValidator.EnsureCardOwnership(
+							deleteCard.Handle,
+						),
+					),
+				),
+			),
+		),
+	)
+	router.HandlerFunc(
+		http.MethodPut,
+		"/v1/teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				boardValidator.EnsureBoardOwnership(
+					boardValidator.EnsureColumnOwnership(
+						boardValidator.EnsureCardOwnership(
+							moveCardToAnotherColumn.Handle,
+						),
+					),
+				),
+			),
+		),
+	)
 
 	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/polls", userAuthenticator.Authenticate(
 		teamMemberValidator.EnsureMemberAccess(
@@ -399,48 +523,68 @@ func routes(db *sql.DB) http.Handler {
 			listAllPolls.Handle,
 		),
 	))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls/:pollId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			pollValidator.EnsurePollOwnership(
-				listPoll.Handle,
-			),
-		),
-	))
-	router.HandlerFunc(http.MethodGet, "/v1/teams/:teamId/polls/:pollId/result", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			pollValidator.EnsurePollOwnership(
-				showPollResult.Handle,
-			),
-		),
-	))
-
-	router.HandlerFunc(http.MethodDelete, "/v1/teams/:teamId/polls/:pollId/options/:optionId", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			pollValidator.EnsurePollOwnership(
-				pollValidator.EnsureOptionOwnership(
-					deleteOption.Handle,
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId/polls/:pollId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				pollValidator.EnsurePollOwnership(
+					listPoll.Handle,
 				),
 			),
 		),
-	))
-
-	router.HandlerFunc(http.MethodPost, "/v1/teams/:teamId/polls/:pollId/options/:optionId/vote", userAuthenticator.Authenticate(
-		teamMemberValidator.EnsureMemberAccess(
-			pollValidator.EnsurePollOwnership(
-				pollValidator.EnsureOptionOwnership(
-					vote.Handle,
+	)
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/teams/:teamId/polls/:pollId/result",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				pollValidator.EnsurePollOwnership(
+					showPollResult.Handle,
 				),
 			),
 		),
-	))
+	)
+
+	router.HandlerFunc(
+		http.MethodDelete,
+		"/v1/teams/:teamId/polls/:pollId/options/:optionId",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				pollValidator.EnsurePollOwnership(
+					pollValidator.EnsureOptionOwnership(
+						deleteOption.Handle,
+					),
+				),
+			),
+		),
+	)
+
+	router.HandlerFunc(
+		http.MethodPost,
+		"/v1/teams/:teamId/polls/:pollId/options/:optionId/vote",
+		userAuthenticator.Authenticate(
+			teamMemberValidator.EnsureMemberAccess(
+				pollValidator.EnsurePollOwnership(
+					pollValidator.EnsureOptionOwnership(
+						vote.Handle,
+					),
+				),
+			),
+		),
+	)
 
 	router.Handler(http.MethodGet, "/v1/docs/*filepath", httpSwagger.WrapHandler)
 
-	router.HandlerFunc(http.MethodGet, "/v1/ws/teams/:teamId/boards/:boardId", userAuthenticator.AuthenticateWebSocket(
-        teamMemberValidator.EnsureMemberAccess(
-            connectToBoardRoom.Handle,
-        ),
-	))
+	router.HandlerFunc(
+		http.MethodGet,
+		"/v1/ws/teams/:teamId/boards/:boardId",
+		userAuthenticator.AuthenticateWebSocket(
+			teamMemberValidator.EnsureMemberAccess(
+				connectToBoardRoom.Handle,
+			),
+		),
+	)
 
 	return middleware.RecoverPanic(middleware.EnableCORS(router))
 }

@@ -10,13 +10,16 @@ import (
 
 type signoutUser struct {
 	incrementVersion application.IIncrementVersion
+	updateSigninToken application.IUpdateSigninToken
 }
 
 func NewSignoutUser(
 	incrementVersion application.IIncrementVersion,
+	updateSigninToken application.IUpdateSigninToken,
 ) *signoutUser {
     return &signoutUser{
 		incrementVersion,
+	    updateSigninToken,
     }
 }
 
@@ -47,6 +50,10 @@ func(su *signoutUser) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 		return
     }
+	updateSigninTokenErr := su.updateSigninToken.Execute(user.ID, "")
+	if updateSigninTokenErr != nil {
+		utils.ServerErrorResponse(w, r, updateSigninTokenErr, metadataErr)
+	}
     writeJsonErr := utils.WriteJSON(w, http.StatusNoContent, nil, nil)
 	if writeJsonErr != nil {
 		utils.ServerErrorResponse(w, r, writeJsonErr, metadataErr)

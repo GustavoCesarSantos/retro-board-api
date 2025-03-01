@@ -64,6 +64,11 @@ func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
+    if memberId == user.ID {
+		metadataErr["line"] = 59
+		utils.BadRequestResponse(w, r, errors.New("CAN'T CHANGE ROLE OF THIS USER."), metadataErr)
+		return
+    }
 	ensureAdminErr := cmp.ensureAdminMembership.Execute(teamId, user.ID)
 	if ensureAdminErr != nil {
 		metadataErr["line"] = 69

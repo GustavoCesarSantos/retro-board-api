@@ -8,12 +8,12 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listAllPolls struct {
+type ListAllPolls struct {
     findAllPolls application.IFindAllPolls
 }
 
-func NewListAllPolls(findAllPolls application.IFindAllPolls) *listAllPolls {
-    return &listAllPolls {
+func NewListAllPolls(findAllPolls application.IFindAllPolls) *ListAllPolls {
+    return &ListAllPolls {
         findAllPolls,
     }
 }
@@ -33,7 +33,7 @@ type ListAllPollsEnvelop struct {
 // @Failure      400        {object}  utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router       /teams/:teamId/polls [get]
-func(lp *listAllPolls) Handle(w http.ResponseWriter, r *http.Request) {
+func(lp *ListAllPolls) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listAllPolls.go",
 		"func": "listAllPolls.Handle",

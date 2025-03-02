@@ -8,10 +8,10 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type healthcheck struct {}
+type Healthcheck struct {}
 
-func NewHealthcheck() *healthcheck {
-    return &healthcheck{}
+func NewHealthcheck() *Healthcheck {
+    return &Healthcheck{}
 }
 
 type HealthCheckEnvelope struct {
@@ -26,7 +26,7 @@ type HealthCheckEnvelope struct {
 // @Success 200 {object} monitor.HealthCheckEnvelope "Health check result"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /healthcheck [get]
-func (hc *healthcheck) Handle(w http.ResponseWriter, r *http.Request) {
+func (hc *Healthcheck) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "healthcheck.go",
 		"func": "healthcheck.Handle",

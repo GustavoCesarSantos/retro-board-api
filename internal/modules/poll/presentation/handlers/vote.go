@@ -7,7 +7,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type vote struct {
+type Vote struct {
     notifySaveVote application.INotifySaveVote
 	saveVote application.ISaveVote
 }
@@ -15,8 +15,8 @@ type vote struct {
 func NewVote(
     notifySaveVote application.INotifySaveVote,
 	saveVote application.ISaveVote,
-) *vote {
-    return &vote{
+) *Vote {
+    return &Vote{
         notifySaveVote,
         saveVote,
     }
@@ -37,7 +37,7 @@ func NewVote(
 // @Failure      404        {object}  utils.ErrorEnvelope  "Poll or option not found"
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router       /teams/:teamId/polls/:pollId/options/:optionId/vote [post]
-func(v *vote) Handle(w http.ResponseWriter, r *http.Request) {
+func(v *Vote) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "vote.go",
 		"func": "vote.Handle",

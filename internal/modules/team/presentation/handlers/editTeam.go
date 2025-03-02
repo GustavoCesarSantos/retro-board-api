@@ -9,19 +9,19 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type editTeam struct {
+type EditTeam struct {
 	updateTeam application.IUpdateTeam
 }
 
 func NewEditTeam(
 	updateTeam application.IUpdateTeam,
-) *editTeam {
-    return &editTeam{
+) *EditTeam {
+    return &EditTeam{
 		updateTeam,
     }
 }
 
-func(et *editTeam) Handle(w http.ResponseWriter, r *http.Request) {
+func(et *EditTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "editTeam.go",
 		"func": "editTeam.Handle",

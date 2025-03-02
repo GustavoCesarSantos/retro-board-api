@@ -8,14 +8,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type deleteColumn struct {
+type DeleteColumn struct {
 	removeColumn application.IRemoveColumn
 }
 
 func NewDeleteColumn(
 	removeColumn application.IRemoveColumn,
-) *deleteColumn {
-    return &deleteColumn{
+) *DeleteColumn {
+    return &DeleteColumn{
 		removeColumn,
     }
 }
@@ -34,7 +34,7 @@ func NewDeleteColumn(
 // @Failure      404       {object} utils.ErrorEnvelope "Team, board, or column not found"
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId [delete]
-func(dc *deleteColumn) Handle(w http.ResponseWriter, r *http.Request) {
+func(dc *DeleteColumn) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "deleteColumn.go",
 		"func": "deleteColumn.Handle",

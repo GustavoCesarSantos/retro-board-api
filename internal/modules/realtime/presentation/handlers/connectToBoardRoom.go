@@ -7,19 +7,19 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type connectToBoardRoom struct {
+type ConnectToBoardRoom struct {
     roomManager interfaces.IRoomManagerApi
 }
 
 func NewConnectToBoardRoom (
     roomManager interfaces.IRoomManagerApi,
-) *connectToBoardRoom {
-    return &connectToBoardRoom{
+) *ConnectToBoardRoom {
+    return &ConnectToBoardRoom{
         roomManager,
     }
 }
 
-func(cbr *connectToBoardRoom) Handle(w http.ResponseWriter, r *http.Request) {
+func(cbr *ConnectToBoardRoom) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "connectToBoardRoom.go",
 		"func": "connectToBoardRoom.Handle",

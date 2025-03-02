@@ -9,12 +9,12 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type showTeam struct {
+type ShowTeam struct {
     findTeam application.IFindTeam
 }
 
-func NewShowTeam(findTeam application.IFindTeam) *showTeam {
-    return &showTeam {
+func NewShowTeam(findTeam application.IFindTeam) *ShowTeam {
+    return &ShowTeam {
         findTeam,
     }
 }
@@ -34,7 +34,7 @@ type ShowTeamEnvelop struct {
 // @Failure 404 {object} utils.ErrorEnvelope "Not Found - Team not found or user not a member"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams/:teamId [get]
-func(st *showTeam) Handle(w http.ResponseWriter, r *http.Request) {
+func(st *ShowTeam) Handle(w http.ResponseWriter, r *http.Request) {
     metadataErr := utils.Envelope{
 		"file": "showTeam.go",
 		"func": "showTeam.Handle",

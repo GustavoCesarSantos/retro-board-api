@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type addMemberToTeam struct {
+type AddMemberToTeam struct {
 	ensureAdminMembership application.IEnsureAdminMembership
 	findMemberInfoByEmail application.IFindMemberInfoByEmail
     saveMember application.ISaveMember
@@ -18,8 +18,8 @@ func NewAddMemberToTeam(
 	ensureAdminMembership application.IEnsureAdminMembership,
 	findMemberInfoByEmail application.IFindMemberInfoByEmail,
 	saveMember application.ISaveMember,
-) *addMemberToTeam {
-    return &addMemberToTeam{
+) *AddMemberToTeam {
+    return &AddMemberToTeam{
 		ensureAdminMembership,
 		findMemberInfoByEmail,
         saveMember,
@@ -39,7 +39,7 @@ func NewAddMemberToTeam(
 // @Failure 404 {object} utils.ErrorEnvelope "Team not found"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams/:teamId/members [post]
-func(amt *addMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
+func(amt *AddMemberToTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "addMemberToTeam.go",
 		"func": "addMemberToTeam.Handle",

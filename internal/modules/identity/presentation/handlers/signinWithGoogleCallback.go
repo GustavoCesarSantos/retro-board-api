@@ -11,7 +11,7 @@ import (
 	"github.com/markbates/goth/gothic"
 )
 
-type signinWithGoogleCallback struct {
+type SigninWithGoogleCallback struct {
 	findUserByEmail   application.IFindUserByEmail
 	saveUser          application.ISaveUser
 	updateSigninToken application.IUpdateSigninToken
@@ -21,15 +21,15 @@ func NewSigninWithGoogleCallback(
 	findUserByEmail application.IFindUserByEmail,
 	saveUser application.ISaveUser,
 	updateSigninToken application.IUpdateSigninToken,
-) *signinWithGoogleCallback {
-	return &signinWithGoogleCallback{
+) *SigninWithGoogleCallback {
+	return &SigninWithGoogleCallback{
 		findUserByEmail,
 		saveUser,
 		updateSigninToken,
 	}
 }
 
-func (sgc *signinWithGoogleCallback) Handle(w http.ResponseWriter, r *http.Request) {
+func (sgc *SigninWithGoogleCallback) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "signinWithGoogleCallback.go",
 		"func": "signinWithGoogleCallback.Handle",

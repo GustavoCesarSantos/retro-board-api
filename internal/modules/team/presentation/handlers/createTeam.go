@@ -9,7 +9,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type createTeam struct {
+type CreateTeam struct {
 	removeTeam application.IRemoveTeam
     saveMember application.ISaveMember
     saveTeam application.ISaveTeam
@@ -19,8 +19,8 @@ func NewCreateTeam(
 	removeTeam application.IRemoveTeam, 
 	saveMember application.ISaveMember, 
 	saveTeam application.ISaveTeam,
-) *createTeam {
-    return &createTeam{
+) *CreateTeam {
+    return &CreateTeam{
 		removeTeam,
 		saveMember,
         saveTeam,
@@ -42,7 +42,7 @@ type CreateTeamEnvelop struct {
 // @Failure 400 {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters)"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams [post]
-func(ct *createTeam) Handle(w http.ResponseWriter, r *http.Request) {
+func(ct *CreateTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "createTeam.go",
 		"func": "createTeam.Handle",

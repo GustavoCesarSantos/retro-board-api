@@ -7,17 +7,17 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type teamMemberValidator struct {
+type TeamMemberValidator struct {
     provider interfaces.ITeamMemberApi
 }
 
-func NewTeamMemberValidator(provider interfaces.ITeamMemberApi) *teamMemberValidator {
-    return &teamMemberValidator{
+func NewTeamMemberValidator(provider interfaces.ITeamMemberApi) *TeamMemberValidator {
+    return &TeamMemberValidator{
         provider,
     }
 }
 
-func (tmv *teamMemberValidator) EnsureMemberAccess(next http.HandlerFunc) http.HandlerFunc {
+func (tmv *TeamMemberValidator) EnsureMemberAccess(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "teamMemberValidator.go",

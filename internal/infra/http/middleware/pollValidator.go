@@ -7,18 +7,18 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type pollValidator struct {
+type PollValidator struct {
     provider interfaces.IPollApi
 }
 
-func NewPollValidator(provider interfaces.IPollApi) *pollValidator {
-    return &pollValidator{
+func NewPollValidator(provider interfaces.IPollApi) *PollValidator {
+    return &PollValidator{
         provider,
     }
 }
 
 
-func (pv *pollValidator) EnsurePollOwnership(next http.HandlerFunc) http.HandlerFunc {
+func (pv *PollValidator) EnsurePollOwnership(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "pollValidator.go",
@@ -59,7 +59,7 @@ func (pv *pollValidator) EnsurePollOwnership(next http.HandlerFunc) http.Handler
 	})
 }
 
-func (pv *pollValidator) EnsureOptionOwnership(next http.HandlerFunc) http.HandlerFunc {
+func (pv *PollValidator) EnsureOptionOwnership(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "pollValidator.go",

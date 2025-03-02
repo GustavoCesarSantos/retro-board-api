@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type deleteCard struct {
+type DeleteCard struct {
 	notifyRemoveCard application.INotifyRemoveCard
 	removeCard application.IRemoveCard
 }
@@ -16,8 +16,8 @@ type deleteCard struct {
 func NewDeleteCard(
 	notifyRemoveCard application.INotifyRemoveCard,
 	removeCard application.IRemoveCard,
-) *deleteCard {
-    return &deleteCard{
+) *DeleteCard {
+    return &DeleteCard{
 		notifyRemoveCard,
 		removeCard,
     }
@@ -38,7 +38,7 @@ func NewDeleteCard(
 // @Failure      404       {object} utils.ErrorEnvelope "Team, board, column, or card not found"
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [delete]
-func(dc *deleteCard) Handle(w http.ResponseWriter, r *http.Request) {
+func(dc *DeleteCard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "deleteCard.go",
 		"func": "deleteCard.Handle",

@@ -10,7 +10,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type refreshAuthToken struct {
+type RefreshAuthToken struct {
     createAuthToken application.ICreateAuthToken
     decodeAuthToken application.IDecodeAuthToken
     findUserByEmail application.IFindUserByEmail
@@ -20,8 +20,8 @@ func NewRefreshAuthToken(
 	createAuthToken application.ICreateAuthToken,
 	decodeAuthToken application.IDecodeAuthToken,
 	findUserByEmail application.IFindUserByEmail,
-) *refreshAuthToken {
-    return &refreshAuthToken{
+) *RefreshAuthToken {
+    return &RefreshAuthToken{
         createAuthToken,
 		decodeAuthToken,
         findUserByEmail,
@@ -44,7 +44,7 @@ type RefreshAuthTokenEnvelope struct {
 // @Failure 404 {object} utils.ErrorEnvelope "User not found"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /auth/refresh-token [post]
-func(rt *refreshAuthToken) Handle(w http.ResponseWriter, r *http.Request) {
+func(rt *RefreshAuthToken) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "refreshAuthToken.go",
 		"func": "refreshAuthToken.Handle",

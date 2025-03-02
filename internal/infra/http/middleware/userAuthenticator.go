@@ -12,12 +12,12 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type userAuthenticator struct {
+type UserAuthenticator struct {
     provider interfaces.IUserIdentityApi
 }
 
-func NewUserAuthenticator(provider interfaces.IUserIdentityApi) *userAuthenticator {
-    return &userAuthenticator{
+func NewUserAuthenticator(provider interfaces.IUserIdentityApi) *UserAuthenticator {
+    return &UserAuthenticator{
         provider,
     }
 }
@@ -31,7 +31,7 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
-func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFunc {
+func (ua *UserAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "userAuthenticator.go",
@@ -99,7 +99,7 @@ func (ua *userAuthenticator) Authenticate(next http.HandlerFunc) http.HandlerFun
 	})
 }
 
-func (ua *userAuthenticator) AuthenticateWebSocket(next http.HandlerFunc) http.HandlerFunc {
+func (ua *UserAuthenticator) AuthenticateWebSocket(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "userAuthenticator.go",

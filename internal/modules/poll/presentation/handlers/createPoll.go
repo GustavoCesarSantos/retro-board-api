@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type createPoll struct {
+type CreatePoll struct {
     saveOption application.ISaveOption
     savePoll application.ISavePoll
 }
@@ -16,8 +16,8 @@ type createPoll struct {
 func NewCreatePoll(
     saveOption application.ISaveOption, 
     savePoll application.ISavePoll,
-) *createPoll {
-    return &createPoll{
+) *CreatePoll {
+    return &CreatePoll{
         saveOption,
         savePoll,
     }
@@ -35,7 +35,7 @@ func NewCreatePoll(
 // @Failure      400        {object}  utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
 // @Failure      500        {object}  utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/polls [post]
-func(cp *createPoll) Handle(w http.ResponseWriter, r *http.Request) {
+func(cp *CreatePoll) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "createPoll.go",
 		"func": "createPoll.Handle",

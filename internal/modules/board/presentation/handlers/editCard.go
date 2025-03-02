@@ -9,7 +9,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type editCard struct {
+type EditCard struct {
     notifyUpdateCard application.INotifyUpdateCard
 	updateCard application.IUpdateCard
 }
@@ -17,8 +17,8 @@ type editCard struct {
 func NewEditCard(
     notifyUpdateCard application.INotifyUpdateCard,
 	updateCard application.IUpdateCard,
-) *editCard {
-    return &editCard{
+) *EditCard {
+    return &EditCard{
         notifyUpdateCard,
 		updateCard,
     }
@@ -40,7 +40,7 @@ func NewEditCard(
 // @Failure      404       {object} utils.ErrorEnvelope           "Team, board, column, or card not found"
 // @Failure      500       {object} utils.ErrorEnvelope           "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [put]
-func(ec *editCard) Handle(w http.ResponseWriter, r *http.Request) {
+func(ec *EditCard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "editCard.go",
 		"func": "editCard.Handle",

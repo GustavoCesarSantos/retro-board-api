@@ -6,10 +6,10 @@ import (
 	"github.com/markbates/goth/gothic"
 )
 
-type signinWithGoogle struct {}
+type SigninWithGoogle struct {}
 
-func NewSigninWithGoogle() *signinWithGoogle {
-    return &signinWithGoogle{}
+func NewSigninWithGoogle() *SigninWithGoogle {
+    return &SigninWithGoogle{}
 }
 
 // Handle starts the OAuth2.0 login flow with Google.
@@ -21,7 +21,7 @@ func NewSigninWithGoogle() *signinWithGoogle {
 // @Success 200 {string} string "Redirecting to Google for authentication"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /auth/signin/google [get]
-func(sg *signinWithGoogle) Handle(w http.ResponseWriter, r *http.Request) {
+func(sg *SigninWithGoogle) Handle(w http.ResponseWriter, r *http.Request) {
     q := r.URL.Query()
     q.Add("provider", "google")
     r.URL.RawQuery = q.Encode()

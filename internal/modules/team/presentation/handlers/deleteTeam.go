@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type deleteTeam struct {
+type DeleteTeam struct {
 	ensureAdminMembership application.IEnsureAdminMembership
     removeTeam application.IRemoveTeam
 }
@@ -16,14 +16,14 @@ type deleteTeam struct {
 func NewDeleteTeam(
 	ensureAdminMembership application.IEnsureAdminMembership,
     removeTeam application.IRemoveTeam,
-) *deleteTeam {
-    return &deleteTeam{
+) *DeleteTeam {
+    return &DeleteTeam{
         ensureAdminMembership,
         removeTeam,
     }
 }
 
-func(dt *deleteTeam) Handle(w http.ResponseWriter, r *http.Request) {
+func(dt *DeleteTeam) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "deleteTeam.go",
 		"func": "deleteTeam.Handle",

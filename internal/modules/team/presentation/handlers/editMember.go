@@ -9,19 +9,19 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type editMember struct {
+type EditMember struct {
 	updateMember application.IUpdateMember
 }
 
 func NewEditMember(
 	updateMember application.IUpdateMember,
-) *editMember {
-    return &editMember{
+) *EditMember {
+    return &EditMember{
 		updateMember,
     }
 }
 
-func(em *editMember) Handle(w http.ResponseWriter, r *http.Request) {
+func(em *EditMember) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "editMember.go",
 		"func": "editMember.Handle",

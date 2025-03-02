@@ -9,14 +9,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listPoll struct {
+type ListPoll struct {
 	findPoll application.IFindPoll
 }
 
 func NewListPoll(
 	findPoll application.IFindPoll,
-) *listPoll {
-    return &listPoll {
+) *ListPoll {
+    return &ListPoll {
 		findPoll,
     }
 }
@@ -38,7 +38,7 @@ type ListPollEnvelop struct {
 // @Failure      404        {object}  utils.ErrorEnvelope  "Poll not found"
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router       /teams/:teamId/polls/:pollId [get]
-func(lp *listPoll) Handle(w http.ResponseWriter, r *http.Request) {
+func(lp *ListPoll) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listPoll.go",
 		"func": "listPoll.Handle",

@@ -10,14 +10,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listAllCards struct {
+type ListAllCards struct {
 	findAllCards application.IFindAllCards
 }
 
 func NewListAllCards(
 	findAllCards application.IFindAllCards,
-) *listAllCards {
-    return &listAllCards {
+) *ListAllCards {
+    return &ListAllCards {
 		findAllCards,
     }
 }
@@ -40,7 +40,7 @@ type ListAllCardsEnvelop struct {
 // @Failure      404        {object} utils.ErrorEnvelope "Board or column not found"
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [get]
-func(lc *listAllCards) Handle(w http.ResponseWriter, r *http.Request) {
+func(lc *ListAllCards) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listAllCards.go",
 		"func": "listAllCards.Handle",

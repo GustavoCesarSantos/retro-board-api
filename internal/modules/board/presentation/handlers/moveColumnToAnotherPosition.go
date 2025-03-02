@@ -9,19 +9,19 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type moveColumnToAnotherPosition struct {
+type MoveColumnToAnotherPosition struct {
 	moveColumn application.IMoveColumn
 }
 
 func NewMoveColumnToAnotherPosition(
 	moveColumn application.IMoveColumn,
-) *moveColumnToAnotherPosition {
-    return &moveColumnToAnotherPosition{
+) *MoveColumnToAnotherPosition {
+    return &MoveColumnToAnotherPosition{
         moveColumn,
     }
 }
 
-func(mc *moveColumnToAnotherPosition) Handle(w http.ResponseWriter, r *http.Request) {
+func(mc *MoveColumnToAnotherPosition) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "moveColumnToAnotherPosition.go",
 		"func": "moveColumnToAnotherPosition.Handle",

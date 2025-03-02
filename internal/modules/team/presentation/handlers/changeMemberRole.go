@@ -9,7 +9,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type changeMemberRole struct {
+type ChangeMemberRole struct {
 	ensureAdminMembership application.IEnsureAdminMembership
     updateRole application.IUpdateRole
 }
@@ -17,8 +17,8 @@ type changeMemberRole struct {
 func NewChangeMemberRole(
 	ensureAdminMembership application.IEnsureAdminMembership,
 	updateRole application.IUpdateRole,
-) *changeMemberRole {
-    return &changeMemberRole{
+) *ChangeMemberRole {
+    return &ChangeMemberRole{
 		ensureAdminMembership,
         updateRole,
     }
@@ -38,7 +38,7 @@ func NewChangeMemberRole(
 // @Failure 404 {object} utils.ErrorEnvelope "Team or member not found"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams/:teamId/members/:memberId/roles [patch]
-func(cmp *changeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
+func(cmp *ChangeMemberRole) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "changeMemberRole.go",
 		"func": "changeMemberRole.Handle",

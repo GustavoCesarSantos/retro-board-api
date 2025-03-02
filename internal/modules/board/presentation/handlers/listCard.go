@@ -9,14 +9,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listCard struct {
+type ListCard struct {
 	findCard application.IFindCard
 }
 
 func NewListCard(
 	findCard application.IFindCard,
-) *listCard {
-    return &listCard {
+) *ListCard {
+    return &ListCard {
 		findCard,
     }
 }
@@ -40,7 +40,7 @@ type ListCardEnvelop struct {
 // @Failure      404        {object} utils.ErrorEnvelope "Card not found"
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId [get]
-func(lc *listCard) Handle(w http.ResponseWriter, r *http.Request) {
+func(lc *ListCard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listCard.go",
 		"func": "listCard.Handle",

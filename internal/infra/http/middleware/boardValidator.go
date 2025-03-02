@@ -7,18 +7,18 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type boardValidator struct {
+type BoardValidator struct {
     provider interfaces.IBoardApi
 }
 
-func NewBoardValidator(provider interfaces.IBoardApi) *boardValidator {
-    return &boardValidator{
+func NewBoardValidator(provider interfaces.IBoardApi) *BoardValidator {
+    return &BoardValidator{
         provider,
     }
 }
 
 
-func (bv *boardValidator) EnsureBoardOwnership(next http.HandlerFunc) http.HandlerFunc {
+func (bv *BoardValidator) EnsureBoardOwnership(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "boardValidator.go",
@@ -59,7 +59,7 @@ func (bv *boardValidator) EnsureBoardOwnership(next http.HandlerFunc) http.Handl
 	})
 }
 
-func (bv *boardValidator) EnsureColumnOwnership(next http.HandlerFunc) http.HandlerFunc {
+func (bv *BoardValidator) EnsureColumnOwnership(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "boardValidator.go",
@@ -100,7 +100,7 @@ func (bv *boardValidator) EnsureColumnOwnership(next http.HandlerFunc) http.Hand
 	})
 }
 
-func (bv *boardValidator) EnsureCardOwnership(next http.HandlerFunc) http.HandlerFunc {
+func (bv *BoardValidator) EnsureCardOwnership(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr := utils.Envelope{
 			"file": "boardValidator.go",

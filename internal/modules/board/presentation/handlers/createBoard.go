@@ -8,14 +8,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type createBoard struct {
+type CreateBoard struct {
     saveBoard application.ISaveBoard
 }
 
 func NewCreateBoard(
 	saveBoard application.ISaveBoard,
-) *createBoard {
-    return &createBoard{
+) *CreateBoard {
+    return &CreateBoard{
 		saveBoard,
     }
 }
@@ -37,7 +37,7 @@ type CreateBoardEnvelop struct {
 // @Failure      404      {object} utils.ErrorEnvelope "Team not found"
 // @Failure      500      {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards [post]
-func(cb *createBoard) Handle(w http.ResponseWriter, r *http.Request) {
+func(cb *CreateBoard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "createBoard.go",
 		"func": "createBoard.Handle",

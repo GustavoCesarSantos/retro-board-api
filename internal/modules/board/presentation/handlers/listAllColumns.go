@@ -10,14 +10,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listAllColumns struct {
+type ListAllColumns struct {
 	findAllColumns application.IFindAllColumns
 }
 
 func NewListAllColumns(
 	findAllColumns application.IFindAllColumns,
-) *listAllColumns {
-    return &listAllColumns {
+) *ListAllColumns {
+    return &ListAllColumns {
 		findAllColumns,
     }
 }
@@ -38,7 +38,7 @@ type ListAllColumnsEnvelop struct {
 // @Failure      400        {object} utils.ErrorEnvelope "Invalid request (e.g., missing parameters or invalid input data)"
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns [get]
-func(lc *listAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
+func(lc *ListAllColumns) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listAllColumns.go",
 		"func": "listAllColumns.Handle",

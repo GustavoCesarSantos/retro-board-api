@@ -9,14 +9,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listColumn struct {
+type ListColumn struct {
 	findColumn application.IFindColumn
 }
 
 func NewListColumn(
 	findColumn application.IFindColumn,
-) *listColumn {
-    return &listColumn {
+) *ListColumn {
+    return &ListColumn {
 		findColumn,
     }
 }
@@ -25,7 +25,7 @@ type ListColumnEnvelop struct {
 	Column *dtos.ListColumnResponse `json:"column"`
 }
 
-func(lc *listColumn) Handle(w http.ResponseWriter, r *http.Request) {
+func(lc *ListColumn) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listColumn.go",
 		"func": "listColumn.Handle",

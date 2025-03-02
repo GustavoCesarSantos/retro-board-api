@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type showPollResult struct {
+type ShowPollResult struct {
 	countVotesByPollId application.ICountVotesByPollId
     notifyCountVotes application.INotifyCountVotes
 }
@@ -16,8 +16,8 @@ type showPollResult struct {
 func NewShowPollResult(
 	countVotesByPollId application.ICountVotesByPollId,
     notifyCountVotes application.INotifyCountVotes,
-) *showPollResult {
-    return &showPollResult {
+) *ShowPollResult {
+    return &ShowPollResult {
 		countVotesByPollId,
         notifyCountVotes,
     }
@@ -40,7 +40,7 @@ type ShowPollResultEnvelop struct {
 // @Failure      404        {object}  utils.ErrorEnvelope  "Poll not found"
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router      /teams/:teamId/polls/:pollId/result [get]
-func(spr *showPollResult) Handle(w http.ResponseWriter, r *http.Request) {
+func(spr *ShowPollResult) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "showPollResult.go",
 		"func": "showPollResult.Handle",

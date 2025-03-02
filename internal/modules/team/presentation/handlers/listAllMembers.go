@@ -8,12 +8,12 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listAllMembers struct {
+type ListAllMembers struct {
 	findAllMembers application.IFindAllMembers
 }
 
-func NewListAllMembers(findAllMembers application.IFindAllMembers) *listAllMembers {
-	return &listAllMembers{
+func NewListAllMembers(findAllMembers application.IFindAllMembers) *ListAllMembers {
+	return &ListAllMembers{
 		findAllMembers,
 	}
 }
@@ -22,7 +22,7 @@ type ListAllMembersEnvelop struct {
 	Members []*dtos.ListAllMembersResponse `json:"members"`
 }
 
-func (lt *listAllMembers) Handle(w http.ResponseWriter, r *http.Request) {
+func (lt *ListAllMembers) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listAllMembers.go",
 		"func": "listAllMembers.Handle",

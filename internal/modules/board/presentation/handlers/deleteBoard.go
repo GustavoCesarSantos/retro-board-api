@@ -8,14 +8,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type deleteBoard struct {
+type DeleteBoard struct {
 	removeBoard application.IRemoveBoard
 }
 
 func NewDeleteBoard(
 	removeBoard application.IRemoveBoard,
-) *deleteBoard {
-    return &deleteBoard{
+) *DeleteBoard {
+    return &DeleteBoard{
 	    removeBoard,
     }
 }
@@ -33,7 +33,7 @@ func NewDeleteBoard(
 // @Failure      404       {object} utils.ErrorEnvelope "Team or board not found"
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId [delete]
-func(db *deleteBoard) Handle(w http.ResponseWriter, r *http.Request) {
+func(db *DeleteBoard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "deleteBoard.go",
 		"func": "deleteBoard.Handle",

@@ -9,14 +9,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type editBoard struct {
+type EditBoard struct {
 	updateBoard application.IUpdateBoard
 }
 
 func NewEditBoard(
 	updateBoard application.IUpdateBoard,
-) *editBoard {
-    return &editBoard{
+) *EditBoard {
+    return &EditBoard{
 		updateBoard,
     }
 }
@@ -35,7 +35,7 @@ func NewEditBoard(
 // @Failure      404      {object} utils.ErrorEnvelope          "Team or board not found"
 // @Failure      500      {object} utils.ErrorEnvelope          "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId [put]
-func(eb *editBoard) Handle(w http.ResponseWriter, r *http.Request) {
+func(eb *EditBoard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "editBoard.go",
 		"func": "editBoard.Handle",

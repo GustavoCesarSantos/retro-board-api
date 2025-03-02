@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type createCard struct {
+type CreateCard struct {
     notifySaveCard application.INotifySaveCard
 	saveCard application.ISaveCard
 }
@@ -16,8 +16,8 @@ type createCard struct {
 func NewCreateCard(
     notifySaveCard application.INotifySaveCard,
 	saveCard application.ISaveCard,
-) *createCard {
-    return &createCard{
+) *CreateCard {
+    return &CreateCard{
         notifySaveCard,
 		saveCard,
     }
@@ -42,7 +42,7 @@ type CreateCardEnvelop struct {
 // @Failure      404       {object} utils.ErrorEnvelope "Team, board, or column not found"
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards [post]
-func(cc *createCard) Handle(w http.ResponseWriter, r *http.Request) {
+func(cc *CreateCard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "createCard.go",
 		"func": "createCard.Handle",

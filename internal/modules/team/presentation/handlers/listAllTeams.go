@@ -10,12 +10,12 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listAllTeams struct {
+type ListAllTeams struct {
     findAllTeams application.IFindAllTeams
 }
 
-func NewListAllTeams(findAllTeams application.IFindAllTeams) *listAllTeams {
-    return &listAllTeams {
+func NewListAllTeams(findAllTeams application.IFindAllTeams) *ListAllTeams {
+    return &ListAllTeams {
         findAllTeams,
     }
 }
@@ -33,7 +33,7 @@ type ListAllTeamsEnvelop struct {
 // @Success 200 {object} team.ListAllTeamsEnvelop "List of teams successfully retrieved"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /teams [get]
-func(lt *listAllTeams) Handle(w http.ResponseWriter, r *http.Request) {
+func(lt *ListAllTeams) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listAllTeams.go",
 		"func": "listAllTeams.Handle",

@@ -9,14 +9,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type listBoard struct {
+type ListBoard struct {
 	findBoard application.IFindBoard
 }
 
 func NewListBoard(
 	findBoard application.IFindBoard,
-) *listBoard {
-    return &listBoard {
+) *ListBoard {
+    return &ListBoard {
 		findBoard,
     }
 }
@@ -39,7 +39,7 @@ type ListBoardEnvelop struct {
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId [get]
 
-func(lb *listBoard) Handle(w http.ResponseWriter, r *http.Request) {
+func(lb *ListBoard) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "listBoard.go",
 		"func": "listBoard.Handle",

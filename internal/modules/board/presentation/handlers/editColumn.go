@@ -9,14 +9,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type editColumn struct {
+type EditColumn struct {
 	updateColumn application.IUpdateColumn
 }
 
 func NewEditColumn(
 	updateColumn application.IUpdateColumn,
-) *editColumn {
-    return &editColumn{
+) *EditColumn {
+    return &EditColumn{
 		updateColumn,
     }
 }
@@ -36,7 +36,7 @@ func NewEditColumn(
 // @Failure      404        {object} utils.ErrorEnvelope           "Team, board, or column not found"
 // @Failure      500        {object} utils.ErrorEnvelope           "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId [put]
-func(ec *editColumn) Handle(w http.ResponseWriter, r *http.Request) {
+func(ec *EditColumn) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "editColumn.go",
 		"func": "editColumn.Handle",

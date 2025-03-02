@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type signoutUser struct {
+type SignoutUser struct {
 	incrementVersion application.IIncrementVersion
 	updateSigninToken application.IUpdateSigninToken
 }
@@ -16,8 +16,8 @@ type signoutUser struct {
 func NewSignoutUser(
 	incrementVersion application.IIncrementVersion,
 	updateSigninToken application.IUpdateSigninToken,
-) *signoutUser {
-    return &signoutUser{
+) *SignoutUser {
+    return &SignoutUser{
 		incrementVersion,
 	    updateSigninToken,
     }
@@ -33,7 +33,7 @@ func NewSignoutUser(
 // @Failure 404 {object} utils.ErrorEnvelope "User not found"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /auth/signout [post]
-func(su *signoutUser) Handle(w http.ResponseWriter, r *http.Request) {
+func(su *SignoutUser) Handle(w http.ResponseWriter, r *http.Request) {
     metadataErr := utils.Envelope{
 		"file": "signoutUser.go",
 		"func": "signoutUser.Handle",

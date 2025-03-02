@@ -7,14 +7,14 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type deleteOption struct {
+type DeleteOption struct {
 	removeOption application.IRemoveOption
 }
 
 func NewDeleteOption(
 	removeOption application.IRemoveOption,
-) *deleteOption {
-    return &deleteOption{
+) *DeleteOption {
+    return &DeleteOption{
         removeOption,
     }
 }
@@ -32,7 +32,7 @@ func NewDeleteOption(
 // @Failure      400        {object}  utils.ErrorEnvelope "Invalid request (e.g., missing parameters or validation error)"
 // @Failure      500        {object}  utils.ErrorEnvelope  "Internal server error"
 // @Router       /teams/:teamId/polls/:pollId/options/:optionId [delete]
-func(do *deleteOption) Handle(w http.ResponseWriter, r *http.Request) {
+func(do *DeleteOption) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "deleteOption.go",
 		"func": "deleteOption.Handle",

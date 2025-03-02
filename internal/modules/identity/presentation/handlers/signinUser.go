@@ -10,7 +10,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type signinUser struct {
+type SigninUser struct {
     creatAuthToken application.ICreateAuthToken
     findUserBySigninToken application.IFindUserBySigninToken
 	incrementVersion application.IIncrementVersion
@@ -20,8 +20,8 @@ func NewSigninUser(
 	createAuthToken application.ICreateAuthToken,  
 	findUserBySigninToken application.IFindUserBySigninToken,
 	incrementVersion application.IIncrementVersion,
-) *signinUser {
-    return &signinUser{
+) *SigninUser {
+    return &SigninUser{
         createAuthToken,
         findUserBySigninToken,
 		incrementVersion,
@@ -44,7 +44,7 @@ type SigninUserEnvelope struct {
 // @Failure 404 {object} utils.ErrorEnvelope "User not found"
 // @Failure 500 {object} utils.ErrorEnvelope "Internal server error"
 // @Router /auth/signin [post]
-func(su *signinUser) Handle(w http.ResponseWriter, r *http.Request) {
+func(su *SigninUser) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "signinUser.go",
 		"func": "signinUser.Handle",

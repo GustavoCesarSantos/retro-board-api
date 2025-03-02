@@ -9,7 +9,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type moveCardToAnotherColumn struct {
+type MoveCardToAnotherColumn struct {
 	moveCardBetweenColumn application.IMoveCardBetweenColumns
     notifyMoveCard application.INotifyMoveCard
 }
@@ -17,8 +17,8 @@ type moveCardToAnotherColumn struct {
 func NewMoveCardtoAnotherColumn(
 	moveCardBetweenColumn application.IMoveCardBetweenColumns,
     notifyMoveCard application.INotifyMoveCard,
-) *moveCardToAnotherColumn {
-    return &moveCardToAnotherColumn{
+) *MoveCardToAnotherColumn {
+    return &MoveCardToAnotherColumn{
 		moveCardBetweenColumn,
         notifyMoveCard,
     }
@@ -40,7 +40,7 @@ func NewMoveCardtoAnotherColumn(
 // @Failure      404        {object} utils.ErrorEnvelope "Card or column not found"
 // @Failure      500        {object} utils.ErrorEnvelope "Internal server error"
 // @Router       /teams/:teamId/boards/:boardId/columns/:columnId/cards/:cardId/move [put]
-func(mc *moveCardToAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
+func(mc *MoveCardToAnotherColumn) Handle(w http.ResponseWriter, r *http.Request) {
 	metadataErr := utils.Envelope{
 		"file": "moveCardToAnotherColumn.go",
 		"func": "moveCardToAnotherColumn.Handle",

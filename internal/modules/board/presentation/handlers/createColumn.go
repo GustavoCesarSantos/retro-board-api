@@ -8,7 +8,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/shared/utils"
 )
 
-type createColumn struct {
+type CreateColumn struct {
     findAllColumns application.IFindAllColumns
 	getNextColumnPosition application.IGetNextColumnPosition
     saveColumn application.ISaveColumn
@@ -18,8 +18,8 @@ func NewCreateColumn(
     findAllColumns application.IFindAllColumns,
 	getNextColumnPosition application.IGetNextColumnPosition,
     saveColumn application.ISaveColumn,
-) *createColumn {
-    return &createColumn{
+) *CreateColumn {
+    return &CreateColumn{
         findAllColumns,
 		getNextColumnPosition,
         saveColumn,
@@ -44,7 +44,7 @@ type CreateColumnEnvelop struct {
 // @Failure      404       {object} utils.ErrorEnvelope "Team or board not found"
 // @Failure      500       {object} utils.ErrorEnvelope "Internal server error"
 // @Router      /teams/:teamId/boards/:boardId/columns [post]
-func(cc *createColumn) Handle(w http.ResponseWriter, r *http.Request) {
+func(cc *CreateColumn) Handle(w http.ResponseWriter, r *http.Request) {
     metadataErr := utils.Envelope{
 		"file": "createColumn.go",
 		"func": "createColumn.Handle",

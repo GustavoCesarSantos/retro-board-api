@@ -401,8 +401,8 @@ definitions:
     type: object
   dtos.SigninUserRequest:
     properties:
-      email:
-        example: teste@teste.com
+      signin_token:
+        example: asdfasdfasd
         type: string
     type: object
   dtos.SigninUserResponse:

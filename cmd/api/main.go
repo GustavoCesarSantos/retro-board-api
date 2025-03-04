@@ -14,6 +14,7 @@ import (
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/database"
 	httpServer "github.com/GustavoCesarSantos/retro-board-api/internal/infra/http"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
+	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/oauth2"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/board"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/identity"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/modules/monitor"
@@ -56,11 +57,14 @@ func main() {
 
 		fx.Provide(
 			database.OpenDB,
-			httpServer.NewServer,
 			httpServer.NewRouter,
+			httpServer.NewServer,
 		),
 
-		fx.Invoke(startServer),
+		fx.Invoke(
+			oauth2.SetProvider, 
+			startServer,
+		),
 	)
 
 	app.Run()

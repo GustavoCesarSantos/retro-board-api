@@ -38,12 +38,10 @@ func NewRouter(
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr["line"] = 42
 		utils.NotFoundResponse(w, r, metadataErr)
-		return
 	})
 	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metadataErr["line"] = 47
 		utils.MethodNotAllowedResponse(w, r, metadataErr)
-		return
 	})
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", monitor.Healthcheck.Handle)

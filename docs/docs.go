@@ -2420,9 +2420,9 @@ const docTemplate = `{
         "dtos.SigninUserRequest": {
             "type": "object",
             "properties": {
-                "email": {
+                "signin_token": {
                     "type": "string",
-                    "example": "teste@teste.com"
+                    "example": "asdfasdfasd"
                 }
             }
         },

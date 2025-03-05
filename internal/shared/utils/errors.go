@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	ErrMissingJSONValue = errors.New("BODY MUST CONTAIN A JSON VALUE")
 	ErrMissingOrInvalidLimitQueryParam = errors.New("MISSING OR INVALID LIMIT QUERY PARAM")
 	ErrInvalidLimitQueryParam = errors.New("INVALID LAST ID QUERY PARAM")
 	ErrBoardNotInTeam = errors.New("BOARD DOES NOT BELONG TO THE SPECIFIED TEAM")

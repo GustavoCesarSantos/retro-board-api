@@ -54,6 +54,10 @@ func(cb *CreateBoard) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
+	if input.Name == "" {
+		utils.BadRequestResponse(w, r, utils.ErrMissingJSONValue, metadataErr)
+		return
+	}
 	board, saveErr := cb.saveBoard.Execute(teamId, input.Name)
 	if saveErr != nil {
 		utils.ServerErrorResponse(w, r, saveErr, metadataErr)

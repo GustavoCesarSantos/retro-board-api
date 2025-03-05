@@ -31,7 +31,7 @@ func LoadDatabaseConfig() DatabaseConfig {
 		os.Exit(1)
 	}
 	return DatabaseConfig {
-		Dsn: GetEnv("DB_DSN", "postgres://usuario:senha@localhost:5432/testDb?sslmode=disable"),
+		Dsn: GetEnv("DB_DSN", "postgres://dev:senhadodev@localhost:5432/testDb?sslmode=disable"),
 		MaxOpenConns: maxOpenConns,
 		MaxIdleConns: maxIdleConns,
 		MaxIdleTime: maxIdleTime,

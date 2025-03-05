@@ -56,6 +56,10 @@ func(su *SigninUser) Handle(w http.ResponseWriter, r *http.Request) {
 		utils.BadRequestResponse(w, r, readErr, metadataErr)
 		return
 	}
+	if input.SigninToken == "" {
+		utils.BadRequestResponse(w, r, utils.ErrMissingJSONValue, metadataErr)
+		return
+	}
 	user, findUserErr := su.findUserBySigninToken.Execute(input.SigninToken)
     if findUserErr != nil {
 		switch {

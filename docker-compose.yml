@@ -1,19 +1,78 @@
 services:
   database_pg:
     image: postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: usuario
       POSTGRES_PASSWORD: senha
     volumes:
       - postgres:/data/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
+
   adminer:
     image: adminer
-    restart: always
+    restart: unless-stopped
     ports:
       - "8080:8080"
+ 
+  prometheus:
+    image: prom/prometheus
+    restart: unless-stopped
+    volumes:
+      - "/home/gustavo/code/projetos/retro-board-api/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml"
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sSf http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports: 
+      - "9090:9090"
+ 
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    environment:
+      GF_DATASOURCE: prometheus
+    networks:
+      - monitoring
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    healthcheck:
+      test: |
+        curl -sSf http://localhost:3000/api/health | grep -q '"database": "ok"'
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "3000:3000"
+ 
+  loki:
+    image: grafana/loki:latest
+    restart: unless-stopped
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sSf http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "3100:3100"
 
 volumes:
   postgres:
+  grafana-storage:
+
+networks:
+  monitoring:
+    external: false

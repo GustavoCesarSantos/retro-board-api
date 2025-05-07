@@ -5,6 +5,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	_ "github.com/GustavoCesarSantos/retro-board-api/docs"
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/http/middleware"
@@ -43,6 +44,8 @@ func NewRouter(
 		metadataErr["line"] = 47
 		utils.MethodNotAllowedResponse(w, r, metadataErr)
 	})
+
+    router.Handler(http.MethodGet, "/metrics", promhttp.Handler())
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", monitor.Healthcheck.Handle)
 

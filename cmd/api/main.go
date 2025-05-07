@@ -8,7 +8,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/joho/godotenv"
+    "github.com/joho/godotenv"
 	"go.uber.org/fx"
 
 	"github.com/GustavoCesarSantos/retro-board-api/internal/infra/database"
@@ -38,12 +38,12 @@ import (
 // @in header
 
 func main() {
-	if os.Getenv("LOAD_ENV_FILE") == "true" {
-		if err := godotenv.Load(); err != nil {
-			slog.Error("failed to load .env file", "error", err)
-			os.Exit(1)
-		}
-	}
+	// if os.Getenv("LOAD_ENV_FILE") == "true" {
+	 	if err := godotenv.Load(); err != nil {
+	 		slog.Error("failed to load .env file", "error", err)
+	 		os.Exit(1)
+	 	}
+	// }
 
 	app := fx.New(
 		middleware.Module,

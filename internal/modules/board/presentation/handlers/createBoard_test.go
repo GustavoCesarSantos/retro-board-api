@@ -22,7 +22,10 @@ type MockSaveBoardService struct {
 	mock.Mock
 }
 
-func (m *MockSaveBoardService) Execute(teamId int64, name string) (*domain.Board, error) {
+func (m *MockSaveBoardService) Execute(
+    teamId int64, 
+    name string,
+) (*domain.Board, error) {
 	args := m.Called(teamId, name)
 	return args.Get(0).(*domain.Board), args.Error(1)
 }
@@ -83,7 +86,14 @@ func TestCreateBoardHandler(t *testing.T) {
 	for _, tc := range createBoardTestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			mockSaveBoard := new(MockSaveBoardService)
-			mockSaveBoard.On("Execute", mock.Anything, mock.Anything).Return(tc.mockReturn, tc.mockError)
+			mockSaveBoard.On(
+                "Execute", 
+                mock.Anything, 
+                mock.Anything,
+            ).Return(
+                tc.mockReturn, 
+                tc.mockError,
+            )
 			handler := &CreateBoard{
 				saveBoard: mockSaveBoard,
 			}
